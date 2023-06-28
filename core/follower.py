@@ -65,10 +65,11 @@ if __name__ == '__main__':
         ld_dex = ld.get_balance_bitget(marginCoin)
         fl_dex = fl.get_balance_bitget(marginCoin)
         pct = round(float(fl_dex)/float(ld_dex) , 2)
-
+        print(pct)
     #     # check positions
     #     ## if same , continue
-
+        positions = ld.get_positions_bitget(symbol)
+        print(positions)
     #     ## if not same , clear 
 
     #     ## if partial not same , cut the size
