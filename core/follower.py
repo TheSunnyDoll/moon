@@ -1,6 +1,8 @@
 from exchange.bitget import Bitget
 import time
 
+## follow leader orders 
+
 class Leader(Bitget):
     def __init__(self,key,secret,passphrase) -> None:
         super().__init__("bitget",key,secret,passphrase=passphrase)
@@ -72,10 +74,10 @@ class Follower(Bitget):
         
     def cut_qty(self,diff_long,diff_short):
         if diff_long != 0:
-            print(diff_long)
+            print(f"diff long is :{diff_long}")
             # self.create_order(symbol,'market','close_long',diff_long,reduce_only=True)
         elif diff_short != 0:
-            print(diff_short)
+            print(f"diff short is :{diff_short}")
             # self.create_order(symbol,'market','close_short',diff_short,reduce_only=True)
 
     def cancel_orders(self,symbol,cancel_orders):
@@ -100,7 +102,7 @@ if __name__ == '__main__':
         ld_dex = ld.get_balance_bitget(marginCoin)
         fl_dex = fl.get_balance_bitget(marginCoin)
         pct = round(float(fl_dex)/float(ld_dex) , 2)
-        print(pct)
+        print(f"pct is {pct}")
     #     # check positions
         ld_positions = ld.get_positions_bitget(symbol)
         fl_positions = fl.get_positions_bitget(symbol)
