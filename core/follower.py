@@ -91,10 +91,10 @@ if __name__ == '__main__':
     symbol = 'ETHUSDT_UMCBL'
     marginCoin = 'USDT'
     # get leader
-    ld = Leader("bg_c45731ac5b26812eb9676f7bb0f23750","ca6f575af882d4af5fb0b3e45a0657c3756ec079d0ac522b0d63f7a06164af73","Zz123456")
+    ld = Leader("","","")
 
     # get follower
-    fl = Follower("bg_2f2c7bcad16db7eaac00c52f162f5fe8","028bc30d5792376166d3c8e70c908bb188b06b4145acbba84911e767c3847814","aishuo999")
+    fl = Follower("","","")
     while True:
         # get pct
         ld_dex = ld.get_balance_bitget(marginCoin)
@@ -126,7 +126,7 @@ if __name__ == '__main__':
 
         ## cancel orders
         fl.cancel_orders(symbol,cancel_orders)
-        
+
         ## exec orders
         print(exec_orders)
         ## copy trader
