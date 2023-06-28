@@ -1,0 +1,8 @@
+colorama
+ccxt==3.0.102
+pandas
+pydantic
+python-pidfile
+requests
+rich
+ta
