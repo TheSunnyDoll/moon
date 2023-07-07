@@ -1,0 +1,4 @@
+users:
+  api_key: YOUR_API_KEY_
+  secret_key: YOUR_SECRET_KEY_
+  passphrase: YOUR_PASSPHRASE

@@ -1,15 +1,71 @@
-# base on https://docs.thekingfisher.io/
-from pybitget import Client
+from flask import Flask, render_template, request, redirect, url_for
 
-class Liquidation:
-    def __init__(self) -> None:
-        pass
+app = Flask(__name__)
+long_orders = []
+short_orders = []
 
-    def get_liquidations(self,symbol):
-        pass
+long_tp = 0
+short_tp = 0
+mul = 0
+qty = 0
+dir = ''
+@app.route('/')
+def home():
+    return render_template('index.html', long_orders=long_orders, short_orders=short_orders,mul=mul,qty=qty, dir=dir ,long_tp=long_tp , short_tp=short_tp)
 
-    def select_best_postion(self,liquidations):
-        pass
+@app.route('/calculate', methods=['POST'])
+def calculate():
+    global long_orders
+    global short_orders
+    global mul
+    global qty
+    global dir
+
+    global long_tp
+    global short_tp
+    long_start = int(request.form['long_start'])
+    long_end = int(request.form['long_end'])
+    short_start = int(request.form['short_start'])
+    short_end = int(request.form['short_end'])
+    dex = int(request.form['balance'])
+
+    btc_fc = FireChain(long_start,long_end,short_start,short_end)
+    long_tp = btc_fc.select_best_c_pct(btc_fc.long_start,btc_fc.long_end)
+    short_tp = btc_fc.select_best_c_pct(btc_fc.short_start,btc_fc.short_end)
+
+    btc_fc.get_chains()
+    long_orders = btc_fc.list_orders(btc_fc.long_unit,btc_fc.long_chains,'long')
+    short_orders = btc_fc.list_orders(btc_fc.short_unit,btc_fc.short_chains,'short')
+
+    mul,qty,dir = btc_fc.select_best_multi(dex)
+    long_tp = qty * long_tp
+    short_tp = qty * short_tp
+
+    return redirect(url_for('home'))
+
+@app.route('/reset')
+def reset():
+    global long_orders
+    global short_orders
+    global mul
+    global qty
+    global dir
+    
+    global long_tp
+    global short_tp
+    long_tp = 0
+    short_tp = 0
+    long_orders = []
+    short_orders = []
+    mul = 0
+    qty = 0
+    dir = ''
+
+    return redirect(url_for('home'))
+
+
+
+
 
 
 ## chain
@@ -19,10 +75,6 @@ class Liquidation:
 # short : start / end 
 
 ## step:
-### 0.划：
-#       （1）顺爆为突破交易：划定震荡区间，首单放置在区间外围外一点
-#       （2）顺爆完成即为假突破交易，置突破完成后抄底
-
 ### 1.积：等多空爆仓比出现明显大差距
 ### 2.选：选择合适排列，选择合适手数
 ###     （1）多空比1:1，  2倍杠杆
@@ -150,6 +202,7 @@ class FireChain:
             self.long_unit = best_exp_pct
         elif start == self.short_start:
             self.short_unit = best_exp_pct
+        return best_exp_tp
 
     ## inner chain ; strength chain
     ### 
@@ -196,81 +249,8 @@ class FireChain:
                 dir = 'short'
             return mul,qty,dir
 
-    # place 
-    def place_orders(self,fire_man,symbol,marginCoin,qty,dir,long_orders,short_orders):
-        # get current plan
-        data = fire_man.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
-        for plan in data:
-            print(plan)
-        if data != []:
-            ## clear all open orders
-            fire_man.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
-            
-
-        if dir == 'long':
-            side = 'open_long'
-            for lo in long_orders:
-                ## order the trigger order 
-                data = fire_man.mix_place_plan_order(symbol, marginCoin, qty, side, 'limit', lo[0], "market_price", executePrice=lo[0], presetTakeProfitPrice=lo[1], presetStopLossPrice=lo[2], reduceOnly=False)
-                print(f"place long order at {lo[0]},tp at {lo[1]} , sl at {lo[2]}")
-            
-        elif dir == 'short':
-            side = 'open_short'
-            for so in short_orders:
-                data = fire_man.mix_place_plan_order(symbol, marginCoin, qty, side, 'limit', so[0], "market_price", executePrice=so[0], presetTakeProfitPrice=so[1], presetStopLossPrice=so[2], reduceOnly=False)
-                print(f"place short order at {so[0]},tp at {so[1]} , sl at {so[2]}")
-        elif dir == 'both':
-            side = 'open_long'
-            for lo in long_orders:
-                ## order the trigger order 
-                data = fire_man.mix_place_plan_order(symbol, marginCoin, qty, side, 'limit', lo[0], "market_price", executePrice=lo[0], presetTakeProfitPrice=lo[1], presetStopLossPrice=lo[2], reduceOnly=False)
-                print(f"place long order at {lo[0]},tp at {lo[1]} , sl at {lo[2]}")
-            side = 'open_short'
-            for so in short_orders:
-                data = fire_man.mix_place_plan_order(symbol, marginCoin, qty, side, 'limit', so[0], "market_price", executePrice=so[0], presetTakeProfitPrice=so[1], presetStopLossPrice=so[2], reduceOnly=False)
-                print(f"place short order at {so[0]},tp at {so[1]} , sl at {so[2]}")
-
-        # check current plan
-        data = fire_man.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
-        for plan in data:
-            print(plan)
-
-    def get_fire_man(self,api,secret,pwd):
-        fire_man = Client(api,secret,pwd)
-
-        ## try to get balance
-        future = fire_man.mix_get_accounts(productType='UMCBL')
-        dex = float(future['data'][0]['usdtEquity'])
-        print(dex)
-        mul,qty,dir = btc_fc.select_best_multi(dex)
-        print(f"dex is {dex} , mul is {mul},qty is {qty},perfer {dir}")
-        return fire_man,qty,dir
-
 
 
 if __name__ == '__main__':
+    app.run(debug=True, port=8080)
 
-    btc_fc = FireChain(31050,31300,30960,30600)
-
-    btc_fc.select_best_c_pct(btc_fc.long_start,btc_fc.long_end)
-    btc_fc.select_best_c_pct(btc_fc.short_start,btc_fc.short_end)
-
-    btc_fc.get_chains()
-    
-    print(f"long chain is {btc_fc.long_chains}")
-    print("let us make long orders !!")
-    long_orders = btc_fc.list_orders(btc_fc.long_unit,btc_fc.long_chains,'long')
-
-    print(f"short chain is {btc_fc.short_chains}")
-    print("let us make short orders !!")
-    short_orders = btc_fc.list_orders(btc_fc.short_unit,btc_fc.short_chains,'short')
-
-    ## start order
-    symbol = 'BTCUSDT_UMCBL'
-    marginCoin = 'USDT'
-    #fire_man,qty,dir = btc_fc.get_fire_man("bg_2f2c7bcad16db7eaac00c52f162f5fe8","028bc30d5792376166d3c8e70c908bb188b06b4145acbba84911e767c3847814","aishuo999")
-    fire_man,qty,diri = btc_fc.get_fire_man("bg_109f7cc0803eeb770c5e6ee7a84d5062","544bb76132737fc4b7b3b584ce705b74f6ed6a702f6635ccb37d0e22fe011a5c","aishuo999")
-    #fire_man,qty,diri = btc_fc.get_fire_man("bg_e09bd29650e5c3cf517017566ddc8857","747467fe4ab031f3c92391c8d052f35c01d4fe8ea428bee2200da676456c1b98","Zz123456")
-
-    dir = 'both'
-    btc_fc.place_orders(fire_man,symbol,marginCoin,qty,dir,long_orders,short_orders)

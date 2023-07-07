@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>火计连环</title>
+    </head>
+<body>
+    <h1>火计连环</h1>
+    <form action="/calculate" method="POST">
+        <label for="long_start">Enter number long_start:</label>
+        <input type="number" id="long_start" name="long_start" required><br><br>
+        
+        <label for="long_end">Enter number long_end:</label>
+        <input type="number" id="long_end" name="long_end" required><br><br>
+
+        <label for="short_start">Enter number short_start:</label>
+        <input type="number" id="short_start" name="short_start" required><br><br>
+        
+        <label for="short_end">Enter number short_end:</label>
+        <input type="number" id="short_end" name="short_end" required><br><br>
+
+        <label for="balance">Enter number balance:</label>
+        <input type="number" id="balance" name="balance" required><br><br>
+        
+        <input type="submit" value="Calculate">
+    </form>
+
+    {% if long_orders %}
+        <h2>通通连起来，开始🔥吧，哈哈哈哈:</h2>
+        <h3> long_orders:</h3>
+        {% for calculation in long_orders %}
+            <div class="long_orders">{{ calculation }}</div>
+        {% endfor %}
+        <h4>期望获利: {{ long_tp }}</h4>
+
+        <h3> short_orders:</h3>
+        {% for calculation in short_orders %}
+            <div class="short_orders">{{ calculation }}</div>
+        {% endfor %}
+        <h4>期望获利: {{ short_tp }}</h4>
+
+        <h3> 指导意见:</h3>
+        <h4> mul :{{ mul }} ,  qty :{{ qty }} , perfer :{{ dir }}</h4>
+
+
+
+        <a href="/reset">Reset</a>
+    {% endif %}
+
+</body>
+</html>
