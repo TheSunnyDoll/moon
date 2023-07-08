@@ -503,6 +503,7 @@ def run(symbol,marginCoin,hero,fight_time,debug_mode):
             pos = result['data']
             long_qty = float(pos[0]["total"])
             short_qty = float(pos[1]["total"])
+            print(pos)
             if long_qty > 0:
                 sc = get_current_second()
                 if sc % 10 == 1:
