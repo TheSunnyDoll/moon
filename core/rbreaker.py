@@ -14,7 +14,7 @@ import argparse
 #      另一个方向进入复仇模式，直接翻倍，限定一次
 
 ## 下单时 设为： Flase
-debug_mode = True
+debug_mode = False
 
 
 ## 构建交易区间rb0 ， rb1 ，rb 2
