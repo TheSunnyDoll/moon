@@ -504,8 +504,10 @@ def run(symbol,marginCoin,hero,fight_time,debug_mode):
                     if new_long_sl > float(plan['triggerPrice']):
                         ## modifiy the sl
                         try:
+                            size = plan['size']
+                            size = long_qty
                             huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
-                            huFu.mix_place_stop_order(symbol, marginCoin, new_short_sl, 'loss_plan', 'long',triggerType='fill_price', size=plan['size'], rangeRate=None)      
+                            huFu.mix_place_stop_order(symbol, marginCoin, new_short_sl, 'loss_plan', 'long',triggerType='fill_price', size=size, rangeRate=None)      
                             logger.info(f"move long sl ,new_long_sl is {new_long_sl} ")
 
                         except Exception as e:
@@ -515,8 +517,9 @@ def run(symbol,marginCoin,hero,fight_time,debug_mode):
                     if new_short_sl < float(plan['triggerPrice']):
                         ## modifiy the sl
                         try:
+                            size = plan['size']
                             huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
-                            huFu.mix_place_stop_order(symbol, marginCoin, new_short_sl, 'loss_plan', 'short',triggerType='fill_price', size=plan['size'], rangeRate=None)                            
+                            huFu.mix_place_stop_order(symbol, marginCoin, new_short_sl, 'loss_plan', 'short',triggerType='fill_price', size=size, rangeRate=None)                            
                             logger.info(f"move short sl ,new_short_sl is {new_short_sl} ")
 
                         except Exception as e:
