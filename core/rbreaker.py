@@ -506,7 +506,7 @@ def run(symbol,marginCoin,hero,fight_time,debug_mode):
                             size = plan['size']
                             size = long_qty
                             huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
-                            huFu.mix_place_stop_order(symbol, marginCoin, new_short_sl, 'loss_plan', 'long',triggerType='fill_price', size=size, rangeRate=None)      
+                            huFu.mix_place_stop_order(symbol, marginCoin, new_long_sl, 'loss_plan', 'long',triggerType='fill_price', size=size, rangeRate=None)      
                             logger.info(f"move long sl ,new_long_sl is {new_long_sl} ")
 
                         except Exception as e:
