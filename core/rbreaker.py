@@ -58,7 +58,7 @@ class Rbreaker():
 
             ## OHLC 2,3
             data = fire.mix_get_candles(symbol,'1H',startTime,endTime)
-            data = data[-23:]
+            data = data[-12:]
             for dt in data:
                 hour = timestamp_to_hour(float(dt[0]))
                 if not fight_time[0] <= hour <=fight_time[1]:
