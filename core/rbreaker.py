@@ -25,6 +25,13 @@ debug_mode = False
 
 # 一个区间，即一天最多交易突破 4次 ，blsh 不限
 
+# 区间分类：            适合兵种
+#   小区间 
+#   中区间
+#   大区间
+#   超大区间
+
+
 
 
 class Rbreaker():
@@ -36,15 +43,16 @@ class Rbreaker():
         self.bEnter = 0  # 反转买入价
         self.bSetup = 0 # 观察买入价
         self.sBreak = 0 # 突破卖出价
+        self.type = ''
 
     ## TODO:update params
     ## range decide
-    def today_range_decide(self,symbol,fire):
+    def today_range_decide(self,symbol,fire,fight_time):
         today_range_kline = []
         today_range = []
 
         current_hour = get_current_hour()
-        if  2 <= current_hour <=17:
+        if  fight_time[0] <= current_hour <=fight_time[1]:
             startTime = get_previous_day_timestamp()
             endTime = get_previous_hour_timestamp()
 
@@ -53,7 +61,7 @@ class Rbreaker():
 
             for dt in data:
                 hour = timestamp_to_hour(float(dt[0]))
-                if not 2 <= hour <=17:
+                if not fight_time[0] <= hour <=fight_time[1]:
                     today_range_kline.append(dt)
 
             ## rm the first element
@@ -99,6 +107,9 @@ class Rbreaker():
 
     ## 考虑是否随着假突破改变突破价格
 
+    ## 判断并设定区间类型
+    def set_range_type(self):
+        pass
 
 
     def if_blsh(self,current_price):
@@ -163,7 +174,7 @@ class Chain:
 
     ## 细化成多单        
     # # 同一个entry 点 , 分单 entry + 万分之三 * i，发盈亏比1:1 - 1:3 
-    def arrange(self,long_sl_end,short_sl_end,side,qty):
+    def arrange(self,soldier_qty,long_sl_end,short_sl_end,side,qty):
 
         # transform
         long_sl_end = float(long_sl_end)
@@ -173,9 +184,6 @@ class Chain:
         short_start = float(self.short_start)
         short_end =float(self.short_end)
 
-        ## soldiers = 4 * 3 
-        soldiers = 12 
-
         if side == 'long' or side == 'both':
         # long chains
             long_chains = []
@@ -184,7 +192,7 @@ class Chain:
             long_entry_piece = round(long_entry_range / pieces)
             long_sl_piece = round(long_entry_piece/2)
 
-            for i in range(soldiers):
+            for i in range(soldier_qty):
                 mul = i + 1
                 step = round(long_entry_piece * mul)
                 sl_step = long_sl_piece * mul
@@ -203,7 +211,7 @@ class Chain:
             short_entry_piece = round(short_entry_range / pieces)
             short_sl_piece = round(short_entry_piece/2)
 
-            for i in range(soldiers):
+            for i in range(soldier_qty):
                 mul = i + 1
                 step = round(short_entry_piece * mul)
                 sl_step = short_sl_piece * mul
@@ -344,7 +352,7 @@ class Fireman:
         pass
 
 
-def run(symbol,marginCoin,hero):
+def run(symbol,marginCoin,hero,fight_time):
 
     blsh_max_qty = 0.15
     fire_max_qty = 0.2
@@ -354,6 +362,8 @@ def run(symbol,marginCoin,hero):
     short_target = 0
     queque_length = 4 
     
+    ## soldiers = 4 * 3 
+    soldier_qty = 12 
     ## construct fireman
     fm = Fireman(hero['api_key'],hero['secret_key'],hero['passphrase'])
 
@@ -371,7 +381,7 @@ def run(symbol,marginCoin,hero):
     # dies soldiers can reborn once, and place in roborn_oids list
     roborn_oids = []
 
-    today_range = rb.today_range_decide(symbol,fire)
+    today_range = rb.today_range_decide(symbol,fire,fight_time)
     if today_range != []:
         rb.set_range(today_range)
     print(rb.pivot,rb.bBreak,rb.sSetup,rb.sEnter,rb.bEnter,rb.bSetup,rb.sBreak)
@@ -385,7 +395,7 @@ def run(symbol,marginCoin,hero):
     base_qty = 0.1
 
     chains = Chain(rb.bBreak,test_long_end,rb.sBreak,test_short_end)
-    long_chains,short_chains = chains.arrange(rb.sEnter,rb.bEnter,side,base_qty)
+    long_chains,short_chains = chains.arrange(soldier_qty,rb.sEnter,rb.bEnter,side,base_qty)
 
     print(long_chains)
     print(short_chains)
@@ -586,13 +596,14 @@ if __name__ == '__main__':
 
     config = get_config_file()
     hero = config[heroname]
+    fight_time = [3,17]
 
     while True:
         current_hour = get_current_hour()
         minute = get_current_minute()
-        if  2 <= current_hour <=17:
+        if  fight_time[0] <= current_hour <=fight_time[1]:
             print("time to work! man! ")
-            run(symbol,marginCoin,hero)
+            run(symbol,marginCoin,hero,fight_time)
         if minute ==0:
             print(f"it's just {current_hour} clock , keep resting,bro~~")
         time.sleep(10)
