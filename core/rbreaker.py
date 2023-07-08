@@ -125,7 +125,7 @@ class Rbreaker():
             alpha = bBreak * 0.001
             delta = sSetup - bSetup
             if delta >= alpha:
-                logger.warning("边防来报～ 城内有奸细🥷潜入，请小心！！")
+                logger.warning("边防来报～ 城内有奸细 🥷 潜入，请小心！！")
                 return True
             else:
                 return False

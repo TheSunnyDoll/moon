@@ -71,7 +71,7 @@ def get_logger():
         '%(asctime)s - %(log_color)s%(levelname)s - %(message)s',
         log_colors={
             'DEBUG': 'green',
-            'INFO': 'blue',
+            'INFO': 'white',
             'WARNING': 'yellow',
             'ERROR': 'red',
             'CRITICAL': 'red,bg_yellow',
