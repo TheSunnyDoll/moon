@@ -61,7 +61,7 @@ class Rbreaker():
             data = data[-12:]
             for dt in data:
                 hour = timestamp_to_hour(float(dt[0]))
-                if not fight_time[0] <= hour <=fight_time[1]:
+                if not fight_time[0] < hour <fight_time[1]:
                     today_range_kline.append(dt)
 
             ## rm the first element
