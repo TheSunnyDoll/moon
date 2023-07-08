@@ -466,6 +466,8 @@ def run(symbol,marginCoin,hero):
         current_hour = get_current_hour()
         if  not 2 <= current_hour <=17:
             print("time to sleep ~ ")
+            fm.placed = False
+
             break
 
         ## get current position
