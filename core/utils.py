@@ -52,6 +52,9 @@ def get_current_hour():
 def get_current_minute():
     return datetime.datetime.now().minute
 
+def get_current_second():
+    return datetime.datetime.now().second
+
 
 def get_config_file():
     file_path = "../config/config.yaml"

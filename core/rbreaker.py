@@ -125,7 +125,9 @@ class Rbreaker():
             alpha = bBreak * 0.001
             delta = sSetup - bSetup
             if delta >= alpha:
-                logger.warning("边防来报～ 城内有奸细 🥷 潜入，请小心！！")
+                sc = get_current_second()
+                if sc == 0:
+                    logger.warning("边防来报～ 城内有奸细 🥷 潜入，请小心！！")
                 return True
             else:
                 return False
@@ -502,9 +504,13 @@ def run(symbol,marginCoin,hero,fight_time,debug_mode):
             long_qty = float(pos[0]["total"])
             short_qty = float(pos[1]["total"])
             if long_qty > 0:
-                logger.info("北军鏖战中🔥～，出兵🪖 数量 %s ，加油啊 ，兄弟们！！！",long_qty)
+                sc = get_current_second()
+                if sc == 0:
+                    logger.info("北军鏖战中🔥～，出兵🪖 数量 %s ，加油啊 ，兄弟们！！！",long_qty)
             if short_qty > 0:
-                logger.info("南军鏖战中🔥～，出兵🪖 数量 %s ，加油啊 ，兄弟们！！！",short_qty)
+                sc = get_current_second()
+                if sc == 0:
+                    logger.info("南军鏖战中🔥～，出兵🪖 数量 %s ，加油啊 ，兄弟们！！！",short_qty)
 
             for order in pos:
                 if order['holdSide'] == 'long':
