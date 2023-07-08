@@ -43,7 +43,7 @@ class Rbreaker():
 
     ## TODO:update params
     ## range decide
-    def today_range_decide(self,symbol,fire,fight_time):
+    def today_range_decide(self,symbol,huFu,fight_time):
         today_range_kline = []
         today_range = []
 
@@ -53,7 +53,7 @@ class Rbreaker():
             endTime = get_previous_hour_timestamp()
 
             ## OHLC 2,3
-            data = fire.mix_get_candles(symbol,'1H',startTime,endTime)
+            data = huFu.mix_get_candles(symbol,'1H',startTime,endTime)
             data = data[-24:]
 
             for dt in data:
@@ -134,7 +134,7 @@ class Rbreaker():
             
         return False
     
-    def blsh(self,symbol,marginCoin,fire,blsh_need_plan,current_price,base_qty):
+    def blsh(self,symbol,marginCoin,huFu,blsh_need_plan,current_price,base_qty):
         can_sell = False
         can_buy = False
         if self.bBreak > current_price > self.sEnter:
@@ -148,22 +148,22 @@ class Rbreaker():
         for plan in blsh_need_plan:
             if plan == 'blsh_sell_to_pivot' and can_sell:
                 #   tp at pivot, sl at bBreak , qty = 2x
-                fire.mix_place_plan_order(symbol, marginCoin, base_qty * 2, 'open_short', 'limit', self.sEnter, "market_price", executePrice=self.sEnter, clientOrderId='blsh_sell_to_pivot',presetTakeProfitPrice=self.pivot, presetStopLossPrice=self.bBreak, reduceOnly=False)
+                huFu.mix_place_plan_order(symbol, marginCoin, base_qty * 2, 'open_short', 'limit', self.sEnter, "market_price", executePrice=self.sEnter, clientOrderId='blsh_sell_to_pivot',presetTakeProfitPrice=self.pivot, presetStopLossPrice=self.bBreak, reduceOnly=False)
                 logger.info("北军巡逻兵已出动, 代号 %s ,蹲守点 北宣武门 %s", 'blsh_sell_to_pivot',self.sEnter)            
             
             elif plan == 'blsh_sell_to_bEnter' and can_sell:
                 #                       tp at bEnter , sl at bBreak ,qty = 1x
-                fire.mix_place_plan_order(symbol, marginCoin, base_qty , 'open_short', 'limit', self.sEnter, "market_price", executePrice=self.sEnter, clientOrderId='blsh_sell_to_bEnter',presetTakeProfitPrice=self.bEnter, presetStopLossPrice=self.bBreak, reduceOnly=False)
+                huFu.mix_place_plan_order(symbol, marginCoin, base_qty , 'open_short', 'limit', self.sEnter, "market_price", executePrice=self.sEnter, clientOrderId='blsh_sell_to_bEnter',presetTakeProfitPrice=self.bEnter, presetStopLossPrice=self.bBreak, reduceOnly=False)
                 logger.info("北军巡逻兵已出动, 代号 %s ,蹲守点 北宣武门 %s", 'blsh_sell_to_bEnter',self.sEnter)            
 
             elif plan == 'blsh_buy_to_pivot' and can_buy:
                 # 2: buy  at bEnter --- tp at pivot, sl at sBreak , qty = 2x
-                fire.mix_place_plan_order(symbol, marginCoin, base_qty * 2, 'open_long', 'limit', self.bEnter, "market_price", executePrice=self.bEnter, clientOrderId='blsh_buy_to_pivot',presetTakeProfitPrice=self.pivot, presetStopLossPrice=self.sBreak, reduceOnly=False)
+                huFu.mix_place_plan_order(symbol, marginCoin, base_qty * 2, 'open_long', 'limit', self.bEnter, "market_price", executePrice=self.bEnter, clientOrderId='blsh_buy_to_pivot',presetTakeProfitPrice=self.pivot, presetStopLossPrice=self.sBreak, reduceOnly=False)
                 logger.info("南军巡逻兵已出动, 代号 %s ,蹲守点 南宣武门 %s", 'blsh_buy_to_pivot',self.sEnter)            
 
             elif plan == 'blsh_buy_to_sEnter' and can_buy:
                 #                       tp at sEnter , sl at sBreak  ,qty = 1x
-                fire.mix_place_plan_order(symbol, marginCoin, base_qty , 'open_long', 'limit', self.bEnter, "market_price", executePrice=self.bEnter, clientOrderId='blsh_buy_to_sEnter',presetTakeProfitPrice=self.sEnter, presetStopLossPrice=self.sBreak, reduceOnly=False)
+                huFu.mix_place_plan_order(symbol, marginCoin, base_qty , 'open_long', 'limit', self.bEnter, "market_price", executePrice=self.bEnter, clientOrderId='blsh_buy_to_sEnter',presetTakeProfitPrice=self.sEnter, presetStopLossPrice=self.sBreak, reduceOnly=False)
                 logger.info("南军巡逻兵已出动, 代号 %s ,蹲守点 南宣武门 %s", 'blsh_buy_to_sEnter',self.sEnter)            
 
 
@@ -235,31 +235,91 @@ class Chain:
         return long_chains,short_chains  
 
 
-## Fireman
-class Fireman:
+## Chief
+class Chief:
     def __init__(self,key,secret,pwd) -> None:
         self.key = key
         self.secret = secret
         self.pwd = pwd
         self.placed = False
+        self.huFu = None
 
-    def new_fire(self):
-        fire = Client(self.key,self.secret,self.pwd)
-        return fire
+    def new_huFu(self):
+        huFu = Client(self.key,self.secret,self.pwd)
+        self.huFu = huFu
+        return huFu
     
-    def fire(self,fire,corps,symbol, marginCoin,debug_mode):
+    def deploy(self,corps,symbol, marginCoin,debug_mode):
         ## place trigger orders
         for corp in corps:
             for sd in corp:
                 logger.info(f"大军准备, 士兵 id  :{sd.id} ,qty  {sd.qty} , side  {sd.side}, entry  {sd.entry} ,tp  {sd.tp} , sl  {sd.sl}")
                 if not debug_mode:
-                    fire.mix_place_plan_order(symbol, marginCoin, sd.qty , sd.side, 'limit', sd.entry, "market_price", executePrice=sd.entry, clientOrderId=sd.id,presetTakeProfitPrice=sd.tp, presetStopLossPrice=sd.sl, reduceOnly=False)
+                    self.huFu.mix_place_plan_order(symbol, marginCoin, sd.qty , sd.side, 'limit', sd.entry, "market_price", executePrice=sd.entry, clientOrderId=sd.id,presetTakeProfitPrice=sd.tp, presetStopLossPrice=sd.sl, reduceOnly=False)
         ## set placed
         self.placed = True
 
     def reborn_sd(self,fire):
         #data = fire.mix_place_plan_order(symbol, marginCoin, qty, side, 'limit', lo[0], "market_price", executePrice=lo[0], presetTakeProfitPrice=lo[1], presetStopLossPrice=lo[2], reduceOnly=False)
         pass
+
+    ## 收兵   撤离，所有单子  如果有仓位，cp +/- 50 作为tp/sl
+    def withdraw(self):
+        withdraw_delta = 50
+        huFu = self.huFu
+        data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
+        if data != []:
+                ## clear all open orders
+            huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
+
+        # result = huFu.mix_get_single_position(symbol,marginCoin)
+        # pos = result['data']
+        # for order in pos:
+        #     if order['holdSide'] == 'long':
+        #         current_price = float(order['marketPrice'])
+        #         long_qty = float(order["total"])
+        #         if long_qty > 0:
+        #             new_long_sl = round(current_price - withdraw_delta)
+        #             new_long_tp = round(current_price + withdraw_delta)
+
+
+        #     elif order['holdSide'] == 'short':
+        #         current_price = float(order['marketPrice'])
+        #         short_qty = float(order["total"])
+        #         if short_qty > 0:
+        #             new_short_sl = round(current_price + withdraw_delta)
+        #             new_short_tp = round(current_price - withdraw_delta)
+
+        #     try:
+        #         data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='profit_loss')['data']
+        #     except Exception as e:
+        #         logger.warning(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
+
+        #     for plan in data:
+        #         if plan['planType'] == 'loss_plan':
+        #             if plan['side'] == 'close_long' and new_long_sl != 0:
+        #                 if new_long_sl > float(plan['triggerPrice']):
+        #                     ## modifiy the sl
+        #                     try:
+        #                         huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
+        #                         huFu.mix_place_stop_order(symbol, marginCoin, new_short_sl, 'loss_plan', 'long',triggerType='fill_price', size=plan['size'], rangeRate=None)      
+        #                         logger.info(f"move long sl ,new_long_sl is {new_long_sl} ")
+
+        #                     except Exception as e:
+        #                         logger.warning(f"move long sl faild, order id is {plan['orderId']},new_long_sl is {new_long_sl} ,{e}")
+                            
+        #             elif plan['side'] == 'close_short' and new_short_sl != 0:
+        #                 if new_short_sl < float(plan['triggerPrice']):
+        #                     ## modifiy the sl
+        #                     try:
+        #                         huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
+        #                         huFu.mix_place_stop_order(symbol, marginCoin, new_short_sl, 'loss_plan', 'short',triggerType='fill_price', size=plan['size'], rangeRate=None)                            
+        #                         logger.info(f"move short sl ,new_short_sl is {new_short_sl} ")
+
+        #                     except Exception as e:
+        #                         logger.warning(f"move short sl faild, order id is {plan['orderId']},new_short_sl is {new_short_sl} ,{e}")
+
+
 
 
 def run(symbol,marginCoin,hero,fight_time,debug_mode):
@@ -275,9 +335,9 @@ def run(symbol,marginCoin,hero,fight_time,debug_mode):
     ## soldiers = 4 * 3 
     soldier_qty = 12 
     ## construct fireman
-    fm = Fireman(hero['api_key'],hero['secret_key'],hero['passphrase'])
+    chief = Chief(hero['api_key'],hero['secret_key'],hero['passphrase'])
 
-    fire = fm.new_fire()
+    huFu = chief.new_huFu()
 
 
     ## get r-breaker
@@ -291,10 +351,10 @@ def run(symbol,marginCoin,hero,fight_time,debug_mode):
     # dies soldiers can reborn once, and place in roborn_oids list
     roborn_oids = []
 
-    today_range = rb.today_range_decide(symbol,fire,fight_time)
+    today_range = rb.today_range_decide(symbol,huFu,fight_time)
     if today_range != []:
         rb.set_range(today_range)
-    logger.info("\n\t\t\t\t 中军位   :%s\n \t\t\t\t 玄武门   :%s\n\t\t\t\t 北瞭望塔 :%s\n\t\t\t\t 北宣武门 :%s\n\t\t\t\t 南宣武门 :%s\n\t\t\t\t 南瞭望塔 :%s\n\t\t\t\t 朱雀门   :%s\n ",rb.pivot,rb.bBreak,rb.sSetup,rb.sEnter,rb.bEnter,rb.bSetup,rb.sBreak)
+    logger.info("\n \t\t\t\t 玄武门   :%s\n\t\t\t\t 北瞭望塔 :%s\n\t\t\t\t 北宣武门 :%s\n\t\t\t\t 中军位   :%s\n\t\t\t\t 南宣武门 :%s\n\t\t\t\t 南瞭望塔 :%s\n\t\t\t\t 朱雀门   :%s\n ",rb.bBreak,rb.sSetup,rb.sEnter,rb.pivot,rb.bEnter,rb.bSetup,rb.sBreak)
     # # construct chains : 
     # long  start is rb.bBreak  
     # short start is rb.sBreakS
@@ -369,10 +429,10 @@ def run(symbol,marginCoin,hero,fight_time,debug_mode):
 
 
     if not debug_mode:
-        data = fire.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
+        data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
         if data != []:
                 ## clear all open orders
-            fire.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
+            huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
 
     logger.warning("三")
     time.sleep(1)
@@ -393,13 +453,14 @@ def run(symbol,marginCoin,hero,fight_time,debug_mode):
         current_hour = get_current_hour()
         if  not 2 <= current_hour <=17:
             logger.info("天色不早～鸣金收兵！！！ 叮！叮！叮！ ")
-            fm.placed = False
+            chief.withdraw()
+            chief.placed = False
 
             break
 
         ## get current position
         try:
-            result = fire.mix_get_single_position(symbol,marginCoin)
+            result = huFu.mix_get_single_position(symbol,marginCoin)
             pos = result['data']
             long_qty = float(pos[0]["total"])
             short_qty = float(pos[1]["total"])
@@ -433,7 +494,7 @@ def run(symbol,marginCoin,hero,fight_time,debug_mode):
 
 
         try:
-            data = fire.mix_get_plan_order_tpsl(symbol=symbol,isPlan='profit_loss')['data']
+            data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='profit_loss')['data']
         except Exception as e:
             logger.warning(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
 
@@ -443,8 +504,8 @@ def run(symbol,marginCoin,hero,fight_time,debug_mode):
                     if new_long_sl > float(plan['triggerPrice']):
                         ## modifiy the sl
                         try:
-                            fire.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
-                            fire.mix_place_stop_order(symbol, marginCoin, new_short_sl, 'loss_plan', 'long',triggerType='fill_price', size=plan['size'], rangeRate=None)      
+                            huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
+                            huFu.mix_place_stop_order(symbol, marginCoin, new_short_sl, 'loss_plan', 'long',triggerType='fill_price', size=plan['size'], rangeRate=None)      
                             logger.info(f"move long sl ,new_long_sl is {new_long_sl} ")
 
                         except Exception as e:
@@ -454,8 +515,8 @@ def run(symbol,marginCoin,hero,fight_time,debug_mode):
                     if new_short_sl < float(plan['triggerPrice']):
                         ## modifiy the sl
                         try:
-                            fire.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
-                            fire.mix_place_stop_order(symbol, marginCoin, new_short_sl, 'loss_plan', 'short',triggerType='fill_price', size=plan['size'], rangeRate=None)                            
+                            huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
+                            huFu.mix_place_stop_order(symbol, marginCoin, new_short_sl, 'loss_plan', 'short',triggerType='fill_price', size=plan['size'], rangeRate=None)                            
                             logger.info(f"move short sl ,new_short_sl is {new_short_sl} ")
 
                         except Exception as e:
@@ -464,7 +525,7 @@ def run(symbol,marginCoin,hero,fight_time,debug_mode):
 
         ## get current price 
         try:
-            result = fire.mix_get_market_price(symbol)
+            result = huFu.mix_get_market_price(symbol)
             current_price = result['data']['markPrice']
             logger.info("斥候来报，坐标 %s 处发现敌军",current_price)
         except Exception as e:
@@ -475,7 +536,7 @@ def run(symbol,marginCoin,hero,fight_time,debug_mode):
         sd_need_plan = copy.deepcopy(sds_oids)
 
         try:
-            data = fire.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
+            data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
         except Exception as e:
             logger.warning(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
 
@@ -486,18 +547,18 @@ def run(symbol,marginCoin,hero,fight_time,debug_mode):
                 except Exception as e:
                     logger.warning(f"An unknown error occurred in cancel_entry(): {e}")
             if plan['clientOid'] in sds_oids:
-                fm.placed = True
+                chief.placed = True
 
             
         ## if blsh
         if rb.if_blsh(float(current_price))  and long_qty < blsh_max_qty and short_qty < blsh_max_qty and blsh_need_plan != []:
             ## blsh
             if not debug_mode:
-                rb.blsh(symbol,marginCoin,fire,blsh_need_plan,float(current_price),base_qty)
+                rb.blsh(symbol,marginCoin,huFu,blsh_need_plan,float(current_price),base_qty)
 
         ## check if fireman placed
-        if fm.placed == False and long_qty <= blsh_max_qty and short_qty <= blsh_max_qty:
-            fm.fire(fire,corps,symbol, marginCoin,debug_mode)
+        if chief.placed == False and long_qty <= blsh_max_qty and short_qty <= blsh_max_qty:
+            chief.deploy(corps,symbol, marginCoin,debug_mode)
 
         ## check corps soldiers
         ## if sodiers is died && not reborned , reborn
