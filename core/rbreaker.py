@@ -14,7 +14,7 @@ import argparse
 #      另一个方向进入复仇模式，直接翻倍，限定一次
 
 ## 下单时 设为： Flase
-debug_mode = False
+debug_mode = True
 
 
 ## 构建交易区间rb0 ， rb1 ，rb 2
@@ -58,7 +58,7 @@ class Rbreaker():
 
             ## OHLC 2,3
             data = fire.mix_get_candles(symbol,'1H',startTime,endTime)
-
+            data = data[-23:]
             for dt in data:
                 hour = timestamp_to_hour(float(dt[0]))
                 if not fight_time[0] <= hour <=fight_time[1]:
