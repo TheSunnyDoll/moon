@@ -3,7 +3,7 @@ import time
 import copy
 from utils import *
 import argparse
-
+from corps import *
 
 ## 动态止损   
 #   long: delta = entry - sl , current_price >= entry + delta/2 , new_sl = current_price - delta , if new_sl > sl , sl = new_sl
@@ -241,97 +241,97 @@ class Chain:
 # 敢死队——Expendables：     0.05/0.1/0.05         爆破位             外                  用亏损来决定盈利
 # 中军大帐——citadel
 
-class Soldier:
-    def __init__(self,side,entry,sl,qty) -> None:
-        self.side = side
-        self.entry = entry
-        self.tp = 0
-        self.sl = sl
-        self.qty = qty 
-        self.id = ''
-        self.reborn = False
+# class Soldier:
+#     def __init__(self,side,entry,sl,qty) -> None:
+#         self.side = side
+#         self.entry = entry
+#         self.tp = 0
+#         self.sl = sl
+#         self.qty = qty 
+#         self.id = ''
+#         self.reborn = False
 
-    def to_melee(self,base_qty):
-        pace = 0.8
-        delta = abs(self.entry - self.sl)
-        if self.side == 'open_long':
-            if self.qty == base_qty:
-                self.tp = self.entry + delta
-            elif self.qty == base_qty * 2:
-                self.tp = self.entry + round(delta * pace)
+#     def to_melee(self,base_qty):
+#         pace = 0.8
+#         delta = abs(self.entry - self.sl)
+#         if self.side == 'open_long':
+#             if self.qty == base_qty:
+#                 self.tp = self.entry + delta
+#             elif self.qty == base_qty * 2:
+#                 self.tp = self.entry + round(delta * pace)
 
-        elif self.side == 'open_short':
-            if self.qty == base_qty:
-                self.tp = self.entry - delta
-            elif self.qty == base_qty * 2:
-                self.tp = self.entry - round(delta * pace)
+#         elif self.side == 'open_short':
+#             if self.qty == base_qty:
+#                 self.tp = self.entry - delta
+#             elif self.qty == base_qty * 2:
+#                 self.tp = self.entry - round(delta * pace)
 
-    def to_expedition(self,base_qty):
-        long_pace = 2
-        short_pace = 1.5
-        delta = abs(self.entry - self.sl)
-        if self.side == 'open_long':
-            if self.qty == base_qty:
-                self.tp = self.entry + round(delta * long_pace)
-            elif self.qty == base_qty * 2:
-                self.tp = self.entry + round(delta * short_pace)
-        elif self.side == 'open_short':
-            if self.qty == base_qty:
-                self.tp = self.entry - round(delta * long_pace)
-            elif self.qty == base_qty * 2:
-                self.tp = self.entry - round(delta * short_pace)
+#     def to_expedition(self,base_qty):
+#         long_pace = 2
+#         short_pace = 1.5
+#         delta = abs(self.entry - self.sl)
+#         if self.side == 'open_long':
+#             if self.qty == base_qty:
+#                 self.tp = self.entry + round(delta * long_pace)
+#             elif self.qty == base_qty * 2:
+#                 self.tp = self.entry + round(delta * short_pace)
+#         elif self.side == 'open_short':
+#             if self.qty == base_qty:
+#                 self.tp = self.entry - round(delta * long_pace)
+#             elif self.qty == base_qty * 2:
+#                 self.tp = self.entry - round(delta * short_pace)
 
-    def to_expendable(self,base_qty,long_target,short_target):
-        base_qty = base_qty /2
-        print(f"expendable's base qty is {base_qty}")
-        short_pace = 2.5
-        delta = abs(self.entry - self.sl)
-        if self.side == 'open_long':
-            if self.qty == base_qty:
-                self.tp = long_target
-            elif self.qty == base_qty * 2:
-                self.tp = self.entry + delta * short_pace
-        elif self.side == 'open_short':
-            if self.qty == base_qty:
-                self.tp = short_target
-            elif self.qty == base_qty * 2:
-                self.tp = self.entry - delta * short_pace
+#     def to_expendable(self,base_qty,long_target,short_target):
+#         base_qty = base_qty /2
+#         print(f"expendable's base qty is {base_qty}")
+#         short_pace = 2.5
+#         delta = abs(self.entry - self.sl)
+#         if self.side == 'open_long':
+#             if self.qty == base_qty:
+#                 self.tp = long_target
+#             elif self.qty == base_qty * 2:
+#                 self.tp = self.entry + delta * short_pace
+#         elif self.side == 'open_short':
+#             if self.qty == base_qty:
+#                 self.tp = short_target
+#             elif self.qty == base_qty * 2:
+#                 self.tp = self.entry - delta * short_pace
  
 
-## corps
-# 近战兵——melee ：          0.1/0.2/0.2/0.1         1               外
-# 远征兵——Expeditionary：   0.1/0.2/0.2/0.1         2               外
-# 敢死队——Expendables：     0.05/0.1/0.05         爆破位             外
+# ## corps
+# # 近战兵——melee ：          0.1/0.2/0.2/0.1         1               外
+# # 远征兵——Expeditionary：   0.1/0.2/0.2/0.1         2               外
+# # 敢死队——Expendables：     0.05/0.1/0.05         爆破位             外
 
-class Corps:
-    def __init__(self) -> None:
-        pass
+# class Corps:
+#     def __init__(self) -> None:
+#         pass
     
-    def queque_melee(self,sds,base_qty):
-        queque = []
-        i = 0
-        for sd in sds:
-            sd.to_melee(base_qty)
-            if sd.side == 'open_long':
-                sd.id = 'long_melee_'+ str(i)
-            elif sd.side == 'open_short':
-                sd.id = 'short_melee_'+ str(i)
-            queque.append(sd)
-            i+=1
-        return queque
+#     def queque_melee(self,sds,base_qty):
+#         queque = []
+#         i = 0
+#         for sd in sds:
+#             sd.to_melee(base_qty)
+#             if sd.side == 'open_long':
+#                 sd.id = 'long_melee_'+ str(i)
+#             elif sd.side == 'open_short':
+#                 sd.id = 'short_melee_'+ str(i)
+#             queque.append(sd)
+#             i+=1
+#         return queque
 
-    def queque_expedition(self,sds,base_qty):
-        queque = []
-        i = 0
-        for sd in sds:
-            sd.to_expedition(base_qty)
-            if sd.side == 'open_long':
-                sd.id = 'long_expedition_'+ str(i)
-            elif sd.side == 'open_short':
-                sd.id = 'short_expedition_'+ str(i)
-            queque.append(sd)
-            i+=1
-        return queque
+#     def queque_expedition(self,sds,base_qty):
+#         queque = []
+#         i = 0
+#         for sd in sds:
+#             sd.to_expedition(base_qty)
+#             if sd.side == 'open_long':
+#                 sd.id = 'long_expedition_'+ str(i)
+#             elif sd.side == 'open_short':
+#                 sd.id = 'short_expedition_'+ str(i)
+#             queque.append(sd)
+#             i+=1
+#         return queque
 
 
 
