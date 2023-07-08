@@ -492,8 +492,6 @@ def run(symbol,marginCoin,hero,fight_time,debug_mode):
         except Exception as e:
             logger.warning(f"An unknown error occurred in mix_get_single_position(): {e}")
 
-        huFu.mix_place_stop_order(symbol, marginCoin, 30136, 'loss_plan', 'long',triggerType='fill_price', size=long_qty, rangeRate=None)      
-
         try:
             data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='profit_loss')['data']
         except Exception as e:
