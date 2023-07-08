@@ -13,10 +13,6 @@ import argparse
 #       died soldier 复活，血量翻倍，一个交易区间限定一次
 #      另一个方向进入复仇模式，直接翻倍，限定一次
 
-## 下单时 设为： Flase
-debug_mode = False
-
-
 ## 构建交易区间rb0 ， rb1 ，rb 2
 ## 交易方法一：
 # 构建区间：17:00 - 02:59 不交易，
@@ -58,7 +54,8 @@ class Rbreaker():
 
             ## OHLC 2,3
             data = fire.mix_get_candles(symbol,'1H',startTime,endTime)
-            data = data[-12:]
+            data = data[-24:]
+
             for dt in data:
                 hour = timestamp_to_hour(float(dt[0]))
                 if not fight_time[0] < hour <fight_time[1]:
@@ -69,16 +66,19 @@ class Rbreaker():
             highest = 0
             lowest = 100000
 
-            for kline in today_range_kline:
-                high = float(kline[2])
-                if high > highest:
-                    highest = high
-                low = float(kline[3])
-                if low < lowest:
-                    lowest = low
-            today_range.append(highest)
-            today_range.append(lowest)
-            print(f"today :{today_range}")
+            if today_range_kline !=[]:
+                for kline in today_range_kline:
+                    high = float(kline[2])
+                    if high > highest:
+                        highest = high
+                    low = float(kline[3])
+                    if low < lowest:
+                        lowest = low
+                today_range.append(highest)
+                today_range.append(lowest)
+                logger.warning("今日守军范围⛺️ %s :",today_range)
+            else:
+                logger.warning("今日守军范围获取失败，请重新检查🧐")
         return today_range
 
     def set_range(self,today_range):
@@ -118,43 +118,51 @@ class Rbreaker():
         sBreak = float(self.sBreak)
         sSetup = float(self.sSetup)
         bSetup = float(self.bSetup)
+        bEnter = float(self.bEnter)
+        sEnter = float(self.sEnter)
         if bBreak > current_price > sBreak:
             # 判断是否可以blsh, delta大于千分之一
             alpha = bBreak * 0.001
             delta = sSetup - bSetup
             if delta >= alpha:
-                print("true")
+                logger.warning("边防来报～ 城内有奸细🥷潜入，请小心！！")
                 return True
             else:
                 return False
             
-        print("false")
-
         return False
     
     def blsh(self,symbol,marginCoin,fire,blsh_need_plan,current_price,base_qty):
-        print("start blsh")
         can_sell = False
         can_buy = False
         if self.bBreak > current_price > self.sEnter:
+            logger.warning("北瞭望塔发现奸细移动，巡逻兵加强警备！！")
             can_sell =True
         elif self.bEnter > current_price > self.sBreak:
+            logger.warning("南瞭望塔发现奸细移动，巡逻兵加强警备！！")
             can_buy = True
         ## condition
         # 1: sell at sEnter --- 
         for plan in blsh_need_plan:
             if plan == 'blsh_sell_to_pivot' and can_sell:
                 #   tp at pivot, sl at bBreak , qty = 2x
-                fire.mix_place_plan_order(symbol, marginCoin, base_qty * 2, 'open_short', 'limit', self.sEnter, "market_price", executePrice=self.sEnter, clientOrderId='blsh_sell_to_pivot',presetTakeProfitPrice=self.pivot, presetStopLossPrice=self.bBreak, reduceOnly=False)            
+                fire.mix_place_plan_order(symbol, marginCoin, base_qty * 2, 'open_short', 'limit', self.sEnter, "market_price", executePrice=self.sEnter, clientOrderId='blsh_sell_to_pivot',presetTakeProfitPrice=self.pivot, presetStopLossPrice=self.bBreak, reduceOnly=False)
+                logger.info("北军巡逻兵已出动, 代号 %s ,蹲守点 北宣武门 %s", 'blsh_sell_to_pivot',self.sEnter)            
+            
             elif plan == 'blsh_sell_to_bEnter' and can_sell:
                 #                       tp at bEnter , sl at bBreak ,qty = 1x
                 fire.mix_place_plan_order(symbol, marginCoin, base_qty , 'open_short', 'limit', self.sEnter, "market_price", executePrice=self.sEnter, clientOrderId='blsh_sell_to_bEnter',presetTakeProfitPrice=self.bEnter, presetStopLossPrice=self.bBreak, reduceOnly=False)
+                logger.info("北军巡逻兵已出动, 代号 %s ,蹲守点 北宣武门 %s", 'blsh_sell_to_bEnter',self.sEnter)            
+
             elif plan == 'blsh_buy_to_pivot' and can_buy:
                 # 2: buy  at bEnter --- tp at pivot, sl at sBreak , qty = 2x
                 fire.mix_place_plan_order(symbol, marginCoin, base_qty * 2, 'open_long', 'limit', self.bEnter, "market_price", executePrice=self.bEnter, clientOrderId='blsh_buy_to_pivot',presetTakeProfitPrice=self.pivot, presetStopLossPrice=self.sBreak, reduceOnly=False)
+                logger.info("南军巡逻兵已出动, 代号 %s ,蹲守点 南宣武门 %s", 'blsh_buy_to_pivot',self.sEnter)            
+
             elif plan == 'blsh_buy_to_sEnter' and can_buy:
                 #                       tp at sEnter , sl at sBreak  ,qty = 1x
                 fire.mix_place_plan_order(symbol, marginCoin, base_qty , 'open_long', 'limit', self.bEnter, "market_price", executePrice=self.bEnter, clientOrderId='blsh_buy_to_sEnter',presetTakeProfitPrice=self.sEnter, presetStopLossPrice=self.sBreak, reduceOnly=False)
+                logger.info("南军巡逻兵已出动, 代号 %s ,蹲守点 南宣武门 %s", 'blsh_buy_to_sEnter',self.sEnter)            
 
 
 ## chain
@@ -337,11 +345,11 @@ class Fireman:
         fire = Client(self.key,self.secret,self.pwd)
         return fire
     
-    def fire(self,fire,corps,symbol, marginCoin):
+    def fire(self,fire,corps,symbol, marginCoin,debug_mode):
         ## place trigger orders
         for corp in corps:
             for sd in corp:
-                print(f"sd id is :{sd.id} ,qty is {sd.qty} , side is {sd.side}, entry is {sd.entry} ,tp is {sd.tp} , sl is {sd.sl}")
+                logger.info(f"大军准备, 士兵 id  :{sd.id} ,qty  {sd.qty} , side  {sd.side}, entry  {sd.entry} ,tp  {sd.tp} , sl  {sd.sl}")
                 if not debug_mode:
                     fire.mix_place_plan_order(symbol, marginCoin, sd.qty , sd.side, 'limit', sd.entry, "market_price", executePrice=sd.entry, clientOrderId=sd.id,presetTakeProfitPrice=sd.tp, presetStopLossPrice=sd.sl, reduceOnly=False)
         ## set placed
@@ -352,7 +360,7 @@ class Fireman:
         pass
 
 
-def run(symbol,marginCoin,hero,fight_time):
+def run(symbol,marginCoin,hero,fight_time,debug_mode):
 
     blsh_max_qty = 0.15
     fire_max_qty = 0.2
@@ -384,7 +392,7 @@ def run(symbol,marginCoin,hero,fight_time):
     today_range = rb.today_range_decide(symbol,fire,fight_time)
     if today_range != []:
         rb.set_range(today_range)
-    print(rb.pivot,rb.bBreak,rb.sSetup,rb.sEnter,rb.bEnter,rb.bSetup,rb.sBreak)
+    logger.info("\n\t\t\t\t 中军位   :%s\n \t\t\t\t 玄武门   :%s\n\t\t\t\t 北瞭望塔 :%s\n\t\t\t\t 北宣武门 :%s\n\t\t\t\t 南宣武门 :%s\n\t\t\t\t 南瞭望塔 :%s\n\t\t\t\t 朱雀门   :%s\n ",rb.pivot,rb.bBreak,rb.sSetup,rb.sEnter,rb.bEnter,rb.bSetup,rb.sBreak)
     # # construct chains : 
     # long  start is rb.bBreak  
     # short start is rb.sBreakS
@@ -397,8 +405,9 @@ def run(symbol,marginCoin,hero,fight_time):
     chains = Chain(rb.bBreak,test_long_end,rb.sBreak,test_short_end)
     long_chains,short_chains = chains.arrange(soldier_qty,rb.sEnter,rb.bEnter,side,base_qty)
 
-    print(long_chains)
-    print(short_chains)
+    logger.info("玄武门外士兵站位表 %s",long_chains)
+    logger.info("朱雀门外士兵站位表 %s",short_chains)
+
     corps = []
 
     if long_chains != []:
@@ -463,8 +472,14 @@ def run(symbol,marginCoin,hero,fight_time):
                 ## clear all open orders
             fire.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
 
-    print("3s later start!")
-    time.sleep(3)
+    logger.warning("三")
+    time.sleep(1)
+    logger.warning("二")
+    time.sleep(1)
+    logger.warning("一")
+    time.sleep(1)
+    logger.warning("全军戒备！！！随时准备迎敌！！！")
+
     trade = True
 
     while trade:
@@ -475,7 +490,7 @@ def run(symbol,marginCoin,hero,fight_time):
 
         current_hour = get_current_hour()
         if  not 2 <= current_hour <=17:
-            print("time to sleep ~ ")
+            logger.info("天色不早～鸣金收兵！！！ 叮！叮！叮！ ")
             fm.placed = False
 
             break
@@ -486,7 +501,11 @@ def run(symbol,marginCoin,hero,fight_time):
             pos = result['data']
             long_qty = float(pos[0]["total"])
             short_qty = float(pos[1]["total"])
-            print(long_qty,short_qty)
+            if long_qty > 0:
+                logger.info("北军鏖战中🔥～，出兵🪖 数量 %s ，加油啊 ，兄弟们！！！",long_qty)
+            if short_qty > 0:
+                logger.info("南军鏖战中🔥～，出兵🪖 数量 %s ，加油啊 ，兄弟们！！！",short_qty)
+
             for order in pos:
                 if order['holdSide'] == 'long':
                     long_pos = float(order['averageOpenPrice'])
@@ -504,13 +523,13 @@ def run(symbol,marginCoin,hero,fight_time):
         # long : new_sl = current_price - delta , if new_sl > sl , sl = new_sl  
         # short: if cp <= short_pos - short_delta/2 , if new_sl < sl ,sl = new_sl
         except Exception as e:
-            print(f"An unknown error occurred in mix_get_single_position(): {e}")
+            logger.warning(f"An unknown error occurred in mix_get_single_position(): {e}")
 
 
         try:
             data = fire.mix_get_plan_order_tpsl(symbol=symbol,isPlan='profit_loss')['data']
         except Exception as e:
-            print(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
+            logger.warning(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
 
         for plan in data:
             if plan['planType'] == 'loss_plan':
@@ -520,10 +539,10 @@ def run(symbol,marginCoin,hero,fight_time):
                         try:
                             fire.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
                             fire.mix_place_stop_order(symbol, marginCoin, new_short_sl, 'loss_plan', 'long',triggerType='fill_price', size=plan['size'], rangeRate=None)      
-                            print(f"move long sl ,new_long_sl is {new_long_sl} ")
+                            logger.info(f"move long sl ,new_long_sl is {new_long_sl} ")
 
                         except Exception as e:
-                            print(f"move long sl faild, order id is {plan['orderId']},new_long_sl is {new_long_sl} ,{e}")
+                            logger.warning(f"move long sl faild, order id is {plan['orderId']},new_long_sl is {new_long_sl} ,{e}")
                         
                 elif plan['side'] == 'close_short' and new_short_sl != 0:
                     if new_short_sl < float(plan['triggerPrice']):
@@ -531,19 +550,19 @@ def run(symbol,marginCoin,hero,fight_time):
                         try:
                             fire.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
                             fire.mix_place_stop_order(symbol, marginCoin, new_short_sl, 'loss_plan', 'short',triggerType='fill_price', size=plan['size'], rangeRate=None)                            
-                            print(f"move short sl ,new_short_sl is {new_short_sl} ")
+                            logger.info(f"move short sl ,new_short_sl is {new_short_sl} ")
 
                         except Exception as e:
-                            print(f"move short sl faild, order id is {plan['orderId']},new_short_sl is {new_short_sl} ,{e}")
+                            logger.warning(f"move short sl faild, order id is {plan['orderId']},new_short_sl is {new_short_sl} ,{e}")
 
 
         ## get current price 
         try:
             result = fire.mix_get_market_price(symbol)
             current_price = result['data']['markPrice']
-            print(current_price)
+            logger.info("斥候来报，坐标 %s 处发现敌军",current_price)
         except Exception as e:
-            print(f"An unknown error occurred in mix_get_market_price(): {e}")
+            logger.warning(f"An unknown error occurred in mix_get_market_price(): {e}")
 
         # check current plan
         blsh_need_plan = copy.deepcopy(blsh_oids)
@@ -552,14 +571,14 @@ def run(symbol,marginCoin,hero,fight_time):
         try:
             data = fire.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
         except Exception as e:
-            print(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
+            logger.warning(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
 
         for plan in data:
             if plan['clientOid'] in blsh_need_plan:
                 try:
                     blsh_need_plan.remove(plan['clientOid'])
                 except Exception as e:
-                    print(f"An unknown error occurred in cancel_entry(): {e}")
+                    logger.warning(f"An unknown error occurred in cancel_entry(): {e}")
             if plan['clientOid'] in sds_oids:
                 fm.placed = True
 
@@ -572,7 +591,7 @@ def run(symbol,marginCoin,hero,fight_time):
 
         ## check if fireman placed
         if fm.placed == False and long_qty <= blsh_max_qty and short_qty <= blsh_max_qty:
-            fm.fire(fire,corps,symbol, marginCoin)
+            fm.fire(fire,corps,symbol, marginCoin,debug_mode)
 
         ## check corps soldiers
         ## if sodiers is died && not reborned , reborn
@@ -585,25 +604,32 @@ def run(symbol,marginCoin,hero,fight_time):
 
 
 if __name__ == '__main__':
+    logger = get_logger()
+    logger.setLevel(logging.DEBUG)
+
     symbol = 'BTCUSDT_UMCBL'
     marginCoin = 'USDT'
-    print("welcome to the rbreaker world!")
-    print("resting~~")
+    logger.info("welcome to the rbreaker world!")
+    logger.info("天色看来尚早 🌛～")
     parser = argparse.ArgumentParser()
     parser.add_argument('-u', '--username', help='Username')
+    parser.add_argument('-d', '--debug_mode', action='store_true', default=False, help='Enable debug mode')
+
     args = parser.parse_args()
     heroname = args.username
+    debug_mode = args.debug_mode
 
     config = get_config_file()
     hero = config[heroname]
     fight_time = [3,17]
 
+
     while True:
         current_hour = get_current_hour()
         minute = get_current_minute()
         if  fight_time[0] <= current_hour <=fight_time[1]:
-            print("time to work! man! ")
-            run(symbol,marginCoin,hero,fight_time)
+            logger.info("起床！起床！ 军旅生涯新的一天开始啦！！！")
+            run(symbol,marginCoin,hero,fight_time,debug_mode)
         if minute ==0:
-            print(f"it's just {current_hour} clock , keep resting,bro~~")
+            logger.info(f"这才 {current_hour} 点 , 继续睡吧,兄弟 ~~")
         time.sleep(10)

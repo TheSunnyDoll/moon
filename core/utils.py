@@ -1,6 +1,8 @@
 import datetime
 import time
 import yaml
+import logging
+import colorlog
 
 def get_minute_timestamp():
     current_time = datetime.datetime.now()
@@ -56,3 +58,31 @@ def get_config_file():
     with open(file_path, 'r') as file:
         config_data = yaml.safe_load(file)
     return config_data
+
+def get_logger():
+    # 创建日志记录器
+    logger = logging.getLogger('rbreaker_logger')
+
+    # 创建控制台处理器
+    console_handler = logging.StreamHandler()
+
+    # 创建格式化器
+    formatter = colorlog.ColoredFormatter(
+        '%(asctime)s - %(log_color)s%(levelname)s - %(message)s',
+        log_colors={
+            'DEBUG': 'green',
+            'INFO': 'blue',
+            'WARNING': 'yellow',
+            'ERROR': 'red',
+            'CRITICAL': 'red,bg_yellow',
+        },
+        reset=True,
+        secondary_log_colors={},
+        style='%'
+    )
+    # 将格式化器添加到处理器
+    console_handler.setFormatter(formatter)
+
+    # 将处理器添加到日志记录器
+    logger.addHandler(console_handler)
+    return logger
