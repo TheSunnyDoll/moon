@@ -272,52 +272,54 @@ class Chief:
                 ## clear all open orders
             huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
 
-        # result = huFu.mix_get_single_position(symbol,marginCoin)
-        # pos = result['data']
-        # for order in pos:
-        #     if order['holdSide'] == 'long':
-        #         current_price = float(order['marketPrice'])
-        #         long_qty = float(order["total"])
-        #         if long_qty > 0:
-        #             new_long_sl = round(current_price - withdraw_delta)
-        #             new_long_tp = round(current_price + withdraw_delta)
+        new_long_sl = 0
+        new_short_sl = 0
+        result = huFu.mix_get_single_position(symbol,marginCoin)
+        pos = result['data']
+        for order in pos:
+            if order['holdSide'] == 'long':
+                current_price = float(order['marketPrice'])
+                long_qty = float(order["total"])
+                if long_qty > 0:
+                    new_long_sl = round(current_price - withdraw_delta)
+                    new_long_tp = round(current_price + withdraw_delta)
 
 
-        #     elif order['holdSide'] == 'short':
-        #         current_price = float(order['marketPrice'])
-        #         short_qty = float(order["total"])
-        #         if short_qty > 0:
-        #             new_short_sl = round(current_price + withdraw_delta)
-        #             new_short_tp = round(current_price - withdraw_delta)
+            elif order['holdSide'] == 'short':
+                current_price = float(order['marketPrice'])
+                short_qty = float(order["total"])
+                if short_qty > 0:
+                    new_short_sl = round(current_price + withdraw_delta)
+                    new_short_tp = round(current_price - withdraw_delta)
 
-        #     try:
-        #         data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='profit_loss')['data']
-        #     except Exception as e:
-        #         logger.warning(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
+        try:
+            data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='profit_loss')['data']
+        except Exception as e:
+            logger.warning(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
 
-        #     for plan in data:
-        #         if plan['planType'] == 'loss_plan':
-        #             if plan['side'] == 'close_long' and new_long_sl != 0:
-        #                 if new_long_sl > float(plan['triggerPrice']):
-        #                     ## modifiy the sl
-        #                     try:
-        #                         huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
-        #                         huFu.mix_place_stop_order(symbol, marginCoin, new_short_sl, 'loss_plan', 'long',triggerType='fill_price', size=plan['size'], rangeRate=None)      
-        #                         logger.info(f"move long sl ,new_long_sl is {new_long_sl} ")
+        for plan in data:
+            if plan['planType'] == 'loss_plan':
+                if plan['side'] == 'close_long' and new_long_sl != 0:
+                    if new_long_sl > float(plan['triggerPrice']):
+                        ## modifiy the sl
+                        try:
+                            huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
+                            huFu.mix_place_stop_order(symbol, marginCoin, new_long_sl, 'loss_plan', 'long',triggerType='fill_price', size=plan['size'], rangeRate=None)      
+                            logger.info(f"鸣金收兵！大军速速归营，在战士兵移动败退点！北军 新败退点: {new_long_sl} ")
 
-        #                     except Exception as e:
-        #                         logger.warning(f"move long sl faild, order id is {plan['orderId']},new_long_sl is {new_long_sl} ,{e}")
-                            
-        #             elif plan['side'] == 'close_short' and new_short_sl != 0:
-        #                 if new_short_sl < float(plan['triggerPrice']):
-        #                     ## modifiy the sl
-        #                     try:
-        #                         huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
-        #                         huFu.mix_place_stop_order(symbol, marginCoin, new_short_sl, 'loss_plan', 'short',triggerType='fill_price', size=plan['size'], rangeRate=None)                            
-        #                         logger.info(f"move short sl ,new_short_sl is {new_short_sl} ")
+                        except Exception as e:
+                            logger.warning(f"move long sl faild, order id is {plan['orderId']},new_long_sl is {new_long_sl} ,{e}")
+                        
+                elif plan['side'] == 'close_short' and new_short_sl != 0:
+                    if new_short_sl < float(plan['triggerPrice']):
+                        ## modifiy the sl
+                        try:
+                            huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
+                            huFu.mix_place_stop_order(symbol, marginCoin, new_short_sl, 'loss_plan', 'short',triggerType='fill_price', size=plan['size'], rangeRate=None)                            
+                            logger.info(f"鸣金收兵！大军速速归营，在战士兵移动败退点！南军 新败退点: {new_short_sl} ")
 
-        #                     except Exception as e:
-        #                         logger.warning(f"move short sl faild, order id is {plan['orderId']},new_short_sl is {new_short_sl} ,{e}")
+                        except Exception as e:
+                            logger.warning(f"move short sl faild, order id is {plan['orderId']},new_short_sl is {new_short_sl} ,{e}")
 
 
 
