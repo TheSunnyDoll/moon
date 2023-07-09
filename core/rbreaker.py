@@ -305,7 +305,7 @@ class Chief:
                         try:
                             huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
                             huFu.mix_place_stop_order(symbol, marginCoin, new_long_sl, 'loss_plan', 'long',triggerType='fill_price', size=plan['size'], rangeRate=None)      
-                            logger.info(f"鸣金收兵！大军速速归营，在战士兵移动败退点！北军 新败退点: {new_long_sl} ")
+                            logger.warning(f"鸣金收兵！大军速速归营，在战士兵移动败退点！北军 新败退点: {new_long_sl} ")
 
                         except Exception as e:
                             logger.warning(f"move long sl faild, order id is {plan['orderId']},new_long_sl is {new_long_sl} ,{e}")
@@ -316,7 +316,7 @@ class Chief:
                         try:
                             huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
                             huFu.mix_place_stop_order(symbol, marginCoin, new_short_sl, 'loss_plan', 'short',triggerType='fill_price', size=plan['size'], rangeRate=None)                            
-                            logger.info(f"鸣金收兵！大军速速归营，在战士兵移动败退点！南军 新败退点: {new_short_sl} ")
+                            logger.warning(f"鸣金收兵！大军速速归营，在战士兵移动败退点！南军 新败退点: {new_short_sl} ")
 
                         except Exception as e:
                             logger.warning(f"move short sl faild, order id is {plan['orderId']},new_short_sl is {new_short_sl} ,{e}")
@@ -509,7 +509,7 @@ def run(symbol,marginCoin,hero,fight_time,debug_mode):
                             size = long_qty
                             huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
                             huFu.mix_place_stop_order(symbol, marginCoin, new_long_sl, 'loss_plan', 'long',triggerType='fill_price', size=size, rangeRate=None)      
-                            logger.info(f"士气正盛！前移败退点！北军 新败退点: {new_long_sl} ")
+                            logger.warning(f"士气正盛！前移败退点！北军 新败退点: {new_long_sl} ")
 
                         except Exception as e:
                             logger.warning(f"move long sl faild, order id is {plan['orderId']},new_long_sl is {new_long_sl} ,{e}")
@@ -521,7 +521,7 @@ def run(symbol,marginCoin,hero,fight_time,debug_mode):
                             size = plan['size']
                             huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
                             huFu.mix_place_stop_order(symbol, marginCoin, new_short_sl, 'loss_plan', 'short',triggerType='fill_price', size=size, rangeRate=None)                            
-                            logger.info(f"士气正盛！前移败退点！ 南军 新败退点:  {new_short_sl} ")
+                            logger.warning(f"士气正盛！前移败退点！ 南军 新败退点:  {new_short_sl} ")
 
                         except Exception as e:
                             logger.warning(f"move short sl faild, order id is {plan['orderId']},new_short_sl is {new_short_sl} ,{e}")
