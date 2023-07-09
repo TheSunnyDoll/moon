@@ -149,22 +149,22 @@ class Rbreaker():
             if plan == 'blsh_sell_to_pivot' and can_sell:
                 #   tp at pivot, sl at bBreak , qty = 2x
                 huFu.mix_place_plan_order(symbol, marginCoin, base_qty * 2, 'open_short', 'limit', self.sEnter, "market_price", executePrice=self.sEnter, clientOrderId='blsh_sell_to_pivot',presetTakeProfitPrice=self.pivot, presetStopLossPrice=self.bBreak, reduceOnly=False)
-                logger.info("北军巡逻兵已出动, 代号 %s ,蹲守点 北宣武门 %s", 'blsh_sell_to_pivot',self.sEnter)            
+                logger.info("南军巡逻兵已出动, 代号 %s ,蹲守点 北宣武门 %s", 'blsh_sell_to_pivot',self.sEnter)            
             
             elif plan == 'blsh_sell_to_bEnter' and can_sell:
                 #                       tp at bEnter , sl at bBreak ,qty = 1x
                 huFu.mix_place_plan_order(symbol, marginCoin, base_qty , 'open_short', 'limit', self.sEnter, "market_price", executePrice=self.sEnter, clientOrderId='blsh_sell_to_bEnter',presetTakeProfitPrice=self.bEnter, presetStopLossPrice=self.bBreak, reduceOnly=False)
-                logger.info("北军巡逻兵已出动, 代号 %s ,蹲守点 北宣武门 %s", 'blsh_sell_to_bEnter',self.sEnter)            
+                logger.info("南军巡逻兵已出动, 代号 %s ,蹲守点 北宣武门 %s", 'blsh_sell_to_bEnter',self.sEnter)            
 
             elif plan == 'blsh_buy_to_pivot' and can_buy:
                 # 2: buy  at bEnter --- tp at pivot, sl at sBreak , qty = 2x
                 huFu.mix_place_plan_order(symbol, marginCoin, base_qty * 2, 'open_long', 'limit', self.bEnter, "market_price", executePrice=self.bEnter, clientOrderId='blsh_buy_to_pivot',presetTakeProfitPrice=self.pivot, presetStopLossPrice=self.sBreak, reduceOnly=False)
-                logger.info("南军巡逻兵已出动, 代号 %s ,蹲守点 南宣武门 %s", 'blsh_buy_to_pivot',self.sEnter)            
+                logger.info("北军巡逻兵已出动, 代号 %s ,蹲守点 南宣武门 %s", 'blsh_buy_to_pivot',self.sEnter)            
 
             elif plan == 'blsh_buy_to_sEnter' and can_buy:
                 #                       tp at sEnter , sl at sBreak  ,qty = 1x
                 huFu.mix_place_plan_order(symbol, marginCoin, base_qty , 'open_long', 'limit', self.bEnter, "market_price", executePrice=self.bEnter, clientOrderId='blsh_buy_to_sEnter',presetTakeProfitPrice=self.sEnter, presetStopLossPrice=self.sBreak, reduceOnly=False)
-                logger.info("南军巡逻兵已出动, 代号 %s ,蹲守点 南宣武门 %s", 'blsh_buy_to_sEnter',self.sEnter)            
+                logger.info("北军巡逻兵已出动, 代号 %s ,蹲守点 南宣武门 %s", 'blsh_buy_to_sEnter',self.sEnter)            
 
 
 ## chain
@@ -253,7 +253,7 @@ class Chief:
         ## place trigger orders
         for corp in corps:
             for sd in corp:
-                logger.info(f"大军准备, 士兵 id  :{sd.id} ,qty  {sd.qty} , side  {sd.side}, entry  {sd.entry} ,tp  {sd.tp} , sl  {sd.sl}")
+                logger.info(f"大军准备, 士兵 代号  :{sd.id} , 带兵数量 {sd.qty} , 进攻方向  {sd.side}, 蹲守地点  {sd.entry} ,进攻目标  {sd.tp} , 败退点  {sd.sl}")
                 if not debug_mode:
                     self.huFu.mix_place_plan_order(symbol, marginCoin, sd.qty , sd.side, 'limit', sd.entry, "market_price", executePrice=sd.entry, clientOrderId=sd.id,presetTakeProfitPrice=sd.tp, presetStopLossPrice=sd.sl, reduceOnly=False)
         ## set placed
@@ -507,7 +507,7 @@ def run(symbol,marginCoin,hero,fight_time,debug_mode):
                             size = long_qty
                             huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
                             huFu.mix_place_stop_order(symbol, marginCoin, new_long_sl, 'loss_plan', 'long',triggerType='fill_price', size=size, rangeRate=None)      
-                            logger.info(f"move long sl ,new_long_sl is {new_long_sl} ")
+                            logger.info(f"士气正盛！前移败退点！北军 新败退点: {new_long_sl} ")
 
                         except Exception as e:
                             logger.warning(f"move long sl faild, order id is {plan['orderId']},new_long_sl is {new_long_sl} ,{e}")
@@ -519,7 +519,7 @@ def run(symbol,marginCoin,hero,fight_time,debug_mode):
                             size = plan['size']
                             huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
                             huFu.mix_place_stop_order(symbol, marginCoin, new_short_sl, 'loss_plan', 'short',triggerType='fill_price', size=size, rangeRate=None)                            
-                            logger.info(f"move short sl ,new_short_sl is {new_short_sl} ")
+                            logger.info(f"士气正盛！前移败退点！ 南军 新败退点:  {new_short_sl} ")
 
                         except Exception as e:
                             logger.warning(f"move short sl faild, order id is {plan['orderId']},new_short_sl is {new_short_sl} ,{e}")
