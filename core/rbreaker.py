@@ -480,12 +480,12 @@ def run(symbol,marginCoin,hero,fight_time,debug_mode):
                     long_pos = float(order['averageOpenPrice'])
                     current_price = float(order['marketPrice'])
                     if current_price >= long_pos + long_delta/2 :
-                        new_long_sl = round(current_price - long_delta)
+                        new_long_sl = round(current_price - long_delta*0.6)
                 elif order['holdSide'] == 'short':
                     short_pos = float(order['averageOpenPrice'])
                     current_price = float(order['marketPrice'])
                     if current_price <= short_pos - short_delta/2 :
-                        new_short_sl = round(current_price + short_delta)
+                        new_short_sl = round(current_price + short_delta*0.6)
 
 
 
