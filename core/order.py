@@ -5,7 +5,7 @@ from utils import *
 
 symbol = 'BTCUSDT_UMCBL'
 marginCoin = 'USDT'
-qty = 0.5
+qty = 0.55
 side = 'open_short'
 entry = 30620
 tp = 29700
