@@ -25,3 +25,5 @@ hero = config[heroname]
 
 huFu = Client(hero['api_key'],hero['secret_key'],hero['passphrase'])
 huFu.mix_place_plan_order(symbol, marginCoin, qty , side, 'limit', entry, "market_price", executePrice=entry,presetTakeProfitPrice=tp, presetStopLossPrice=sl, reduceOnly=False)
+data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
+print(data)
