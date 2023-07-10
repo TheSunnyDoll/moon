@@ -9,7 +9,7 @@ qty = 0.55
 side = 'open_short'
 entry = 30620
 tp = 29700
-sl = 31000
+sl = 31070
 
 
 parser = argparse.ArgumentParser()
