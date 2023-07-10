@@ -506,7 +506,6 @@ def run(symbol,marginCoin,hero,fight_time,debug_mode):
                         ## modifiy the sl
                         try:
                             size = plan['size']
-                            size = long_qty
                             huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
                             huFu.mix_place_stop_order(symbol, marginCoin, new_long_sl, 'loss_plan', 'long',triggerType='fill_price', size=size, rangeRate=None)      
                             logger.warning(f"士气正盛！前移败退点！北军 新败退点: {new_long_sl} ")
