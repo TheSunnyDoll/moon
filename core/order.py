@@ -7,7 +7,7 @@ symbol = 'BTCUSDT_UMCBL'
 marginCoin = 'USDT'
 qty = 0.55
 side = 'open_short'
-entry = 30620
+entry = 30785
 tp = 29700
 sl = 31070
 
