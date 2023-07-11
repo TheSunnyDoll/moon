@@ -44,7 +44,7 @@ config = get_config_file()
 hero = config[heroname]
 huFu = Client(hero['api_key'],hero['secret_key'],hero['passphrase'])
 
-
+print(1)
 if dex != 0:
     max_loss_ratio = 0.03  # 最大仓位亏损比例为2%
     stop_loss_points = 100  # 亏损点数为100
