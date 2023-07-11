@@ -72,7 +72,7 @@ for plan in data:
                 size = plan['size']
                 huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'profit_plan')
                 huFu.mix_place_stop_order(symbol, marginCoin, new_long_tp, 'profit_plan', 'long',triggerType='fill_price', size=size, rangeRate=None)      
-                print(f"士气正盛！前移止盈点！北军 新败退点: {new_long_tp} ")
+                print(f"士气正盛！前移止盈点！北军 新止盈点: {new_long_tp} ")
 
             except Exception as e:
                 print(f"move long sl faild, order id is {plan['orderId']},new_long_sl is {new_long_tp} ,{e}")
@@ -83,7 +83,7 @@ for plan in data:
                 size = plan['size']
                 huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'profit_plan')
                 huFu.mix_place_stop_order(symbol, marginCoin, new_short_tp, 'profit_plan', 'short',triggerType='fill_price', size=size, rangeRate=None)                            
-                print(f"士气正盛！前移止盈点！ 南军 新败退点:  {new_short_tp} ")
+                print(f"士气正盛！前移止盈点！ 南军 新止盈点:  {new_short_tp} ")
 
             except Exception as e:
                 print(f"move short sl faild, order id is {plan['orderId']},new_short_sl is {new_short_tp} ,{e}")
