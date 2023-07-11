@@ -15,6 +15,9 @@ sl = 31070
 parser = argparse.ArgumentParser()
 parser.add_argument('-u', '--username', help='Username')
 parser.add_argument('-d', '--debug_mode', action='store_true', default=False, help='Enable debug mode')
+parser.add_argument('-d', '--debug_mode', action='store_true', default=False, help='Enable debug mode')
+
+
 
 args = parser.parse_args()
 heroname = args.username
@@ -33,7 +36,10 @@ data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
 for data in data:
     print(data)
 
-
+result = huFu.mix_get_single_position(symbol,marginCoin)
+pos = result['data']
+for pos in pos:
+    print(pos)
 
 new_long_sl = 0
 new_short_sl = 30900
