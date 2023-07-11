@@ -32,7 +32,10 @@ for data in data:
 
 
 new_long_sl = 0
-new_short_sl = 29801
+new_short_sl = 30900
+new_short_tp = 29801
+new_long_tp = 0
+
 data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='profit_loss')['data']
 for plan in data:
     if plan['planType'] == 'loss_plan':
@@ -58,6 +61,29 @@ for plan in data:
 
                 except Exception as e:
                     print(f"move short sl faild, order id is {plan['orderId']},new_short_sl is {new_short_sl} ,{e}")
+    if plan['planType'] == 'profit_plan':
+        if plan['side'] == 'close_long' and new_long_tp != 0:
+            ## modifiy the sl
+            try:
+                size = plan['size']
+                huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'profit_plan')
+                huFu.mix_place_stop_order(symbol, marginCoin, new_long_tp, 'profit_plan', 'long',triggerType='fill_price', size=size, rangeRate=None)      
+                print(f"士气正盛！前移止盈点！北军 新败退点: {new_long_tp} ")
+
+            except Exception as e:
+                print(f"move long sl faild, order id is {plan['orderId']},new_long_sl is {new_long_tp} ,{e}")
+            
+        elif plan['side'] == 'close_short' and new_short_tp != 0:
+            if new_short_sl < float(plan['triggerPrice']):
+                ## modifiy the sl
+                try:
+                    size = plan['size']
+                    huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'profit_plan')
+                    huFu.mix_place_stop_order(symbol, marginCoin, new_short_tp, 'profit_plan', 'short',triggerType='fill_price', size=size, rangeRate=None)                            
+                    print(f"士气正盛！前移止盈点！ 南军 新败退点:  {new_short_tp} ")
+
+                except Exception as e:
+                    print(f"move short sl faild, order id is {plan['orderId']},new_short_sl is {new_short_tp} ,{e}")
 
 data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='profit_loss')['data']
 for data in data:
