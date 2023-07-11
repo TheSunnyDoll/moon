@@ -23,7 +23,8 @@ sl = 31070
 parser = argparse.ArgumentParser()
 parser.add_argument('-u', '--username', help='Username')
 parser.add_argument('-d', '--debug_mode', action='store_true', default=False, help='Enable debug mode')
-parser.add_argument('-o', '--orderId', action='store_true', default=False, help='Enable order mode')
+parser.add_argument('-o', '--order', action='store_true', default=False, help='Enable order mode')
+
 parser.add_argument('-c', '--cancel', help='cancel order id ')
 parser.add_argument('-m', '--move', action='store_true', default=False, help='Enable move sl mode')
 parser.add_argument('-b', '--balance',  default=10000 ,help='calculate position size by balance ')
@@ -35,7 +36,7 @@ args = parser.parse_args()
 heroname = args.username
 debug_mode = args.debug_mode
 order = args.order
-orderId = args.orderId
+orderId = args.cancel
 move = args.move
 dex = args.balance
 
