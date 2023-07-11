@@ -59,3 +59,6 @@ for plan in data:
                 except Exception as e:
                     print(f"move short sl faild, order id is {plan['orderId']},new_short_sl is {new_short_sl} ,{e}")
 
+data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='profit_loss')['data']
+for data in data:
+    print(data)
