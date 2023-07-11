@@ -79,7 +79,7 @@ print("close orders qty -------------------------")
 if close:
     qty = round(float(pos['total'])/2)
     print(qty)
-    #data = huFu.mix_place_order(symbol,'USDT',qty,'close_short','market',reduceOnly=True)
+    data = huFu.mix_place_order(symbol,'USDT',qty,'close_short','market',reduceOnly=True)
 
 
 new_long_sl = 0
