@@ -83,7 +83,7 @@ if close:
 
 
 new_long_sl = 0
-new_short_sl = 30950
+new_short_sl = 30800
 new_short_tp = 29801
 new_long_tp = 0
 
