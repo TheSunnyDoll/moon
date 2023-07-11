@@ -29,6 +29,8 @@ parser.add_argument('-c', '--cancel', help='cancel order id ', default=0)
 parser.add_argument('-m', '--move', action='store_true', default=False, help='Enable move sl mode')
 parser.add_argument('-b', '--balance',  default=0 ,help='calculate position size by balance ')
 
+parser.add_argument('-cl', '--close', action='store_true', default=False, help='Enable close position mode')
+
 
 args = parser.parse_args()
 heroname = args.username
@@ -37,6 +39,8 @@ order = args.order
 orderId = args.cancel
 move = args.move
 dex = args.balance
+close = args.close
+
 
 config = get_config_file()
 hero = config[heroname]
@@ -48,6 +52,8 @@ if dex != 0:
 
     position_size = calculate_position_size(max_loss_ratio, stop_loss_points, dex)
     print("应开仓位数：", position_size)
+
+
 
 
 if order :
@@ -66,6 +72,15 @@ result = huFu.mix_get_single_position(symbol,marginCoin)
 pos = result['data']
 for pos in pos:
     print(pos)
+
+
+print("close orders qty -------------------------")
+
+if close:
+    qty = round(float(pos['total'])/2)
+    print(qty)
+    #data = huFu.mix_place_order(symbol,'USDT',qty,'close_short','market',reduceOnly=True)
+
 
 new_long_sl = 0
 new_short_sl = 30800
