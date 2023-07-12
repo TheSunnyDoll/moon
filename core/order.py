@@ -51,7 +51,7 @@ if dex != 0:
 
 if cancelAll:
     huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
-    print("cancel all")
+    print("cancel all plan")
 
 if order :
     qty = 0.55
