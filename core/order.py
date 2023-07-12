@@ -54,9 +54,9 @@ if dex != 0:
 if order :
     qty = 0.55
     side = 'open_long'
-    entry = 30650
+    entry = 302000
     tp = 30999
-    sl = 30500
+    sl = 29999
 
     huFu.mix_place_plan_order(symbol, marginCoin, qty , side, 'limit', entry, "market_price", executePrice=entry,presetTakeProfitPrice=tp, presetStopLossPrice=sl, reduceOnly=False)
 
