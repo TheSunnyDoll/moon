@@ -25,6 +25,7 @@ parser.add_argument('-m', '--move', action='store_true', default=False, help='En
 parser.add_argument('-b', '--balance',  default=0 ,help='calculate position size by balance ')
 
 parser.add_argument('-cl', '--close', action='store_true', default=False, help='Enable close position mode')
+parser.add_argument('-ca', '--cancelAll', action='store_true', default=False, help='cancel all')
 
 
 args = parser.parse_args()
@@ -35,7 +36,7 @@ orderId = args.cancel
 move = args.move
 dex = args.balance
 close = args.close
-
+cancelAll = args.cancelAll
 
 config = get_config_file()
 hero = config[heroname]
@@ -48,8 +49,8 @@ if dex != 0:
     position_size = calculate_position_size(max_loss_ratio, stop_loss_points, dex)
     print("应开仓位数：", position_size)
 
-
-
+if cancelAll:
+    huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
 
 if order :
     qty = 0.55
