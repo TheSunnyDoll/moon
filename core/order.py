@@ -54,7 +54,7 @@ if dex != 0:
 if order :
     qty = 0.55
     side = 'open_long'
-    entry = 30200
+    entry = 30201
     tp = 30999
     sl = 29999
 
