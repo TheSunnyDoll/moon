@@ -13,11 +13,6 @@ def calculate_position_size(max_loss_ratio, stop_loss_points, account_balance):
 
 symbol = 'BTCUSDT_UMCBL'
 marginCoin = 'USDT'
-qty = 0.55
-side = 'open_short'
-entry = 30530
-tp = 29700
-sl = 30900
 
 
 parser = argparse.ArgumentParser()
@@ -57,6 +52,12 @@ if dex != 0:
 
 
 if order :
+    qty = 0.55
+    side = 'open_short'
+    entry = 30530
+    tp = 29700
+    sl = 30900
+
     huFu.mix_place_plan_order(symbol, marginCoin, qty , side, 'limit', entry, "market_price", executePrice=entry,presetTakeProfitPrice=tp, presetStopLossPrice=sl, reduceOnly=False)
 
 if orderId != 0:
@@ -77,7 +78,7 @@ for pos in pos:
 print("close orders qty -------------------------")
 
 if close:
-    qty = float(pos['total'])-0.3
+    qty = float(pos['total'])
     print(qty)
     data = huFu.mix_place_order(symbol,'USDT',qty,'close_short','market',reduceOnly=True)
 
