@@ -87,8 +87,8 @@ for pos in position:
 print("close orders qty -------------------------")
 
 if close:
-    long_qty = float(position['long']['total'])
-    short_qty = float(position['short']['total'])
+    long_qty = float(position[0]['total'])
+    short_qty = float(position[1]['total'])
 
     print(long_qty)
     print(short_qty)
