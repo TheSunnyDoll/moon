@@ -93,8 +93,8 @@ if close:
 
 
 new_long_sl = 0
-new_short_sl = 30900
-new_short_tp = 30660
+new_short_sl = 2027
+new_short_tp = 2000
 new_long_tp = 0
 
 if move:
