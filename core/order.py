@@ -92,10 +92,11 @@ if close:
 
     print(long_qty)
     print(short_qty)
-    if short_qty != '':
-        data = huFu.mix_place_order(symbol,'USDT',short_qty,'close_short','market',reduceOnly=True)
     if long_qty != '':
         data = huFu.mix_place_order(symbol,'USDT',long_qty,'close_long','market',reduceOnly=True)
+
+    if short_qty != '':
+        data = huFu.mix_place_order(symbol,'USDT',short_qty,'close_short','market',reduceOnly=True)
 
 
 new_long_sl = 0
