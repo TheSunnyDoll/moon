@@ -326,7 +326,8 @@ class Chief:
 
 def run(symbol,marginCoin,hero,fight_time,times,debug_mode):
 
-    blsh_max_qty = 0.15 * times
+    blsh_max_qty = 0.15 * float(times)
+    logger.info("最大巡逻兵力为: d%",blsh_max_qty)
     fire_max_qty = 0.2
     side = 'both'
     revenge_mode = False
@@ -364,7 +365,8 @@ def run(symbol,marginCoin,hero,fight_time,times,debug_mode):
     short_delta = rb.bEnter - rb.sBreak
     test_long_end = float(rb.bBreak) + long_delta
     test_short_end = float(rb.sBreak) - short_delta
-    base_qty = 0.1 * times
+    base_qty = 0.1 * float(times)
+    logger.info("基础兵力为: d%",base_qty)
 
     chains = Chain(rb.bBreak,test_long_end,rb.sBreak,test_short_end)
     long_chains,short_chains = chains.arrange(soldier_qty,rb.sEnter,rb.bEnter,side,base_qty)
