@@ -79,17 +79,23 @@ for data in data:
 print("positions orders -------------------------")
 
 result = huFu.mix_get_single_position(symbol,marginCoin)
-pos = result['data']
-for pos in pos:
+position = result['data']
+for pos in position:
     print(pos)
 
 
 print("close orders qty -------------------------")
 
 if close:
-    qty = float(pos['total'])
-    print(qty)
-    data = huFu.mix_place_order(symbol,'USDT',qty,'close_short','market',reduceOnly=True)
+    long_qty = float(position['long']['total'])
+    short_qty = float(position['short']['total'])
+
+    print(long_qty)
+    print(short_qty)
+    if short_qty != '':
+        data = huFu.mix_place_order(symbol,'USDT',short_qty,'close_short','market',reduceOnly=True)
+    if long_qty != '':
+        data = huFu.mix_place_order(symbol,'USDT',long_qty,'close_long','market',reduceOnly=True)
 
 
 new_long_sl = 0
