@@ -21,6 +21,8 @@ parser.add_argument('-d', '--debug_mode', action='store_true', default=False, he
 parser.add_argument('-o', '--order', action='store_true', default=False, help='Enable order mode')
 
 parser.add_argument('-c', '--cancel', help='cancel order id ', default=0)
+parser.add_argument('-s', '--symbol', help='set symbol ', default='BTC')
+
 parser.add_argument('-m', '--move', action='store_true', default=False, help='Enable move sl mode')
 parser.add_argument('-b', '--balance',  default=0 ,help='calculate position size by balance ')
 
@@ -37,6 +39,11 @@ move = args.move
 dex = args.balance
 close = args.close
 cancelAll = args.cancelAll
+symbol = args.symbol
+
+
+symbol = symbol +'USDT_UMCBL'
+
 
 config = get_config_file()
 hero = config[heroname]
