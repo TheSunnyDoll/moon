@@ -99,6 +99,14 @@ new_long_tp = 0
 
 if move:
     data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='profit_loss')['data']
+    if data == [] and new_short_sl != 0:
+        huFu.mix_place_stop_order(symbol, marginCoin, new_short_sl, 'loss_plan', 'short',triggerType='fill_price', size=pos['total'], rangeRate=None) 
+        print(f"南军 新败退点: {new_short_sl} ")
+
+    if data == [] and new_short_tp != 0:
+        huFu.mix_place_stop_order(symbol, marginCoin, new_short_tp, 'profit_plan', 'short',triggerType='fill_price', size=pos['total'], rangeRate=None) 
+        print(f"南军 新止盈点: {new_short_tp} ")
+
     for plan in data:
         if plan['planType'] == 'loss_plan':
             if plan['side'] == 'close_long' and new_long_sl != 0:
