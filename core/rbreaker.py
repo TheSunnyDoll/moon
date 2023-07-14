@@ -324,9 +324,9 @@ class Chief:
 
 
 
-def run(symbol,marginCoin,hero,fight_time,debug_mode):
+def run(symbol,marginCoin,hero,fight_time,times,debug_mode):
 
-    blsh_max_qty = 0.15
+    blsh_max_qty = 0.15 * times
     fire_max_qty = 0.2
     side = 'both'
     revenge_mode = False
@@ -364,7 +364,7 @@ def run(symbol,marginCoin,hero,fight_time,debug_mode):
     short_delta = rb.bEnter - rb.sBreak
     test_long_end = float(rb.bBreak) + long_delta
     test_short_end = float(rb.sBreak) - short_delta
-    base_qty = 0.1
+    base_qty = 0.1 * times
 
     chains = Chain(rb.bBreak,test_long_end,rb.sBreak,test_short_end)
     long_chains,short_chains = chains.arrange(soldier_qty,rb.sEnter,rb.bEnter,side,base_qty)
@@ -584,10 +584,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-u', '--username', help='Username')
     parser.add_argument('-d', '--debug_mode', action='store_true', default=False, help='Enable debug mode')
+    parser.add_argument('-x', '--xtimes', default=1,help='x times base')
 
     args = parser.parse_args()
     heroname = args.username
     debug_mode = args.debug_mode
+    times = args.xtimes
 
     config = get_config_file()
     hero = config[heroname]
@@ -599,7 +601,7 @@ if __name__ == '__main__':
         minute = get_current_minute()
         if  fight_time[0] <= current_hour <=fight_time[1]:
             logger.info("起床！起床！ 军旅生涯新的一天开始啦！！！")
-            run(symbol,marginCoin,hero,fight_time,debug_mode)
+            run(symbol,marginCoin,hero,fight_time,times,debug_mode)
         if minute ==0:
             logger.info(f"这才 {current_hour} 点 , 继续睡吧,兄弟 ~~")
         time.sleep(10)

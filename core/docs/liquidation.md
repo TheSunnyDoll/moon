@@ -14,4 +14,4 @@
     6. 开多  
 
     
-![image](https://github.com/TheSunnyDoll/moon/blob/main/core/liquidations.png)
+![image](https://github.com/TheSunnyDoll/moon/blob/main/core/image/liquidations.png)
