@@ -100,8 +100,8 @@ if close:
 
 
 new_long_sl = 0
-new_short_sl = 102
-new_short_tp = 98
+new_short_sl = 0.81
+new_short_tp = 0.65
 new_long_tp = 0
 
 if move:
