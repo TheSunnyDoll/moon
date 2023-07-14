@@ -327,6 +327,7 @@ class Chief:
 def run(symbol,marginCoin,hero,fight_time,times,debug_mode):
 
     blsh_max_qty = 0.15 * float(times)
+    logger.info(times)
     logger.info("最大巡逻兵力为: %d",blsh_max_qty)
     fire_max_qty = 0.2
     side = 'both'
