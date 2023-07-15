@@ -99,10 +99,11 @@ if close:
         data = huFu.mix_place_order(symbol,'USDT',short_qty,'close_short','market',reduceOnly=True)
 
 
-new_long_sl = 0
-new_short_sl = 0.81
-new_short_tp = 0.65
-new_long_tp = 0
+new_short_sl = 0
+new_short_tp = 0
+
+new_long_sl = 29922
+new_long_tp = 30599
 
 if move:
     data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='profit_loss')['data']
