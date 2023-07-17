@@ -99,8 +99,6 @@ class Po3():
                 slps.append(pair)
         return slps
 
-
-
     def calculate_position_size(max_loss_ratio, stop_loss_points, account_balance):
 
         risk_amount = account_balance * max_loss_ratio

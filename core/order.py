@@ -61,9 +61,9 @@ if cancelAll:
     print("cancel all plan")
 
 if order :
-    qty = 0.55
+    qty = 0.3
     side = 'open_long'
-    entry = 30081
+    entry = 30185
     tp = 30500
     sl = 29980
 

@@ -17,7 +17,10 @@ bear，突破前最低k线的最高点，然后突破最低点，是vp，算一�
 ### internal liquidity
 次级结构  
 1.inducement   回撤1点 ，50-50 概率区  
-2.engineer liquidity（ENG LQD）  回撤2点，高概率区  
+
+## engineer liquidity（ENG LQD）  
+在极限ob前的内部高点
+回撤2点，高概率区  
 
 ## Identify valid structure
 1.标记出所有的swing_h , swing_l  (major)
@@ -33,3 +36,13 @@ exp：bear，在主结构下，打破次结构的高点的低点。 bull，打�
 
 ## IFC
 带sweep 的OB
+
+## BOS
+实体突破
+
+## single candle mitigation entry 
+1.ob entry  
+2.previous candle high sweep and close below high  --- entry previous entity high (bear)
+
+
+## ping pong entry
