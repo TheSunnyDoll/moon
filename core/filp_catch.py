@@ -18,3 +18,7 @@
 ## time x price 
 ## pd array
 ## ipda
+
+
+## sliver bullet
+## 10 - 11 

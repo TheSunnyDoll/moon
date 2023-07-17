@@ -63,7 +63,7 @@ if cancelAll:
 if order :
     qty = 0.55
     side = 'open_long'
-    entry = 30040
+    entry = 30081
     tp = 30500
     sl = 29980
 
