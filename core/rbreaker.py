@@ -43,12 +43,12 @@ class Rbreaker():
 
     ## TODO:update params
     ## range decide
-    def today_range_decide(self,symbol,huFu,fight_time):
+    def today_range_decide(self,symbol,huFu,rest_time):
         today_range_kline = []
         today_range = []
 
         current_hour = get_current_hour()
-        if  fight_time[0] <= current_hour <=fight_time[1]:
+        if  current_hour <= rest_time[0] or current_hour >= rest_time[1]:
             startTime = get_previous_day_timestamp()
             endTime = get_previous_hour_timestamp()
 
@@ -58,7 +58,7 @@ class Rbreaker():
 
             for dt in data:
                 hour = timestamp_to_hour(float(dt[0]))
-                if not fight_time[0] < hour <fight_time[1]:
+                if rest_time[0] < hour <rest_time[1]:
                     today_range_kline.append(dt)
 
             ## rm the first element
@@ -324,7 +324,7 @@ class Chief:
 
 
 
-def run(symbol,marginCoin,hero,fight_time,times,debug_mode):
+def run(symbol,marginCoin,hero,rest_time,times,debug_mode):
 
     blsh_max_qty = 0.15 * float(times)
     logger.info(times)
@@ -355,7 +355,7 @@ def run(symbol,marginCoin,hero,fight_time,times,debug_mode):
     # dies soldiers can reborn once, and place in roborn_oids list
     roborn_oids = []
 
-    today_range = rb.today_range_decide(symbol,huFu,fight_time)
+    today_range = rb.today_range_decide(symbol,huFu,rest_time)
     if today_range != []:
         rb.set_range(today_range)
     logger.info("\n \t\t\t\t 玄武门   :%s\n\t\t\t\t 北瞭望塔 :%s\n\t\t\t\t 北宣武门 :%s\n\t\t\t\t 中军位   :%s\n\t\t\t\t 南宣武门 :%s\n\t\t\t\t 南瞭望塔 :%s\n\t\t\t\t 朱雀门   :%s\n ",rb.bBreak,rb.sSetup,rb.sEnter,rb.pivot,rb.bEnter,rb.bSetup,rb.sBreak)
@@ -596,15 +596,18 @@ if __name__ == '__main__':
 
     config = get_config_file()
     hero = config[heroname]
-    fight_time = [3,17]
+    rest_time = [13,19]
 
-
+# 13 - 19 rest
     while True:
         current_hour = get_current_hour()
         minute = get_current_minute()
-        if  fight_time[0] <= current_hour <=fight_time[1]:
+        if  current_hour <= rest_time[0] or current_hour >= rest_time[1]:
             logger.info("起床！起床！ 军旅生涯新的一天开始啦！！！")
-            run(symbol,marginCoin,hero,fight_time,times,debug_mode)
+            run(symbol,marginCoin,hero,rest_time,times,debug_mode)
         if minute ==0:
             logger.info(f"这才 {current_hour} 点 , 继续睡吧,兄弟 ~~")
         time.sleep(10)
+
+# 19 + 13 = 32 
+# 19 - 32 
