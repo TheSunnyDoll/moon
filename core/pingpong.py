@@ -1,3 +1,7 @@
+# 1.标记swing_h,swing_l
+# 2.如果当前价格低于swing_l,标记当前价格为swing_l,标记当前市场为bear_bias,delta = (swing_h - swing_l)/2 , 标记交易区间DR = （swing_l + delta,swing_h）
+# 3.当市场为bear_bias 时,在价格pullback 到DR 且 DR > 30 时,开始观察，如果下一根k线高于当前区间最高价的一根k线，则挂单在最高价k线的（开盘价-5）的位置，止盈放在swing_l，止损放在swing_h，在这根k线收盘时还未进场，则取消订单，等待下一次
+
 import pandas as pd
 import numpy as np
 from utils import *
@@ -77,6 +81,11 @@ class PingPong():
                         if market_struct['High'][j] > market_struct['High'][j - 1]:
                             current_pivot_h = market_struct['High'][j]
                             market_struct['last_king'][j] = 'highest'
+                        if market_struct['High'][j] > pivots[-1][1]:
+                            # break block , choch
+                            market_struct['bias'][i] = 'demand'
+                            i = j
+                            break
 
 
                 elif market_struct['High'][i] > pivots[-1][1]:
@@ -93,8 +102,14 @@ class PingPong():
                                 i = j
                                 break
                         if market_struct['Low'][j] < market_struct['Low'][j - 1]:
+                            # break block ,choch
                             current_pivot_l = market_struct['Low'][j]
                             market_struct['last_king'][j] = 'lowest'
+                        if market_struct['Low'][j] < pivots[-1][2]:
+                            # break block , choch
+                            market_struct['bias'][i] = 'supply'
+                            i = j
+                            break
 
         last_bias = None
         last_strct = None
@@ -142,9 +157,10 @@ class PingPong():
             last_entry_base = bulls_lowest_val
 
         self.pivots = pivots
+        print(market_struct)
         return pivots,last_bias,last_strct,last_entry_base
 
-    def on_minute(self,pivots,last_bias,last_strct,last_entry_base):
+    def on_minute(self,symbol,huFu,pivots,last_bias,last_strct,last_entry_base):
         if last_bias == 'bear':
             low = min(float(pivots[-1][2]),float(last_strct['Low']))
             high = float(pivots[-2][1])
@@ -153,18 +169,26 @@ class PingPong():
             last_high = float(last_entry_base['High'])
             last_entry = (max(float(last_entry_base['Open']),float(last_entry_base['Close'])) - 5)
             if delta > 20:
-                print(last_high,last_entry)
             # get current price
             # if cp > interview  && cp > last_high :
             #    tp = low ,sl = high
             #    place order
-                pass
-            print(low,high,delta,interview)
+        ## get current price 
+                try:
+                    result = huFu.mix_get_market_price(symbol)
+                    current_price = result['data']['markPrice']
+                    logger.info("斥候来报，坐标 %s 处发现敌军",current_price)
+                except Exception as e:
+                    logger.warning(f"An unknown error occurred in mix_get_market_price(): {e}")
+                if current_price > interview and current_price > last_high:
+                    logger.info("最新观测突破点%f\n,最新入场点%f\n,止盈价格%f\n,止损价格%f\n",last_high,last_entry,low,high)
+
+                
 
 
             
 
-def main():
+def run():
     parser = argparse.ArgumentParser()
     parser.add_argument('-u', '--username', help='Username')
     args = parser.parse_args()
@@ -176,12 +200,15 @@ def main():
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
 
     player = PingPong()
-    pivots,last_bias,last_strct,last_entry_base = player.find_pivots(symbol,huFu)
-    player.on_minute(pivots,last_bias,last_strct,last_entry_base)
 
-    for pivot in pivots:
-        print(pivot)
-   # print(df)
+    while True:
+        pivots,last_bias,last_strct,last_entry_base = player.find_pivots(symbol,huFu)
+        for i in range(3):
+            player.on_minute(symbol,huFu,pivots,last_bias,last_strct,last_entry_base)
+            time.sleep(300)
 
 if __name__ == "__main__":
-    main()
+    logger = get_logger()
+    logger.setLevel(logging.DEBUG)
+
+    run()
