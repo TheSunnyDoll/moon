@@ -253,9 +253,10 @@ class Chief:
         ## place trigger orders
         for corp in corps:
             for sd in corp:
-                logger.info(f"大军准备, 士兵 代号  :{sd.id} , 带兵数量 {sd.qty} , 进攻方向  {sd.side}, 蹲守地点  {sd.entry} ,进攻目标  {sd.tp} , 败退点  {sd.sl}")
+                #logger.info(f"大军准备, 士兵 代号  :{sd.id} , 带兵数量 {sd.qty} , 进攻方向  {sd.side}, 蹲守地点  {sd.entry} ,进攻目标  {sd.tp} , 败退点  {sd.sl}")
                 if not debug_mode:
-                    self.huFu.mix_place_plan_order(symbol, marginCoin, sd.qty , sd.side, 'limit', sd.entry, "market_price", executePrice=sd.entry, clientOrderId=sd.id,presetTakeProfitPrice=sd.tp, presetStopLossPrice=sd.sl, reduceOnly=False)
+                    # self.huFu.mix_place_plan_order(symbol, marginCoin, sd.qty , sd.side, 'limit', sd.entry, "market_price", executePrice=sd.entry, clientOrderId=sd.id,presetTakeProfitPrice=sd.tp, presetStopLossPrice=sd.sl, reduceOnly=False)
+                    logger.info(f"突破大军休息中")
         ## set placed
         self.placed = True
 
@@ -459,7 +460,7 @@ def run(symbol,marginCoin,hero,rest_time,times,debug_mode):
         if  not 2 <= current_hour <=17:
             logger.info("天色不早～鸣金收兵！！！ 叮！叮！叮！ ")
             chief.withdraw()
-            chief.placed = False
+            #chief.placed = False
 
             break
 
