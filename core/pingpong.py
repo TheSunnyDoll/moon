@@ -302,11 +302,17 @@ class PingPong():
 
     def mark_some_points(self):
         if self.current_bias == 'weak_bear' or self.current_bias == 'bull':
-            self.idm = min(self.pivot_lows_short[-3:])
+            ## 第一次低点 大于 高点
+            delta = (max(self.pivot_highs_short) - min(self.pivot_inter_lows_short))*0.618
+            self.idm = round(max(self.pivot_highs_short) - delta)
+
             self.reversal = max(self.pivot_inter_highs_short)
 
         elif self.current_bias == 'weak_bull' or self.current_bias == 'bear' :
-            self.idm = max(self.pivot_highs_short[-3:])
+            ## 第一次高点 低于 低点
+            delta = (max(self.pivot_inter_highs_short) - min(self.pivot_lows_short))*0.618
+            self.idm = round(min(self.pivot_lows_short) + delta)
+
             self.reversal = min(self.pivot_inter_lows_short)
 
     def advertise(self):
@@ -353,9 +359,9 @@ class PingPong():
 
                         logger.info("🐮🐮💤,🐻🐻开始🏃吧,观察空单点位 %s ,止盈点位 %s,止损点位 %s ,止盈段 %d , 止损段 %d,",self.observe_price,tp,sl,tp_delta,sl_delta)
                         if tp_delta >= sl_delta:
-                            logger.info("🐮🐮💤,🐻🐻开始🏃吧,设置空单点位 %s ,止盈点位 %s,止损点位 %s ,止盈段 %d , 止损段 %d,",self.observe_price,tp,sl,tp_delta,sl_delta)
+                            logger.warning("🐮🐮💤,🐻🐻开始🏃吧,设置空单点位 %s ,止盈点位 %s,止损点位 %s ,止盈段 %d , 止损段 %d,",self.observe_price,tp,sl,tp_delta,sl_delta)
                             if sl_delta <= 100:
-                                logger.info("🐮🐮💤,🐻🐻开始🏃吧,加倍设置空单点位 %s ,止盈点位 %s,止损点位 %s ,止盈段 %d , 止损段 %d,",self.observe_price,tp,sl,tp_delta,sl_delta)
+                                logger.warning("🐮🐮💤,🐻🐻开始🏃吧,加倍设置空单点位 %s ,止盈点位 %s,止损点位 %s ,止盈段 %d , 止损段 %d,",self.observe_price,tp,sl,tp_delta,sl_delta)
                     elif self.last_candle_type == 'bull':
                         logger.info("🐻🐻持续向上回头中,现在至少有两根🐮🐮")
                     # flip modle
@@ -371,22 +377,16 @@ class PingPong():
 
                         logger.info("🐻🐻💤,🐮🐮开始🏃吧,观察多单点位 %s ,止盈点位 %s,止损点位 %s ,止盈段 %d , 止损段 %d,",self.observe_price,tp,sl,tp_delta,sl_delta)
                         if tp_delta >= sl_delta:
-                            logger.info("🐻🐻💤,🐮🐮开始🏃吧,设置多单点位 %s ,止盈点位 %s,止损点位 %s ,止盈段 %d , 止损段 %d,",self.observe_price,tp,sl,tp_delta,sl_delta)
+                            logger.warning("🐻🐻💤,🐮🐮开始🏃吧,设置多单点位 %s ,止盈点位 %s,止损点位 %s ,止盈段 %d , 止损段 %d,",self.observe_price,tp,sl,tp_delta,sl_delta)
+
                             if sl_delta <= 100:
-                                logger.info("🐻🐻💤,🐮🐮开始🏃吧,加倍设置多单点位 %s ,止盈点位 %s,止损点位 %s ,止盈段 %d , 止损段 %d,",self.observe_price,tp,sl,tp_delta,sl_delta)
+                                logger.warning("🐻🐻💤,🐮🐮开始🏃吧,加倍设置多单点位 %s ,止盈点位 %s,止损点位 %s ,止盈段 %d , 止损段 %d,",self.observe_price,tp,sl,tp_delta,sl_delta)
                     elif self.last_candle_type == 'bear':
                         logger.info("🐮🐮持续向下回头中,现在至少有两根🐻🐻")
 
 
-def run():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-u', '--username', help='Username')
-    args = parser.parse_args()
-    heroname = args.username
+def run(symbol,hero,debug_mode):
 
-    config = get_config_file()
-    hero = config[heroname]
-    symbol = 'BTCUSDT_UMCBL'
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
 
     player = PingPong()
@@ -398,13 +398,32 @@ def run():
         player.advertise()
         logger.info("现在趋势:%s to %s , 陷阱位 : %s , 潜在反转位: %s ,最后一根蜡烛是 %s",player.old_bias,player.current_bias,player.idm,player.reversal,player.last_candle_type)
 
+        print(player.pivot_highs_short)
+        print(player.pivot_lows_short)
+
         for i in range(30):
             player.track(huFu,symbol)
             time.sleep(30)
         # cancel all plan order
+        if not debug_mode:
+            data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
+            if data != []:
+                    ## clear all open orders
+                huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
+
 
 if __name__ == "__main__":
     logger = get_logger()
     logger.setLevel(logging.DEBUG)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-u', '--username', help='Username')
+    parser.add_argument('-d', '--debug_mode', action='store_true', default=False, help='Enable debug mode')
 
-    run()
+    args = parser.parse_args()
+    heroname = args.username
+    debug_mode = args.debug_mode
+
+    config = get_config_file()
+    hero = config[heroname]
+    symbol = 'BTCUSDT_UMCBL'
+    run(symbol,hero,debug_mode)
