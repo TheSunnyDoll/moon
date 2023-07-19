@@ -335,16 +335,14 @@ class PingPong():
                 sc = get_current_second()
                 if sc % 10 == 1:
                     logger.info("北军鏖战中🔥～，出兵🪖 数量 %s ，目前北军已斩获 %s 敌军，正在斩获 %s ，加油啊 ，兄弟们！！！",long_qty, pos[0]['achievedProfits'],pos[0]['unrealizedPL'])
-                    return None
+                    return 
             if short_qty > 0:
                 sc = get_current_second()
                 if sc % 10 == 1:
                     logger.info("南军鏖战中🔥～，出兵🪖 数量 %s ，目前南军已斩获 %s 敌军，正在斩获 %s ，加油啊 ，兄弟们！！！",short_qty, pos[1]['achievedProfits'],pos[1]['unrealizedPL'])
-                    return None
+                    return 
         except Exception as e:
             logger.warning(f"An unknown error occurred in mix_get_single_position(): {e}")
-
-
 
 
         base_qty = 0.001
@@ -429,13 +427,14 @@ def run(symbol,marginCoin,hero,debug_mode):
 
         for i in range(30):
             player.track(huFu,symbol,marginCoin)
+
             time.sleep(30)
-        # cancel all plan order
-        if not debug_mode:
-            data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
-            if data != []:
-                    ## clear all open orders
-                huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
+            if not debug_mode:
+                data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
+                if data != []:
+                        ## clear all open orders
+                    huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
+
 
 
 if __name__ == "__main__":
