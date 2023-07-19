@@ -1,26 +1,74 @@
-high = [30058.0, 30015.5, 29943.5, 29926.0, 29797.5, 29820.0, 30053.5, 30001.0, 30058.0, 30177.0, 30093.0, 30055.0, 30006.5]
-low = [29889.0, 29776.5, 29676.5, 29795.0, 29816.0, 29470.0, 29665.0, 29678.0, 29738.5, 29770.0, 29931.0, 29983.0, 30045.5, 29988.0, 29933.5, 29851.0]
+from pybitget import Client
+import pandas as pd
+import numpy as np
+import argparse
+from utils import *
 
-# 计算 delta（max(high) 和 min(low) 的距离）
-delta = max(high) - min(low)
+# 之前实现的 ZigZag 函数
+def zigzag(high, low, depth=12, deviation=5, backstep=2):
+    # 返回 ZigZag 高低点的 DataFrame
+    lw = 1
+    hg = 1
+    last_h = 1
+    last_l = 1
+    p_lw = -np.inf
+    p_hg = -np.inf
+    lw_vals = []
+    hg_vals = []
+    
+    for i in range(len(high)):
+        lw = lw + 1
+        hg = hg + 1
+        p_lw = max(p_lw, i - depth)
+        p_hg = max(p_hg, i - depth)
+        
+        lowing = lw == p_lw or low[i] - low[p_lw] > deviation * np.min(np.diff(low))
+        highing = hg == p_hg or high[p_hg] - high[i] > deviation * np.min(np.diff(high))
+        
+        lh = 0 if highing else lh + 1
+        ll = 0 if lowing else ll + 1
+        down = lh >= backstep
+        lower = low[i] > low[p_lw]
+        higher = high[i] < high[p_hg]
+        
+        if lw != p_lw and (not down or lower):
+            lw = p_lw if p_lw < hg else 0
+        
+        if hg != p_hg and (down or higher):
+            hg = p_hg if p_hg < lw else 0
+        
+        if down == down[1]:
+            pass
+        if down != down[1]:
+            if down:
+                last_h = hg
+                hg_vals.append((i - last_h, high[i]))
+            else:
+                last_l = lw
+                lw_vals.append((i - last_l, low[i]))
+    
+    zigzag_points = pd.DataFrame({'High_Zigzag': np.array(hg_vals)[:, 1], 'Low_Zigzag': np.array(lw_vals)[:, 1]}, index=np.array(hg_vals)[:, 0])
+    return zigzag_points
 
-# 计算 0.618 倍的目标距离
-target_distance = delta * 0.618
+# 解析命令行参数
+parser = argparse.ArgumentParser()
+parser.add_argument('-u', '--username', help='Username')
 
-# 找到与目标距离最接近的值
-closest_index = None
-min_diff = float('inf')  # 初始化为正无穷大，用于保存最小差值
-for i in range(len(high)):
-    diff = abs(target_distance - (high[i] - low[i]))
-    if diff < min_diff:
-        min_diff = diff
-        closest_index = i
+args = parser.parse_args()
+heroname = args.username
 
-if closest_index is not None:
-    closest_low_value = low[closest_index]
-    closest_high_value = high[closest_index]
-    print("最接近距离 max(high) 和 min(low) 的 0.618 倍的值：")
-    print("Low:", closest_low_value)
-    print("High:", closest_high_value)
-else:
-    print("没有找到最接近距离 max(high) 和 min(low) 的 0.618 倍的值。")
+config = get_config_file()
+hero = config[heroname]
+symbol = 'BTCUSDT_UMCBL'
+huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
+startTime = get_previous_day_timestamp()
+endTime = get_previous_minute_timestamp()
+data = huFu.mix_get_candles(symbol, '15m', startTime, endTime)
+
+# 将获取到的数据转换成 DataFrame
+df = pd.DataFrame(data, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume', 'Turnover'])
+# 调用 ZigZag 函数获取 ZigZag 高低点
+zigzag_points = zigzag(df['high'], df['low'])
+
+# 输出 ZigZag 高低点
+print(zigzag_points)
