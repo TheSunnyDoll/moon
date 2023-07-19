@@ -341,7 +341,7 @@ class PingPong():
 
 
         if not ((self.old_bias == 'bull' and self.current_bias == 'weak_bear') or (self.old_bias == 'bear' and self.current_bias == 'weak_bull')):
-            if self.current_bias == 'weak_bear':
+            if self.current_bias == 'weak_bear' or self.current_bias == 'bear':
                 if self.observe_candle_type == 'bear':
                     logger.info("时机未到,坐等一根bull_bar")
                 elif self.observe_candle_type == 'bull':
@@ -352,6 +352,10 @@ class PingPong():
                         sl_delta = float(float(sl) - self.observe_price)
 
                         logger.info("是时候等待反转了,设置空单点位 %s ,止盈点位 %s,止损点位 %s ,止盈段 %d , 止损段 %d,",self.observe_price,tp,sl,tp_delta,sl_delta)
+                        if tp_delta >= sl_delta:
+                            logger.info("冲啊～～～～～")
+                            if sl_delta <= 100:
+                                logger.info("往死里冲啊")
                     # flip modle
 
 
