@@ -325,7 +325,29 @@ class PingPong():
                 logger.info("推荐进场点位 :%s,止盈点位%s,止损点位%s",entry,tp,sl)
 
 
-    def track(self,huFu,symbol):
+    def track(self,huFu,symbol,marginCoin):
+        try:
+            result = huFu.mix_get_single_position(symbol,marginCoin)
+            pos = result['data']
+            long_qty = float(pos[0]["total"])
+            short_qty = float(pos[1]["total"])
+            if long_qty > 0:
+                sc = get_current_second()
+                if sc % 10 == 1:
+                    logger.info("北军鏖战中🔥～，出兵🪖 数量 %s ，目前北军已斩获 %s 敌军，正在斩获 %s ，加油啊 ，兄弟们！！！",long_qty, pos[0]['achievedProfits'],pos[0]['unrealizedPL'])
+                    return
+            if short_qty > 0:
+                sc = get_current_second()
+                if sc % 10 == 1:
+                    logger.info("南军鏖战中🔥～，出兵🪖 数量 %s ，目前南军已斩获 %s 敌军，正在斩获 %s ，加油啊 ，兄弟们！！！",short_qty, pos[1]['achievedProfits'],pos[1]['unrealizedPL'])
+                    return
+        except Exception as e:
+            logger.warning(f"An unknown error occurred in mix_get_single_position(): {e}")
+
+
+
+
+        base_qty = 0.001
         startTime = get_previous_hour_timestamp()
         endTime = get_previous_minute_timestamp()
         data = huFu.mix_get_candles(symbol, '15m', startTime, endTime)
@@ -362,6 +384,8 @@ class PingPong():
                             logger.warning("🐮🐮💤,🐻🐻开始🏃吧,设置空单点位 %s ,止盈点位 %s,止损点位 %s ,止盈段 %d , 止损段 %d,",self.observe_price,tp,sl,tp_delta,sl_delta)
                             if sl_delta <= 100:
                                 logger.warning("🐮🐮💤,🐻🐻开始🏃吧,加倍设置空单点位 %s ,止盈点位 %s,止损点位 %s ,止盈段 %d , 止损段 %d,",self.observe_price,tp,sl,tp_delta,sl_delta)
+                                huFu.mix_place_plan_order(symbol, marginCoin, base_qty, 'open_short', 'limit', self.observe_price, "market_price", executePrice=self.observe_price, clientOrderId='pingpong_short',presetTakeProfitPrice=tp, presetStopLossPrice=sl, reduceOnly=False)
+
                     elif self.last_candle_type == 'bull':
                         logger.info("🐻🐻持续向上回头中,现在至少有两根🐮🐮")
                     # flip modle
@@ -381,11 +405,13 @@ class PingPong():
 
                             if sl_delta <= 100:
                                 logger.warning("🐻🐻💤,🐮🐮开始🏃吧,加倍设置多单点位 %s ,止盈点位 %s,止损点位 %s ,止盈段 %d , 止损段 %d,",self.observe_price,tp,sl,tp_delta,sl_delta)
+                                huFu.mix_place_plan_order(symbol, marginCoin, base_qty, 'open_long', 'limit', self.observe_price, "market_price", executePrice=self.observe_price, clientOrderId='pingpong_long',presetTakeProfitPrice=tp, presetStopLossPrice=sl, reduceOnly=False)
+
                     elif self.last_candle_type == 'bear':
                         logger.info("🐮🐮持续向下回头中,现在至少有两根🐻🐻")
 
 
-def run(symbol,hero,debug_mode):
+def run(symbol,marginCoin,hero,debug_mode):
 
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
 
@@ -402,7 +428,7 @@ def run(symbol,hero,debug_mode):
         print(player.pivot_lows_short)
 
         for i in range(30):
-            player.track(huFu,symbol)
+            player.track(huFu,symbol,marginCoin)
             time.sleep(30)
         # cancel all plan order
         if not debug_mode:
@@ -426,4 +452,5 @@ if __name__ == "__main__":
     config = get_config_file()
     hero = config[heroname]
     symbol = 'BTCUSDT_UMCBL'
-    run(symbol,hero,debug_mode)
+    marginCoin = 'USDT'
+    run(symbol,marginCoin,hero,debug_mode)
