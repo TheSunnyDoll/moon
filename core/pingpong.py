@@ -336,12 +336,14 @@ class PingPong():
                 if sc % 10 == 1:
                     logger.info("北军鏖战中🔥～，出兵🪖 数量 %s ，目前北军已斩获 %s 敌军，正在斩获 %s ，加油啊 ，兄弟们！！！",long_qty, pos[0]['achievedProfits'],pos[0]['unrealizedPL'])
                 if long_qty > 0.003:
+                    logger.warning("军队裁员中")
                     return 
             if short_qty > 0:
                 sc = get_current_second()
                 if sc % 10 == 1:
                     logger.info("南军鏖战中🔥～，出兵🪖 数量 %s ，目前南军已斩获 %s 敌军，正在斩获 %s ，加油啊 ，兄弟们！！！",short_qty, pos[1]['achievedProfits'],pos[1]['unrealizedPL'])
                 if short_qty > 0.003:
+                    logger.warning("军队裁员中")
                     return 
         except Exception as e:
             logger.warning(f"An unknown error occurred in mix_get_single_position(): {e}")
