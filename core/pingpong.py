@@ -205,6 +205,7 @@ class PingPong():
         data = huFu.mix_get_candles(symbol, '15m', startTime, endTime)
         # Convert the provided data to a DataFrame
         market_struct = pd.DataFrame(data, columns=['Timestamp', 'Open', 'High', 'Low', 'Close', 'Volume', 'Turnover'])
+        market_struct['Timestamp'] = market_struct['Timestamp'].astype(int)
         market_struct['Timestamp'] = pd.to_datetime(market_struct['Timestamp'], unit='ms')
         market_struct['type'] = None
 
