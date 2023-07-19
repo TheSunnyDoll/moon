@@ -347,7 +347,10 @@ class PingPong():
                     if self.last_candle_type == 'bear':
                         sl = self.pivot_highs_short[-1]
                         tp = self.pivot_lows_short[-1]
-                        logger.info("是时候等待反转了,设置空单点位 %s ,止盈点位 %s,止损点位 %s",self.observe_price,tp,sl)
+                        tp_delta = float(self.observe_price - float(tp))
+                        sl_delta = float(float(sl) - self.observe_price)
+
+                        logger.info("是时候等待反转了,设置空单点位 %s ,止盈点位 %s,止损点位 %s ,止盈段 %d , 止损段 %d,",self.observe_price,tp,sl,tp_delta,sl_delta)
                     # flip modle
 
 
