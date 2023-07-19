@@ -343,7 +343,7 @@ class PingPong():
         if not ((self.old_bias == 'bull' and self.current_bias == 'weak_bear') or (self.old_bias == 'bear' and self.current_bias == 'weak_bull')):
             if self.current_bias == 'weak_bear' or self.current_bias == 'bear':
                 if self.observe_candle_type == 'bear':
-                    logger.info("时机未到,坐等一根🐮🐮🌈bull_bar")
+                    logger.info("时机未到,坐等一根🐮🐮🌈出现")
                 elif self.observe_candle_type == 'bull':
                     if self.last_candle_type == 'bear':
                         sl = self.pivot_highs_short[-1]
@@ -359,7 +359,23 @@ class PingPong():
                     elif self.last_candle_type == 'bull':
                         logger.info("🐻🐻持续向上回头中,现在至少有两根🐮🐮")
                     # flip modle
+            if self.current_bias == 'weak_bull' or self.current_bias == 'bull':
+                if self.observe_candle_type == 'bull':
+                    logger.info("时机未到,坐等一根🐻🐻🌈出现")
+                elif self.observe_candle_type == 'bear':
+                    if self.last_candle_type == 'bull':
+                        tp = self.pivot_highs_short[-1]
+                        sl = self.pivot_lows_short[-1]
+                        tp_delta = float(float(tp) - self.observe_price)
+                        sl_delta = float(self.observe_price - float(sl))
 
+                        logger.info("🐻🐻💤,🐮🐮开始🏃吧,观察多单点位 %s ,止盈点位 %s,止损点位 %s ,止盈段 %d , 止损段 %d,",self.observe_price,tp,sl,tp_delta,sl_delta)
+                        if tp_delta >= sl_delta:
+                            logger.info("🐻🐻💤,🐮🐮开始🏃吧,设置多单点位 %s ,止盈点位 %s,止损点位 %s ,止盈段 %d , 止损段 %d,",self.observe_price,tp,sl,tp_delta,sl_delta)
+                            if sl_delta <= 100:
+                                logger.info("🐻🐻💤,🐮🐮开始🏃吧,加倍设置多单点位 %s ,止盈点位 %s,止损点位 %s ,止盈段 %d , 止损段 %d,",self.observe_price,tp,sl,tp_delta,sl_delta)
+                    elif self.last_candle_type == 'bear':
+                        logger.info("🐮🐮持续向下回头中,现在至少有两根🐻🐻")
 
 
 def run():
@@ -385,6 +401,7 @@ def run():
         for i in range(30):
             player.track(huFu,symbol)
             time.sleep(30)
+        # cancel all plan order
 
 if __name__ == "__main__":
     logger = get_logger()
