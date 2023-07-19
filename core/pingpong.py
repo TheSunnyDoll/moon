@@ -13,9 +13,25 @@ pd.options.mode.chained_assignment = None  # default='warn'
 class PingPong():
     def __init__(self) -> None:
         self.pivots = []
+        self.pivot_highs_long = []
+        self.pivot_lows_long = []
+        self.pivot_highs_short = []
+        self.pivot_lows_short = []
+        self.pivot_inter_highs_long = []
+        self.pivot_inter_lows_long = []
+        self.pivot_inter_highs_short = []
+        self.pivot_inter_lows_short = []
+
+        self.old_bias = ''
+        self.current_bias = ''
+        self.idm = 0
+        self.reversal = 0
+        self.last_candle_type = ''
+        self.observe_candle_type = ''
+        self.observe_price = 0
 
     def find_pivots(self,symbol,huFu):
-        startTime = get_previous_three_hour_timestamp()
+        startTime = get_previous_day_timestamp()
         endTime = get_previous_minute_timestamp()
         data = huFu.mix_get_candles(symbol, '15m', startTime, endTime)
         # Convert the provided data to a DataFrame
@@ -183,10 +199,157 @@ class PingPong():
                 if current_price > interview and current_price > last_high:
                     logger.info("最新观测突破点%f\n,最新入场点%f\n,止盈价格%f\n,止损价格%f\n",last_high,last_entry,low,high)
 
-                
+    def find_pivots_lr(self,symbol,huFu,left_len,right_len):
+        startTime = get_previous_day_timestamp()
+        endTime = get_previous_minute_timestamp()
+        data = huFu.mix_get_candles(symbol, '15m', startTime, endTime)
+        # Convert the provided data to a DataFrame
+        market_struct = pd.DataFrame(data, columns=['Timestamp', 'Open', 'High', 'Low', 'Close', 'Volume', 'Turnover'])
+        market_struct['Timestamp'] = pd.to_datetime(market_struct['Timestamp'], unit='ms')
+        market_struct['type'] = None
+
+        for i in range(1, len(market_struct)):
+            if market_struct['Close'][i] >= market_struct['Open'][i]:
+                market_struct['type'][i] = 'bull'
+            else:
+                market_struct['type'][i] = 'bear'
+        self.last_candle_type = market_struct.iloc[-1]['type']
+        self.observe_candle_type = market_struct.iloc[-2]['type']
+        self.observe_price = round((float(market_struct.iloc[-2]['Open']) + float(market_struct.iloc[-2]['Close']))/2)
+
+        bear_bars = market_struct[market_struct["type"] == 'bear'].reset_index(drop=True)
+        bull_bars = market_struct[market_struct["type"] == 'bull'].reset_index(drop=True)
+        pivot_highs = []
+        pivot_lows = []
+        pivot_inter_highs = []
+        pivot_inter_lows = []
+
+        for i in range(left_len, len(market_struct) - right_len):
+
+            if market_struct["High"][i] > max(max(market_struct["High"][i-left_len:i]),max(market_struct["High"][i+1:i+right_len+1])):
+                pivot_highs.append(float(market_struct["High"][i]))
+
+            if market_struct["Low"][i] < min(min(market_struct["Low"][i-left_len:i]),min(market_struct["Low"][i+1:i+right_len+1])):
+                pivot_lows.append(float(market_struct["Low"][i]))
+
+        for i in range(left_len, len(bull_bars) - right_len):
+            if bull_bars["Close"][i] > max(max(bull_bars["Close"][i-left_len:i]),max(bull_bars["Close"][i+1:i+right_len+1])):
+                pivot_inter_highs.append(float(bull_bars["Close"][i]))
+
+        for i in range(left_len, len(bear_bars) - right_len):
+            if bear_bars["Close"][i] < min(min(bear_bars["Close"][i-left_len:i]),min(bear_bars["Close"][i+1:i+right_len+1])):
+                pivot_inter_lows.append(float(bear_bars["Close"][i]))
 
 
-            
+        if left_len >=10:
+            self.pivot_highs_long = pivot_highs
+            self.pivot_lows_long = pivot_lows
+            self.pivot_inter_highs_long = pivot_inter_highs
+            self.pivot_inter_lows_long = pivot_inter_lows
+
+        else:
+            self.pivot_highs_short = pivot_highs
+            self.pivot_lows_short = pivot_lows
+            self.pivot_inter_highs_short = pivot_inter_highs
+            self.pivot_inter_lows_short = pivot_inter_lows
+
+    def on_minute_move(self,symbol,huFu):
+        last_short_high = self.pivot_highs_short[-1]
+        last_short_low = self.pivot_lows_short[-1]
+        delta = round((last_short_high - last_short_low)/2)
+        if delta > 20:
+            try:
+                result = huFu.mix_get_market_price(symbol)
+                current_price = result['data']['markPrice']
+                logger.info("斥候来报，坐标 %s 处发现敌军",current_price)
+            except Exception as e:
+                logger.warning(f"An unknown error occurred in mix_get_market_price(): {e}")
+
+            # if current_price > interview and current_price > last_high:
+            #     logger.info("最新观测突破点%f\n,最新入场点%f\n,止盈价格%f\n,止损价格%f\n",last_high,last_entry,low,high)
+
+            if self.current_bias == 'bull':
+                # get last 15m candle
+                # get current price
+                # wait flip 
+                pass
+            elif self.current_bias == 'bear':
+                pass
+            elif self.current_bias == 'weak_bull':
+                pass
+            elif self.current_bias == 'weak_bear':
+                pass
+
+
+
+    def get_current_bias(self):
+        last_long_high = self.pivot_highs_long[-1]
+        last_long_low = self.pivot_lows_long[-1]
+        last_short_high = self.pivot_highs_short[-1]
+        last_short_low = self.pivot_lows_short[-1]
+
+        self.old_bias = self.current_bias
+
+        if last_short_high > last_long_high:
+            self.current_bias = 'bull'
+        elif last_short_low < last_long_low:
+            self.current_bias = 'bear'
+        elif last_short_high > self.pivot_highs_short[-2]:
+            self.current_bias = 'weak_bull'
+        elif last_short_low < self.pivot_lows_short[-2]:
+            self.current_bias = 'weak_bear'
+
+    def mark_some_points(self):
+        if self.current_bias == 'weak_bear' or self.current_bias == 'bull':
+            self.idm = min(self.pivot_lows_short[-3:])
+            self.reversal = max(self.pivot_inter_highs_short)
+
+        elif self.current_bias == 'weak_bull' or self.current_bias == 'bear' :
+            self.idm = max(self.pivot_highs_short[-3:])
+            self.reversal = min(self.pivot_inter_lows_short)
+
+    def advertise(self):
+        if (self.old_bias == 'bull' and self.current_bias == 'weak_bear') or (self.old_bias == 'bear' and self.current_bias == 'weak_bull'):
+            entry = self.idm
+            tp = self.reversal
+            sl = self.idm - 60
+            delta = tp - entry
+            if delta >= 60:
+                logger.info("推荐进场点位 :%s,止盈点位%s,止损点位%s",entry,tp,sl)
+
+
+    def track(self,huFu,symbol):
+        startTime = get_previous_hour_timestamp()
+        endTime = get_previous_minute_timestamp()
+        data = huFu.mix_get_candles(symbol, '15m', startTime, endTime)
+        # Convert the provided data to a DataFrame
+        market_struct = pd.DataFrame(data, columns=['Timestamp', 'Open', 'High', 'Low', 'Close', 'Volume', 'Turnover'])
+        market_struct['Timestamp'] = pd.to_datetime(market_struct['Timestamp'], unit='ms')
+        market_struct['type'] = None
+
+        for i in range(1, len(market_struct)):
+            if market_struct['Close'][i] >= market_struct['Open'][i]:
+                market_struct['type'][i] = 'bull'
+            else:
+                market_struct['type'][i] = 'bear'
+        self.last_candle_type = market_struct.iloc[-1]['type']
+        self.observe_candle_type = market_struct.iloc[-2]['type']
+        self.observe_price = round((float(market_struct.iloc[-2]['Open']) + float(market_struct.iloc[-2]['Close']))/2)
+
+
+
+        if not ((self.old_bias == 'bull' and self.current_bias == 'weak_bear') or (self.old_bias == 'bear' and self.current_bias == 'weak_bull')):
+            if self.current_bias == 'weak_bear':
+                if self.observe_candle_type == 'bear':
+                    logger.info("时机未到,坐等一根bull_bar")
+                elif self.observe_candle_type == 'bull':
+                    if self.last_candle_type == 'bear':
+                        sl = self.pivot_highs_short[-1]
+                        tp = self.pivot_lows_short[-1]
+                        logger.info("是时候等待反转了,设置空单点位 %s ,止盈点位 %s,止损点位 %s",self.observe_price,tp,sl)
+                    # flip modle
+
+
 
 def run():
     parser = argparse.ArgumentParser()
@@ -200,12 +363,17 @@ def run():
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
 
     player = PingPong()
-
     while True:
-        pivots,last_bias,last_strct,last_entry_base = player.find_pivots(symbol,huFu)
-        for i in range(3):
-            player.on_minute(symbol,huFu,pivots,last_bias,last_strct,last_entry_base)
-            time.sleep(300)
+        player.find_pivots_lr(symbol,huFu,10,10)
+        player.find_pivots_lr(symbol,huFu,2,2)
+        player.get_current_bias()
+        player.mark_some_points()
+        player.advertise()
+        logger.info("现在趋势:%s to %s , 陷阱位 : %s , 潜在反转位: %s ,最后一根蜡烛是 %s",player.old_bias,player.current_bias,player.idm,player.reversal,player.last_candle_type)
+
+        for i in range(30):
+            player.track(huFu,symbol)
+            time.sleep(30)
 
 if __name__ == "__main__":
     logger = get_logger()
