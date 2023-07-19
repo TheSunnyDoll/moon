@@ -356,6 +356,8 @@ class PingPong():
                             logger.info("冲啊～～～～～")
                             if sl_delta <= 100:
                                 logger.info("往死里冲啊")
+                    elif self.last_candle_type == 'bull':
+                        logger.info("🐻🐻持续向上回头中")
                     # flip modle
 
 
