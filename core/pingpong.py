@@ -351,11 +351,11 @@ class PingPong():
                         tp_delta = float(self.observe_price - float(tp))
                         sl_delta = float(float(sl) - self.observe_price)
 
-                        logger.info("🐮🐮💤,🐻🐻开始🏃吧,设置空单点位 %s ,止盈点位 %s,止损点位 %s ,止盈段 %d , 止损段 %d,",self.observe_price,tp,sl,tp_delta,sl_delta)
+                        logger.info("🐮🐮💤,🐻🐻开始🏃吧,观察空单点位 %s ,止盈点位 %s,止损点位 %s ,止盈段 %d , 止损段 %d,",self.observe_price,tp,sl,tp_delta,sl_delta)
                         if tp_delta >= sl_delta:
-                            logger.info("冲啊～～～～～")
+                            logger.info("🐮🐮💤,🐻🐻开始🏃吧,设置空单点位 %s ,止盈点位 %s,止损点位 %s ,止盈段 %d , 止损段 %d,",self.observe_price,tp,sl,tp_delta,sl_delta)
                             if sl_delta <= 100:
-                                logger.info("往死里冲啊")
+                                logger.info("🐮🐮💤,🐻🐻开始🏃吧,加倍设置空单点位 %s ,止盈点位 %s,止损点位 %s ,止盈段 %d , 止损段 %d,",self.observe_price,tp,sl,tp_delta,sl_delta)
                     elif self.last_candle_type == 'bull':
                         logger.info("🐻🐻持续向上回头中,现在至少有两根🐮🐮")
                     # flip modle
