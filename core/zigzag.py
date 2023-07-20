@@ -19,6 +19,13 @@ from utils import *
 ##      entry at (low + 0.618 * delta)  , tp at (low +0.236 * delta) , sl at (low + 0.786 * delta)
 ##      entry at (low + 0.786 * delta)  , tp at (low +0.236 * delta) , sl at high
 
+## 动态止损
+## 15m 级别 , 盈利 88 开始挪动, 可接受回撤 44 点
+## 30m 级别 , 盈利 166 开始挪动, 可接受回撤 88 点
+## 1h 级别 , 盈利 199 开始挪动, 可接受回撤 88 点
+## 4h 级别 , 盈利 299 开始挪动, 可接受回撤 88 点
+## 1d 级别 , 盈利 399 开始挪动, 可接受回撤 88 点
+
 
 
 class ZigZag():
@@ -204,10 +211,12 @@ class ZigZag():
         return orders
         
 
-    def batch_orders(self,oders,huFu,marginCoin,base_qty,debug_mode,base_sl):
+    def batch_orders(self,oders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price):
         for ft_orders in oders:
             for order in ft_orders:
                 if order[0] == 'open_long':
+                    if current_price < order[1]:
+                        continue
                     tp_delta = order[2] - order[1]
                     sl_delta = order[1] - order[3]
                     if sl_delta <= 0 or sl_delta >= 100:
@@ -216,6 +225,8 @@ class ZigZag():
                     else:
                         sl = order[3]
                 if order[0] == 'open_short':
+                    if current_price > order[1]:
+                        continue
                     tp_delta = order[1] - order[2]
                     sl_delta = order[3] - order[1]
                     if sl_delta <= 0 or sl_delta >= 100:
@@ -309,6 +320,12 @@ def run(hero,symbol,marginCoin,debug_mode):
             if data != []:
                     ## clear all open orders
                 huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
+        try:
+            result = huFu.mix_get_market_price(symbol)
+            current_price = result['data']['markPrice']
+            logger.info("斥候来报，坐标 %s 处发现敌军",current_price)
+        except Exception as e:
+            logger.warning(f"An unknown error occurred in mix_get_market_price(): {e}")
 
         startTime = get_previous_month_timestamp()
         endTime = get_previous_minute_timestamp()
@@ -334,7 +351,7 @@ def run(hero,symbol,marginCoin,debug_mode):
             time.sleep(0.3)
 
         orders = zz.advortise(trend)
-        zz.batch_orders(orders,huFu,marginCoin,base_qty,debug_mode,base_sl)
+        zz.batch_orders(orders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price)
         for i in range(30):
             zz.on_track(last_trend,huFu,marginCoin,base_qty,debug_mode,base_sl)
 
