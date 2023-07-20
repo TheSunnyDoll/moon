@@ -234,6 +234,7 @@ class ZigZag():
         for ft_orders in oders:
             for order in ft_orders:
                 time.sleep(0.3)
+                hft_qty = base_qty
                 if order[0] == 'open_long':
                     if current_price < order[1]:
                         continue
@@ -259,9 +260,9 @@ class ZigZag():
                 if not debug_mode:
                     if sl_delta>=0:
                         if order[1] > 30900:
-                            base_qty = 0.6
+                            hft_qty = 0.6
 
-                        huFu.mix_place_plan_order(symbol, marginCoin, base_qty, order[0], 'limit', order[1], "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
+                        huFu.mix_place_plan_order(symbol, marginCoin, hft_qty, order[0], 'limit', order[1], "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
 
     def on_track(self,legs,huFu,marginCoin,base_qty,debug_mode,base_sl):
         base_point = 150
