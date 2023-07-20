@@ -207,9 +207,17 @@ class ZigZag():
     def batch_orders(self,oders,huFu,marginCoin,base_qty,debug_mode):
         for ft_orders in oders:
             for order in ft_orders:
-                logger.info("let us take out! 开单方向: %s ,进场点位: %s, 止盈: %s,止损: %s ,标签: %s",order[0],order[1],order[2],order[3],order[4])
+                if order[0] == 'open_long':
+                    tp_delta = order[2] - order[1]
+                    sl_delta = order[1] - order[3]
+                if order[0] == 'open_short':
+                    tp_delta = order[1] - order[2]
+                    sl_delta = order[3] - order[1]
+
+                logger.info("let us take out! 开单方向: %s ,进场点位: %s, 止盈: %s,止损: %s ,标签: %s,止盈点数: %s,止损点数: %s",order[0],order[1],order[2],order[3],order[4],tp_delta,sl_delta)
                 if not debug_mode:
-                    huFu.mix_place_plan_order(symbol, marginCoin, base_qty, order[0], 'limit', order[1], "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=order[3], reduceOnly=False)
+                    if sl_delta>=0:
+                        huFu.mix_place_plan_order(symbol, marginCoin, base_qty, order[0], 'limit', order[1], "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=order[3], reduceOnly=False)
 
     def on_track(self,legs,huFu,marginCoin,base_qty,debug_mode):
         base_point = 150
@@ -223,10 +231,10 @@ class ZigZag():
             orders = []
             if last_leg[0] == 'bull':
                 derc = 'open_long'
-                idm1_entry = last_leg[2] - delta_idm1
-                idm2_entry = last_leg[2] - delta_idm2
-                tp1_idm = last_leg[2] - delta_tp1_idm
-                tp2_idm = last_leg[2] - delta_tp2_idm
+                idm1_entry = round(last_leg[2] - delta_idm1)
+                idm2_entry = round(last_leg[2] - delta_idm2)
+                tp1_idm = round(last_leg[2] - delta_tp1_idm)
+                tp2_idm = round(last_leg[2] - delta_tp2_idm)
 
                 sl1_idm = last_leg[1]
                 sl2_idm = idm1_entry
@@ -239,10 +247,10 @@ class ZigZag():
 
             if last_leg[0] == 'bear':
                 derc = 'open_short'
-                idm1_entry = last_leg[2] + delta_idm1
-                idm2_entry = last_leg[2] + delta_idm2
-                tp1_idm = last_leg[2] + delta_tp1_idm
-                tp2_idm = last_leg[2] + delta_tp2_idm
+                idm1_entry = round(last_leg[2] + delta_idm1)
+                idm2_entry = round(last_leg[2] + delta_idm2)
+                tp1_idm = round(last_leg[2] + delta_tp1_idm)
+                tp2_idm = round(last_leg[2] + delta_tp2_idm)
 
                 sl1_idm = last_leg[1]
                 sl2_idm = idm1_entry
@@ -254,9 +262,17 @@ class ZigZag():
                 orders[len(orders):] = [idm1_order1,idm1_order2,idm2_order1,idm2_order2]
 
             for order in orders:
-                logger.warning("short term meat! 开单方向: %s ,进场点位: %s, 止盈: %s,止损: %s ",order[0],order[1],order[2],order[3])
+                if order[0] == 'open_long':
+                    tp_delta = order[2] - order[1]
+                    sl_delta = order[1] - order[3]
+                if order[0] == 'open_short':
+                    tp_delta = order[1] - order[2]
+                    sl_delta = order[3] - order[1]
+
+                logger.warning("short term meat! 开单方向: %s ,进场点位: %s, 止盈: %s,止损: %s ,止盈点数: %s,止损点数: %s ",order[0],order[1],order[2],order[3],tp_delta,sl_delta)
                 if not debug_mode:
-                    huFu.mix_place_plan_order(symbol, marginCoin, base_qty, order[0], 'limit', order[1], "market_price", executePrice=order[1],presetTakeProfitPrice=order[2], presetStopLossPrice=order[3], reduceOnly=False)
+                    if sl_delta>=0:
+                        huFu.mix_place_plan_order(symbol, marginCoin, base_qty, order[0], 'limit', order[1], "market_price", executePrice=order[1],presetTakeProfitPrice=order[2], presetStopLossPrice=order[3], reduceOnly=False)
 
 
 
