@@ -314,6 +314,19 @@ def run(hero,symbol,marginCoin,debug_mode):
     zz = ZigZag()
 
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
+    if not debug_mode:
+        data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
+        if data != []:
+                ## clear all open orders
+            huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
+    logger.warning("三")
+    time.sleep(1)
+    logger.warning("二")
+    time.sleep(1)
+    logger.warning("一")
+    time.sleep(1)
+    logger.warning("比赛开始 🏎️  🏎️ 🏎️ 🏎️ 🏎️ ！！！")
+
     while True:
         if not debug_mode:
             data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
@@ -382,4 +395,5 @@ if __name__ == "__main__":
     hero = config[heroname]
     symbol = 'BTCUSDT_UMCBL'
     marginCoin = 'USDT'
+    logger.info("让场子热起来吧🔥！ 新一场棒球比赛即将开始⚾️～")
     run(hero,symbol,marginCoin,debug_mode)
