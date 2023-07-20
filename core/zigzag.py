@@ -368,7 +368,15 @@ def run(hero,symbol,marginCoin,debug_mode):
         orders = zz.advortise(trend)
         zz.batch_orders(orders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price)
         for i in range(30):
-            zz.on_track(last_trend,huFu,marginCoin,base_qty,debug_mode,base_sl)
+            try:
+                result = huFu.mix_get_single_position(symbol,marginCoin)
+                pos = result['data']
+                long_qty = float(pos[0]["total"])
+                short_qty = float(pos[1]["total"])
+            except Exception as e:
+                logger.warning(f"An unknown error occurred in mix_get_single_position(): {e}")
+            if long_qty <=0.6 and short_qty<= 0.6:
+                zz.on_track(last_trend,huFu,marginCoin,base_qty,debug_mode,base_sl)
 
             time.sleep(30)
             if not debug_mode:
