@@ -143,16 +143,16 @@ class ZigZag():
 
             # 0.786
             delta =  price[high_index] - price[low_index]
-            idm_1 =  round(price[high_index] - 0.786 * delta)
+            idm_1 =  round(price[high_index] - 0.786 * delta + 1)
 
             # 0.618
-            idm_2 =  round(price[high_index] - 0.618 * delta)
+            idm_2 =  round(price[high_index] - 0.618 * delta + 1)
 
             # 0.382
-            tp1 =  round(price[high_index] - 0.382 * delta)
+            tp1 =  round(price[high_index] - 0.382 * delta - 1)
 
             # 0.236
-            tp2 =  round(price[high_index] - 0.236 * delta)
+            tp2 =  round(price[high_index] - 0.236 * delta - 1)
             big_trend[len(big_trend):]=[idm_1,idm_2,tp1,tp2]
 
         else:
@@ -163,16 +163,16 @@ class ZigZag():
 
             # 0.786
             delta =  price[high_index] - price[low_index]
-            idm_1 =  round(price[low_index] + 0.786 * delta)
+            idm_1 =  round(price[low_index] + 0.786 * delta - 1)
 
             # 0.618
-            idm_2 =  round(price[low_index] + 0.618 * delta)
+            idm_2 =  round(price[low_index] + 0.618 * delta - 1)
 
             # 0.382
-            tp1 =  round(price[low_index] + 0.382 * delta)
+            tp1 =  round(price[low_index] + 0.382 * delta + 1)
 
             # 0.236
-            tp2 =  round(price[low_index] + 0.236 * delta)
+            tp2 =  round(price[low_index] + 0.236 * delta + 1)
             big_trend[len(big_trend):]=[idm_1,idm_2,tp1,tp2]
         return result,big_trend
 
@@ -231,10 +231,10 @@ class ZigZag():
             orders = []
             if last_leg[0] == 'bull':
                 derc = 'open_long'
-                idm1_entry = round(last_leg[2] - delta_idm1)
-                idm2_entry = round(last_leg[2] - delta_idm2)
-                tp1_idm = round(last_leg[2] - delta_tp1_idm)
-                tp2_idm = round(last_leg[2] - delta_tp2_idm)
+                idm1_entry = round(last_leg[2] - delta_idm1 + 1)
+                idm2_entry = round(last_leg[2] - delta_idm2 + 1)
+                tp1_idm = round(last_leg[2] - delta_tp1_idm - 1)
+                tp2_idm = round(last_leg[2] - delta_tp2_idm - 1)
 
                 sl1_idm = last_leg[1]
                 sl2_idm = idm1_entry
@@ -247,10 +247,10 @@ class ZigZag():
 
             if last_leg[0] == 'bear':
                 derc = 'open_short'
-                idm1_entry = round(last_leg[2] + delta_idm1)
-                idm2_entry = round(last_leg[2] + delta_idm2)
-                tp1_idm = round(last_leg[2] + delta_tp1_idm)
-                tp2_idm = round(last_leg[2] + delta_tp2_idm)
+                idm1_entry = round(last_leg[2] + delta_idm1 - 1)
+                idm2_entry = round(last_leg[2] + delta_idm2 - 1)
+                tp1_idm = round(last_leg[2] + delta_tp1_idm + 1)
+                tp2_idm = round(last_leg[2] + delta_tp2_idm + 1)
 
                 sl1_idm = last_leg[1]
                 sl2_idm = idm1_entry
