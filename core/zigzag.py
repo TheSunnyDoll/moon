@@ -259,7 +259,8 @@ class ZigZag():
                     if sl_delta>=0:
                         if order[1] > 30900:
                             base_qty = 0.6
-                            huFu.mix_place_plan_order(symbol, marginCoin, base_qty, order[0], 'limit', order[1], "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
+
+                        huFu.mix_place_plan_order(symbol, marginCoin, base_qty, order[0], 'limit', order[1], "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
 
     def on_track(self,legs,huFu,marginCoin,base_qty,debug_mode,base_sl):
         base_point = 150
