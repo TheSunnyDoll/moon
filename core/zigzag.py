@@ -235,7 +235,7 @@ class ZigZag():
                     else:
                         sl = order[3]
 
-                logger.info("let us take out! 开单方向: %s ,进场点位: %s, 止盈: %s,止损: %s ,标签: %s,止盈点数: %s,止损点数: %s",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta)
+                logger.info("来吧全垒打⚾️ !我准备好啦! 🥖击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta)
                 if not debug_mode:
                     if sl_delta>=0:
                         huFu.mix_place_plan_order(symbol, marginCoin, base_qty, order[0], 'limit', order[1], "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
@@ -299,8 +299,8 @@ class ZigZag():
                         sl_delta = base_sl
                     else:
                         sl = order[3]
+                logger.warning("一垒就交给我了!⛳️  击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,得分圈: %s,失分圈: %s",order[0],order[1],order[2],sl,tp_delta,sl_delta)   
 
-                logger.warning("short term meat! 开单方向: %s ,进场点位: %s, 止盈: %s,止损: %s ,止盈点数: %s,止损点数: %s ",order[0],order[1],order[2],sl,tp_delta,sl_delta)
                 if not debug_mode:
                     if sl_delta>=0:
                         huFu.mix_place_plan_order(symbol, marginCoin, base_qty, order[0], 'limit', order[1], "market_price", executePrice=order[1],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
@@ -323,7 +323,7 @@ def run(hero,symbol,marginCoin,debug_mode):
         try:
             result = huFu.mix_get_market_price(symbol)
             current_price = float(result['data']['markPrice'])
-            logger.info("斥候来报，坐标 %s 处发现敌军",current_price)
+            logger.info("裁判播报员: ⚾️ 坐标 %s ",current_price)
         except Exception as e:
             logger.warning(f"An unknown error occurred in mix_get_market_price(): {e}")
 
