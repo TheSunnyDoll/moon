@@ -312,7 +312,7 @@ class ZigZag():
 
 def run(hero,symbol,marginCoin,debug_mode):
     base_sl = 88
-    base_qty = 0.001
+    base_qty = 0.1
     zz = ZigZag()
 
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
