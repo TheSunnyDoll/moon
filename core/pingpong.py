@@ -2,6 +2,9 @@
 # 2.如果当前价格低于swing_l,标记当前价格为swing_l,标记当前市场为bear_bias,delta = (swing_h - swing_l)/2 , 标记交易区间DR = （swing_l + delta,swing_h）
 # 3.当市场为bear_bias 时,在价格pullback 到DR 且 DR > 30 时,开始观察，如果下一根k线高于当前区间最高价的一根k线，则挂单在最高价k线的（开盘价-5）的位置，止盈放在swing_l，止损放在swing_h，在这根k线收盘时还未进场，则取消订单，等待下一次
 
+
+## 波段回撤0.618挂单
+
 import pandas as pd
 import numpy as np
 from utils import *
@@ -33,7 +36,10 @@ class PingPong():
     def find_pivots(self,symbol,huFu):
         startTime = get_previous_day_timestamp()
         endTime = get_previous_minute_timestamp()
-        data = huFu.mix_get_candles(symbol, '15m', startTime, endTime)
+        try:
+            data = huFu.mix_get_candles(symbol, '15m', startTime, endTime)
+        except Exception as e:
+            logger.warning(f"An unknown error occurred in mix_get_candles(): {e}")
         # Convert the provided data to a DataFrame
         market_struct = pd.DataFrame(data, columns=['Timestamp', 'Open', 'High', 'Low', 'Close', 'Volume', 'Turnover'])
         market_struct['Timestamp'] = pd.to_datetime(market_struct['Timestamp'], unit='ms')
@@ -202,7 +208,10 @@ class PingPong():
     def find_pivots_lr(self,symbol,huFu,left_len,right_len):
         startTime = get_previous_day_timestamp()
         endTime = get_previous_minute_timestamp()
-        data = huFu.mix_get_candles(symbol, '15m', startTime, endTime)
+        try:
+            data = huFu.mix_get_candles(symbol, '15m', startTime, endTime)
+        except Exception as e:
+            logger.warning(f"An unknown error occurred in mix_get_candles(): {e}")
         # Convert the provided data to a DataFrame
         market_struct = pd.DataFrame(data, columns=['Timestamp', 'Open', 'High', 'Low', 'Close', 'Volume', 'Turnover'])
         market_struct['Timestamp'] = market_struct['Timestamp'].astype(int)
@@ -352,7 +361,10 @@ class PingPong():
         base_qty = 0.001
         startTime = get_previous_hour_timestamp()
         endTime = get_previous_minute_timestamp()
-        data = huFu.mix_get_candles(symbol, '15m', startTime, endTime)
+        try:
+            data = huFu.mix_get_candles(symbol, '15m', startTime, endTime)
+        except Exception as e:
+            logger.warning(f"An unknown error occurred in mix_get_candles(): {e}")
         # Convert the provided data to a DataFrame
         market_struct = pd.DataFrame(data, columns=['Timestamp', 'Open', 'High', 'Low', 'Close', 'Volume', 'Turnover'])
         market_struct['Timestamp'] = market_struct['Timestamp'].astype(int)
