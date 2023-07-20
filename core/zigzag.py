@@ -325,7 +325,7 @@ def run(hero,symbol,marginCoin,debug_mode):
     time.sleep(1)
     logger.warning("一")
     time.sleep(1)
-    logger.warning("比赛开始 🏎️  🏎️ 🏎️ 🏎️ 🏎️ ！！！")
+    logger.warning("比赛开始 🏎️  🏎️ 🏎️ 🏎️🏎️ ！！！")
 
     while True:
         if not debug_mode:
