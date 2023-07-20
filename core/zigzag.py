@@ -227,7 +227,7 @@ class ZigZag():
                 logger.info("let us take out! 开单方向: %s ,进场点位: %s, 止盈: %s,止损: %s ,标签: %s,止盈点数: %s,止损点数: %s",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta)
                 if not debug_mode:
                     if sl_delta>=0:
-                        huFu.mix_place_plan_order(symbol, marginCoin, base_qty, order[0], 'limit', order[1], "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=order[3], reduceOnly=False)
+                        huFu.mix_place_plan_order(symbol, marginCoin, base_qty, order[0], 'limit', order[1], "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
 
     def on_track(self,legs,huFu,marginCoin,base_qty,debug_mode,base_sl):
         base_point = 150
@@ -292,7 +292,7 @@ class ZigZag():
                 logger.warning("short term meat! 开单方向: %s ,进场点位: %s, 止盈: %s,止损: %s ,止盈点数: %s,止损点数: %s ",order[0],order[1],order[2],sl,tp_delta,sl_delta)
                 if not debug_mode:
                     if sl_delta>=0:
-                        huFu.mix_place_plan_order(symbol, marginCoin, base_qty, order[0], 'limit', order[1], "market_price", executePrice=order[1],presetTakeProfitPrice=order[2], presetStopLossPrice=order[3], reduceOnly=False)
+                        huFu.mix_place_plan_order(symbol, marginCoin, base_qty, order[0], 'limit', order[1], "market_price", executePrice=order[1],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
 
 
 
