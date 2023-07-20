@@ -322,7 +322,7 @@ def run(hero,symbol,marginCoin,debug_mode):
                 huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
         try:
             result = huFu.mix_get_market_price(symbol)
-            current_price = result['data']['markPrice']
+            current_price = float(result['data']['markPrice'])
             logger.info("斥候来报，坐标 %s 处发现敌军",current_price)
         except Exception as e:
             logger.warning(f"An unknown error occurred in mix_get_market_price(): {e}")
