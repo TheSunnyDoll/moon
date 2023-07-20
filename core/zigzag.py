@@ -234,11 +234,13 @@ class ZigZag():
                         sl_delta = base_sl
                     else:
                         sl = order[3]
-
+                
                 logger.info("来吧全垒打⚾️ !我准备好啦! 🥖击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta)
                 if not debug_mode:
                     if sl_delta>=0:
-                        huFu.mix_place_plan_order(symbol, marginCoin, base_qty, order[0], 'limit', order[1], "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
+                        if order[1] > 30900:
+                            base_qty = 0.6
+                            huFu.mix_place_plan_order(symbol, marginCoin, base_qty, order[0], 'limit', order[1], "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
 
     def on_track(self,legs,huFu,marginCoin,base_qty,debug_mode,base_sl):
         base_point = 150
