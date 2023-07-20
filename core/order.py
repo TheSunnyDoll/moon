@@ -65,9 +65,9 @@ if order :
    # side = 'open_long'
     side = 'open_short'
 
-    entry = 30980
+    entry = 30990
     tp = 29000
-    sl = 31080
+    sl = 31090
 
     huFu.mix_place_plan_order(symbol, marginCoin, qty , side, 'limit', entry, "market_price", executePrice=entry,presetTakeProfitPrice=tp, presetStopLossPrice=sl, reduceOnly=False)
 
