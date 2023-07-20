@@ -43,6 +43,23 @@ def get_previous_day_timestamp():
     timestamp_ms = timestamp * 1000
     return timestamp_ms
 
+def get_previous_three_day_timestamp():
+    current_time = datetime.datetime.now()
+    previous_day = current_time - datetime.timedelta(days=3)
+    previous_day_midnight = previous_day.replace(hour=0, minute=0, second=0, microsecond=0)
+    timestamp = int(time.mktime(previous_day_midnight.timetuple()))
+    timestamp_ms = timestamp * 1000
+    return timestamp_ms
+
+def get_previous_month_timestamp():
+    current_time = datetime.datetime.now()
+    previous_day = current_time - datetime.timedelta(days=30)
+    previous_day_midnight = previous_day.replace(hour=0, minute=0, second=0, microsecond=0)
+    timestamp = int(time.mktime(previous_day_midnight.timetuple()))
+    timestamp_ms = timestamp * 1000
+    return timestamp_ms
+
+
 def timestamp_to_hour(timestamp_ms):
     timestamp_sec = timestamp_ms // 1000
     time_obj = datetime.datetime.fromtimestamp(timestamp_sec)

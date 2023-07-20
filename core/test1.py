@@ -1,54 +1,133 @@
+import numpy as np
+from math import floor
 from pybitget import Client
 import pandas as pd
 import numpy as np
 import argparse
 from utils import *
 
-# 之前实现的 ZigZag 函数
-def zigzag(high, low, depth=12, deviation=5, backstep=2):
-    # 返回 ZigZag 高低点的 DataFrame
-    lw = 1
-    hg = 1
-    last_h = 1
-    last_l = 1
-    p_lw = -np.inf
-    p_hg = -np.inf
-    lw_vals = []
-    hg_vals = []
+def zigzag(*, klines, min_size, percent):
+    klines = np.array(object=klines, dtype=np.float64)
+    time = klines[:, 0]
+    high = klines[:, 2]
+    low = klines[:, 3]
+  
+    length = len(klines)
+    zigzag = np.zeros(length)
+    trend, last_high, last_low = 0, 0, 0
     
-    for i in range(len(high)):
-        lw = lw + 1
-        hg = hg + 1
-        p_lw = max(p_lw, i - depth)
-        p_hg = max(p_hg, i - depth)
-        
-        lowing = lw == p_lw or low[i] - low[p_lw] > deviation * np.min(np.diff(low))
-        highing = hg == p_hg or high[p_hg] - high[i] > deviation * np.min(np.diff(high))
-        
-        lh = 0 if highing else lh + 1
-        ll = 0 if lowing else ll + 1
-        down = lh >= backstep
-        lower = low[i] > low[p_lw]
-        higher = high[i] < high[p_hg]
-        
-        if lw != p_lw and (not down or lower):
-            lw = p_lw if p_lw < hg else 0
-        
-        if hg != p_hg and (down or higher):
-            hg = p_hg if p_hg < lw else 0
-        
-        if down == down[1]:
-            pass
-        if down != down[1]:
-            if down:
-                last_h = hg
-                hg_vals.append((i - last_h, high[i]))
-            else:
-                last_l = lw
-                lw_vals.append((i - last_l, low[i]))
-    
-    zigzag_points = pd.DataFrame({'High_Zigzag': np.array(hg_vals)[:, 1], 'Low_Zigzag': np.array(lw_vals)[:, 1]}, index=np.array(hg_vals)[:, 0])
-    return zigzag_points
+    for i in range(length):
+        if trend == 0:
+            price_change = min_size * (low[0] if percent else 1)
+            if high[i] >= low[0] + price_change:
+                trend = 1
+                last_high = i
+                zigzag[0] = -1
+                continue
+            price_change = min_size * (high[0] if percent else 1)
+            if low[i] <= high[0] - price_change:
+                trend = -1
+                last_low = i
+                zigzag[0] = 1
+
+        if trend == 1:
+            price_change = min_size
+            if percent:
+                price_change *= high[last_high]
+            exp = low[i] <= high[last_high] - price_change
+            if exp and high[i] < high[last_high]:
+                trend = -1
+                zigzag[last_high] = 1
+                last_low = i
+            if high[i] > high[last_high]:
+                last_high = i
+
+        if trend == -1:
+            price_change = min_size
+            if percent:
+                price_change *= low[last_low]
+            exp = high[i] >= low[last_low] + price_change
+            if exp and low[i] > low[last_low]:
+                trend = 1
+                zigzag[last_low] = -1
+                last_high = i
+            if low[i] < low[last_low]:
+                last_low = i
+
+    last_trend = 0
+    last_trend_index = 0
+
+    for i in range(length - 1, -1, -1):
+        if zigzag[i] != 0:
+            last_trend = zigzag[i]
+            last_trend_index = i
+            break
+
+    determinant = 0
+    high_determinant = high[last_trend_index]
+    low_determinant = low[last_trend_index]
+
+    for i in range(last_trend_index + 1, length):
+        if last_trend == 1 and low[i] < low_determinant:
+            low_determinant = low[i]
+            determinant = i
+
+        if last_trend == -1 and high[i] > high_determinant:
+            high_determinant = high[i]
+            determinant = i
+
+    if last_trend == 1:
+        zigzag[determinant] = -1
+    if last_trend == -1:
+        zigzag[determinant] = 1
+
+    out = []
+
+    for i in range(length):
+        if zigzag[i] == 1:
+            out.append([time[i], high[i]])
+        if zigzag[i] == -1:
+            out.append([time[i], low[i]])
+    sorted_price = sorted(out, key=lambda x: x[0])
+    price = [item[1] for item in sorted_price]
+
+    ### 小周期
+    # 创建空列表用于存储结果
+    result = []
+    # 循环遍历每两个值进行比较，并添加相应的标签和两个值组成子列表
+    for i in range(1, len(price)):
+        if price[i] > price[i - 1]:
+            result.append(['bull', price[i - 1], price[i]])
+        else:
+            result.append(['bear', price[i - 1], price[i]])
+    ### 大周期
+    # 创建一个新的空列表用于存储结果
+    big_trend = []
+
+    # 初始化变量用于记录最低值和最高值的索引
+    low_index = 0
+    high_index = 0
+
+    # 循环遍历列表，找到最低值和最高值的索引
+    for i in range(1, len(price)):
+        if price[i] < price[low_index]:
+            low_index = i
+        if price[i] > price[high_index]:
+            high_index = i
+
+    # 判断最低值和最高值的先后出现顺序，并添加标签和对应的值到结果列表
+    if low_index < high_index:
+        big_trend.append(['bull', price[low_index], price[high_index]])
+        # 将price列表按大小排序，取倒数第二低的值
+        price_sorted = sorted(price)
+        big_trend[0].append(price_sorted[1])
+    else:
+        big_trend.append(['bear', price[high_index], price[low_index]])
+        # 将price列表按大小排序，取第二高的值
+        price_sorted = sorted(price, reverse=True)
+        big_trend[0].append(price_sorted[1])
+
+    return result,big_trend
 
 # 解析命令行参数
 parser = argparse.ArgumentParser()
@@ -61,14 +140,20 @@ config = get_config_file()
 hero = config[heroname]
 symbol = 'BTCUSDT_UMCBL'
 huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
-startTime = get_previous_day_timestamp()
+startTime = get_previous_month_timestamp()
 endTime = get_previous_minute_timestamp()
-data = huFu.mix_get_candles(symbol, '15m', startTime, endTime)
+klines = huFu.mix_get_candles(symbol, '15m', startTime, endTime)
 
-# 将获取到的数据转换成 DataFrame
-df = pd.DataFrame(data, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume', 'Turnover'])
-# 调用 ZigZag 函数获取 ZigZag 高低点
-zigzag_points = zigzag(df['high'], df['low'])
+r,b = zigzag(klines=klines, min_size=0.0055, percent=True)
+print(r)
+print(f'15m 级别趋势,{b}')
 
-# 输出 ZigZag 高低点
-print(zigzag_points)
+klines = huFu.mix_get_candles(symbol, '30m', startTime, endTime)
+
+r,b = zigzag(klines=klines, min_size=0.0055, percent=True)
+print(f'30m 级别趋势,{b}')
+
+klines = huFu.mix_get_candles(symbol, '1H', startTime, endTime)
+
+r,b = zigzag(klines=klines, min_size=0.0055, percent=True)
+print(f'1H 级别趋势,{b}')
