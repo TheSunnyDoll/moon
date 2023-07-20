@@ -279,35 +279,54 @@ class ZigZag():
 
 def run(hero,symbol,marginCoin,debug_mode):
     base_qty = 0.001
+    zz = ZigZag()
 
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
-    startTime = get_previous_month_timestamp()
-    endTime = get_previous_minute_timestamp()
-    zz = ZigZag()
-    if not debug_mode:
-        data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
-        if data != []:
-                ## clear all open orders
-            huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
-    trend = []
-    ft_list = ['15m','30m','1H','4H','1D']
-    last_trend = []
-    for ft in ft_list:
-        try:
-            klines = huFu.mix_get_candles(symbol, ft, startTime, endTime)
-        except Exception as e:
-            logger.warning(f"An unknown error occurred in mix_get_candles(): {e}")
+    while True:
+        if not debug_mode:
+            data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
+            if data != []:
+                    ## clear all open orders
+                huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
 
-        r,b = zz.zigzag(klines=klines, min_size=0.0055, percent=True)
-        if ft == '15m':
-            last_trend = r
-        b.insert(0,ft)
-        trend.append(b)
-        time.sleep(0.3)
+        startTime = get_previous_month_timestamp()
+        endTime = get_previous_minute_timestamp()
+        if not debug_mode:
+            data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
+            if data != []:
+                    ## clear all open orders
+                huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
+        trend = []
+        ft_list = ['15m','30m','1H','4H','1D']
+        last_trend = []
+        for ft in ft_list:
+            try:
+                klines = huFu.mix_get_candles(symbol, ft, startTime, endTime)
+            except Exception as e:
+                logger.warning(f"An unknown error occurred in mix_get_candles(): {e}")
 
-    orders = zz.advortise(trend)
-    zz.batch_orders(orders,huFu,marginCoin,base_qty,debug_mode)
-    zz.on_track(last_trend,huFu,marginCoin,base_qty,debug_mode)
+            r,b = zz.zigzag(klines=klines, min_size=0.0055, percent=True)
+            if ft == '15m':
+                last_trend = r
+            b.insert(0,ft)
+            trend.append(b)
+            time.sleep(0.3)
+
+        orders = zz.advortise(trend)
+        zz.batch_orders(orders,huFu,marginCoin,base_qty,debug_mode)
+        for i in range(30):
+            zz.on_track(last_trend,huFu,marginCoin,base_qty,debug_mode)
+
+            time.sleep(30)
+            if not debug_mode:
+                data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
+                if data != []:
+                    for order in data:
+                        if '_' not in order['clientOid']:
+                        ## clear all open orders
+                            huFu.mix_cancel_plan_order(symbol, marginCoin, order['orderId'], 'normal_plan')
+
+
 
 if __name__ == "__main__":
     logger = get_logger()
