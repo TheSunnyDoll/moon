@@ -188,16 +188,19 @@ class ZigZag():
         for td in trend:
             ft = td[0]
             sl1 = td[2]
-            sl2 = td[4]
             eng_entry = td[4]
             idm1_entry = td[5]
             idm2_entry = td[6]
             tp1 = td[7]
             tp2 = td[8]
+            tp3 = 50
             if td[1] == 'bull':
                 drec = 'open_long'
+                sl2 = td[4] - 20
+
             if td[1] == 'bear':
                 drec = 'open_short'
+                sl2 = td[4] + 20
 
             ft_orders = []
             eng_order = [drec,eng_entry,tp1,sl1,ft+'_eng_order']
@@ -205,7 +208,15 @@ class ZigZag():
             idm1_order2 = [drec,idm1_entry,tp2,sl2,ft+'_idm1_order2']
             idm2_order1 = [drec,idm2_entry,tp1,sl2,ft+'_idm2_order1']
             idm2_order2 = [drec,idm2_entry,tp2,sl2,ft+'_idm2_order2']
+
+            eng_order_fix_tp = [drec,eng_entry,tp3,sl1,ft+'_eng_order_fix_tp']
+            idm1_order1_fix_tp = [drec,idm1_entry,tp3,sl2,ft+'_idm1_order1_fix_tp']
+            idm1_order2_fix_tp = [drec,idm1_entry,tp3,sl2,ft+'_idm1_order2_fix_tp']
+            idm2_order1_fix_tp = [drec,idm2_entry,tp3,sl2,ft+'_idm2_order1_fix_tp']
+            idm2_order2_fix_tp = [drec,idm2_entry,tp3,sl2,ft+'_idm2_order2_fix_tp']
+
             ft_orders[len(ft_orders):] = [eng_order,idm1_order1,idm1_order2,idm2_order1,idm2_order2]
+            ft_orders[len(ft_orders):] = [eng_order_fix_tp,idm1_order1_fix_tp,idm1_order2_fix_tp,idm2_order1_fix_tp,idm2_order2_fix_tp]
             orders.append(ft_orders)
 
         return orders
@@ -258,15 +269,24 @@ class ZigZag():
                 idm2_entry = round(last_leg[2] - delta_idm2 + 1)
                 tp1_idm = round(last_leg[2] - delta_tp1_idm - 1)
                 tp2_idm = round(last_leg[2] - delta_tp2_idm - 1)
+                fix_tp = 50
 
                 sl1_idm = last_leg[1]
-                sl2_idm = idm1_entry
+                sl2_idm = idm1_entry - 20
 
                 idm1_order1 = [derc,idm1_entry,tp1_idm,sl1_idm]
                 idm1_order2 = [derc,idm1_entry,tp2_idm,sl1_idm]
                 idm2_order1 = [derc,idm2_entry,tp1_idm,sl2_idm]
                 idm2_order2 = [derc,idm2_entry,tp2_idm,sl2_idm]
+
+                idm1_order1_fix_tp = [derc,idm1_entry,fix_tp,sl1_idm]
+                idm1_order2_fix_tp = [derc,idm1_entry,fix_tp,sl1_idm]
+                idm2_order1_fix_tp = [derc,idm2_entry,fix_tp,sl2_idm]
+                idm2_order2_fix_tp = [derc,idm2_entry,fix_tp,sl2_idm]
+
+
                 orders[len(orders):] = [idm1_order1,idm1_order2,idm2_order1,idm2_order2]
+                orders[len(orders):] = [idm1_order1_fix_tp,idm1_order2_fix_tp,idm2_order1_fix_tp,idm2_order2_fix_tp]
 
             if last_leg[0] == 'bear':
                 derc = 'open_short'
@@ -274,6 +294,7 @@ class ZigZag():
                 idm2_entry = round(last_leg[2] + delta_idm2 - 1)
                 tp1_idm = round(last_leg[2] + delta_tp1_idm + 1)
                 tp2_idm = round(last_leg[2] + delta_tp2_idm + 1)
+                fix_tp = 50
 
                 sl1_idm = last_leg[1]
                 sl2_idm = idm1_entry
@@ -282,7 +303,14 @@ class ZigZag():
                 idm1_order2 = [derc,idm1_entry,tp2_idm,sl1_idm]
                 idm2_order1 = [derc,idm2_entry,tp1_idm,sl2_idm]
                 idm2_order2 = [derc,idm2_entry,tp2_idm,sl2_idm]
+
+                idm1_order1_fix_tp = [derc,idm1_entry,fix_tp,sl1_idm]
+                idm1_order2_fix_tp = [derc,idm1_entry,fix_tp,sl1_idm]
+                idm2_order1_fix_tp = [derc,idm2_entry,fix_tp,sl2_idm]
+                idm2_order2_fix_tp = [derc,idm2_entry,fix_tp,sl2_idm]
+
                 orders[len(orders):] = [idm1_order1,idm1_order2,idm2_order1,idm2_order2]
+                orders[len(orders):] = [idm1_order1_fix_tp,idm1_order2_fix_tp,idm2_order1_fix_tp,idm2_order2_fix_tp]
 
             for order in orders:
                 if order[0] == 'open_long':
@@ -312,7 +340,7 @@ class ZigZag():
 
 def run(hero,symbol,marginCoin,debug_mode):
     base_sl = 88
-    base_qty = 0.1
+    base_qty = 0.05
     zz = ZigZag()
 
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
