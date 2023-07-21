@@ -365,7 +365,60 @@ class BaseBall():
                 if is_approximately_equal(short_info[1],entry)   or is_approximately_equal(long_info[1],entry):
                     logger.warning("球员记分,编号: %s, 进场位 %f, 得分圈%f",label,entry,delta)
 
-    def base_run(self):
+    def base_run(self,current_price,pos,huFu):
+        # a垒 ,40 开始,保一半
+
+        # b垒 ,80 开始,保一半 
+        long_info  = [float(pos[0]["total"]),float(pos[0]['averageOpenPrice']),pos[0]['achievedProfits'],pos[0]['unrealizedPL']]
+        short_info = [float(pos[1]["total"]),float(pos[1]['averageOpenPrice']),pos[1]['achievedProfits'],pos[1]['unrealizedPL']]
+        delta = 0
+        new_long_sl = 0
+        new_short_sl = 0
+
+        if short_info[0] > 0:
+            delta = short_info[1] - current_price
+            if delta >= 40:
+                new_sl_point_delta = delta / 2
+                new_short_sl = short_info[1] - new_sl_point_delta
+                ## move sl to new_short_sl
+        if long_info[0] > 0:
+            delta = current_price - long_info[1]
+            if delta >= 40:
+                new_sl_point_delta = delta / 2
+                new_short_sl = short_info[1] - new_sl_point_delta
+                ## move sl to new_long_sl
+
+        try:
+            data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='profit_loss')['data']
+        except Exception as e:
+            logger.warning(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
+
+        for plan in data:
+            if plan['planType'] == 'loss_plan':
+                if plan['side'] == 'close_long' and new_long_sl != 0:
+                    if new_long_sl > float(plan['triggerPrice']):
+                        ## modifiy the sl
+                        try:
+                            size = plan['size']
+                            huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
+                            huFu.mix_place_stop_order(symbol, marginCoin, new_long_sl, 'loss_plan', 'long',triggerType='fill_price', size=size, rangeRate=None)      
+                            logger.warning("LOL队员已在 %f 上垒击球,正在跑垒,得分区不断扩大,新失分区 : %f ",long_info[1],new_long_sl)
+
+                        except Exception as e:
+                            logger.warning(f"move long sl faild, order id is {plan['orderId']},new_long_sl is {new_long_sl} ,{e}")
+                        
+                elif plan['side'] == 'close_short' and new_short_sl != 0:
+                    if new_short_sl < float(plan['triggerPrice']):
+                        ## modifiy the sl
+                        try:
+                            size = plan['size']
+                            huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
+                            huFu.mix_place_stop_order(symbol, marginCoin, new_short_sl, 'loss_plan', 'short',triggerType='fill_price', size=size, rangeRate=None)                            
+                            logger.warning("SVS队员已在 %f 上垒击球,正在跑垒,得分区不断扩大,新失分区 : %f ",short_info[1],new_short_sl)
+
+                        except Exception as e:
+                            logger.warning(f"move short sl faild, order id is {plan['orderId']},new_short_sl is {new_short_sl} ,{e}")
+
         pass
 
 
@@ -445,6 +498,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl):
                 logger.debug(f"An unknown error occurred in mix_get_market_price(): {e}")
 
             bb.record(current_price,pos,orders,track_orders)
+            bb.base_run(current_price,pos,huFu)
             time.sleep(30)
             if not debug_mode:
                 try:
