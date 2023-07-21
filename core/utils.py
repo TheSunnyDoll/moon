@@ -87,10 +87,14 @@ def get_config_file():
         config_data = yaml.safe_load(file)
     return config_data
 
-def get_logger(logfile='record.log'):
+def get_logger(logfile='app.log'):
     # 创建日志记录器
     logger = logging.getLogger('rbreaker_logger')
     logger.setLevel(logging.DEBUG)  # 设置日志记录器的级别为 DEBUG
+
+    # 如果已经存在处理器，则直接返回
+    if logger.hasHandlers():
+        return logger
 
     # 创建控制台处理器
     console_handler = logging.StreamHandler()
@@ -124,3 +128,4 @@ def get_logger(logfile='record.log'):
     logger.addHandler(file_handler)
 
     return logger
+
