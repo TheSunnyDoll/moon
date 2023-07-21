@@ -234,7 +234,6 @@ class BaseBall():
         for ft_orders in oders:
             for order in ft_orders:
                 time.sleep(0.3)
-                hft_qty = base_qty * 2
                 if order[0] == 'open_long':
                     if current_price < order[1]:
                         continue
@@ -255,8 +254,10 @@ class BaseBall():
                         sl_delta = base_sl
                     else:
                         sl = order[3]
-                
-                logger.info("来吧全垒打⚾️ !我准备好啦! 🥖击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta)
+
+                hft_qty = round(base_qty * round(tp_delta/sl_delta),2)
+
+                logger.info("来吧全垒打⚾️ !我准备好啦! 🥖击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s,出手数: %s",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta,hft_qty)
                 if not debug_mode:
                     if sl_delta>=0:
                         try:
@@ -269,6 +270,8 @@ class BaseBall():
         long_qty = float(pos[0]["total"])
         short_qty = float(pos[1]["total"])
         base_point = 150
+        if debug_mode:
+            print(legs)
         last_leg = legs[-1]
         delta = abs(last_leg[1]-last_leg[2])
         if delta >= base_point:
@@ -328,6 +331,8 @@ class BaseBall():
                         sl_delta = base_sl
                     else:
                         sl = order[3]
+                if debug_mode:
+                    logger.info("一垒就交给我了!⛳️  击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta)   
 
                 if not debug_mode:
                     if sl_delta>=0 and long_qty <= max_qty and short_qty<= max_qty:
@@ -523,9 +528,9 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--debug_mode', action='store_true', default=False, help='Enable debug mode')
     parser.add_argument('-f', '--fix_tp_mode', action='store_true', default=False, help='Enable fix_tp mode')
     parser.add_argument('-fp', '--fix_tp_point', default=88,help='fix_tp_point')
+    parser.add_argument('-bsl', '--base_sl', default=88,help='base_sl')
     parser.add_argument('-bq', '--base_qty', default=0.05,help='base_qty')
     parser.add_argument('-mxq', '--max_qty', default=0.6,help='max_qty')
-    parser.add_argument('-bsl', '--base_sl', default=88,help='base_sl')
 
     args = parser.parse_args()
     heroname = args.username
