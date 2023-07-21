@@ -528,7 +528,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                                 logger.debug(f"An unknown error occurred in mix_cancel_plan_order(): {e}")
         long_qty = float(pos[0]["total"])
         short_qty = float(pos[1]["total"])
-        out_max_qty = max_qty * 1
+        out_max_qty = max_qty * 2
         if long_qty <= out_max_qty and short_qty<= out_max_qty:
 
             bb.batch_orders(orders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price)
