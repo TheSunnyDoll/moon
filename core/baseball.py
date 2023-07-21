@@ -349,12 +349,12 @@ class BaseBall():
                         sl_delta = base_sl
                     else:
                         sl = order[3]
-                logger.warning("一垒就交给我了!⛳️  击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,得分圈: %s,失分圈: %s",order[0],order[1],order[2],sl,tp_delta,sl_delta)   
+                logger.warning("一垒就交给我了!⛳️  击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta)   
 
                 if not debug_mode:
                     if sl_delta>=0:
                         try:
-                            huFu.mix_place_plan_order(symbol, marginCoin, base_qty, order[0], 'limit', order[1], "market_price", executePrice=order[1],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
+                            huFu.mix_place_plan_order(symbol, marginCoin, base_qty, order[0], 'limit', order[1], "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
                         except Exception as e:
                             logger.warning(f"An unknown error occurred in mix_place_plan_order(): {e}")
 
