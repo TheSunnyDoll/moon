@@ -267,7 +267,7 @@ class BaseBall():
                             logger.debug(f"An unknown error occurred in mix_place_plan_order(): {e}")
 
 
-    def on_track(self,legs,huFu,marginCoin,base_qty,debug_mode,base_sl,pos):
+    def on_track(self,legs,huFu,marginCoin,base_qty,debug_mode,base_sl,pos,max_qty):
         long_qty = float(pos[0]["total"])
         short_qty = float(pos[1]["total"])
         base_point = 150
@@ -332,7 +332,7 @@ class BaseBall():
                         sl = order[3]
 
                 if not debug_mode:
-                    if sl_delta>=0 and long_qty <=0.6 and short_qty<= 0.6:
+                    if sl_delta>=0 and long_qty <= max_qty and short_qty<= max_qty:
                         try:
                             huFu.mix_place_plan_order(symbol, marginCoin, base_qty, order[0], 'limit', order[1], "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
                             logger.info("一垒就交给我了!⛳️  击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta)   
@@ -424,7 +424,7 @@ class BaseBall():
 
 
 
-def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl):
+def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty):
 
     bb = BaseBall()
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
@@ -489,7 +489,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl):
             except Exception as e:
                 logger.debug(f"An unknown error occurred in mix_get_single_position(): {e}")
             
-            track_orders = bb.on_track(last_trend,huFu,marginCoin,base_qty,debug_mode,base_sl,pos)
+            track_orders = bb.on_track(last_trend,huFu,marginCoin,base_qty,debug_mode,base_sl,pos,max_qty)
             try:
                 result = huFu.mix_get_market_price(symbol)
                 current_price = float(result['data']['markPrice'])
@@ -526,6 +526,7 @@ if __name__ == "__main__":
     parser.add_argument('-f', '--fix_tp_mode', action='store_true', default=False, help='Enable fix_tp mode')
     parser.add_argument('-fp', '--fix_tp_point', default=88,help='fix_tp_point')
     parser.add_argument('-bq', '--base_qty', default=0.05,help='base_qty')
+    parser.add_argument('-mxq', '--max_qty', default=0.6,help='max_qty')
     parser.add_argument('-bsl', '--base_sl', default=88,help='base_sl')
 
     args = parser.parse_args()
@@ -535,6 +536,7 @@ if __name__ == "__main__":
     fix_tp = float(args.fix_tp_point)
     base_qty = float(args.base_qty)
     base_sl = float(args.base_sl)
+    max_qty = float(args.max_qty)
 
     logger = get_logger(heroname+'_record.log')
 
@@ -543,4 +545,4 @@ if __name__ == "__main__":
     symbol = 'BTCUSDT_UMCBL'
     marginCoin = 'USDT'
     logger.info("让场子热起来吧🔥！ 新一场棒球比赛即将开始⚾️～")
-    start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl)
+    start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty)
