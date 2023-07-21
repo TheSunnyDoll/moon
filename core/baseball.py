@@ -267,7 +267,7 @@ class BaseBall():
                             logger.debug(f"An unknown error occurred in mix_place_plan_order(): {e}")
 
 
-    def on_track(self,legs,huFu,marginCoin,base_qty,debug_mode,base_sl,fix_mode,fix_tp):
+    def on_track(self,legs,huFu,marginCoin,base_qty,debug_mode,base_sl):
         base_point = 150
         last_leg = legs[-1]
         delta = abs(last_leg[1]-last_leg[2])
@@ -315,23 +315,13 @@ class BaseBall():
                 sl1_idm = last_leg[1]
                 sl2_idm = idm1_entry + 20
 
-                if not fix_mode:
-                    idm1_order1 = [derc,idm1_entry,tp1_idm,sl1_idm,'firsebase-idm1-1']
-                    idm1_order2 = [derc,idm1_entry,tp2_idm,sl1_idm,'firsebase-idm1-2']
-                    idm2_order1 = [derc,idm2_entry,tp1_idm,sl2_idm,'firsebase-idm2-1']
-                    idm2_order2 = [derc,idm2_entry,tp2_idm,sl2_idm,'firsebase-idm2-2']
-                    orders[len(orders):] = [idm1_order1,idm1_order2,idm2_order1,idm2_order2]
-                
-                else:
-                    idm1_tp = idm1_entry - fix_tp
-                    idm2_tp = idm2_entry - fix_tp
 
-                    idm1_order1_fix_tp = [derc,idm1_entry,idm1_tp,sl1_idm,'firsebase-idm1-1-fxtp']
-                    idm1_order2_fix_tp = [derc,idm1_entry,idm1_tp,sl1_idm,'firsebase-idm1-2-fxtp']
-                    idm2_order1_fix_tp = [derc,idm2_entry,idm2_tp,sl2_idm,'firsebase-idm2-1-fxtp']
-                    idm2_order2_fix_tp = [derc,idm2_entry,idm2_tp,sl2_idm,'firsebase-idm2-2-fxtp']
-                    orders[len(orders):] = [idm1_order1_fix_tp,idm1_order2_fix_tp,idm2_order1_fix_tp,idm2_order2_fix_tp]
-
+                idm1_order1 = [derc,idm1_entry,tp1_idm,sl1_idm,'firsebase-idm1-1']
+                idm1_order2 = [derc,idm1_entry,tp2_idm,sl1_idm,'firsebase-idm1-2']
+                idm2_order1 = [derc,idm2_entry,tp1_idm,sl2_idm,'firsebase-idm2-1']
+                idm2_order2 = [derc,idm2_entry,tp2_idm,sl2_idm,'firsebase-idm2-2']
+                orders[len(orders):] = [idm1_order1,idm1_order2,idm2_order1,idm2_order2]
+            
             for order in orders:
                 if order[0] == 'open_long':
                     tp_delta = order[2] - order[1]
@@ -367,10 +357,10 @@ class BaseBall():
         delta = 0
         if short_info[0] > 0:
             delta = short_info[1] - current_price
-            logger.warning("SVS队员已接球反击 : %f ,正在得分 :%f",short_info[1],delta)
+            logger.warning("SVS队员已上垒接球反击 : %f ,正在得分 :%f",short_info[1],delta)
         if long_info[0] > 0:
             delta = current_price - long_info[1]
-            logger.warning("LOL队员已接球反击 : %f ,正在得分 :%f",long_info[1],delta)
+            logger.warning("LOL队员已上垒接球反击 : %f ,正在得分 :%f",long_info[1],delta)
 
         for ft_orders in orders:
             for order in ft_orders:
@@ -386,9 +376,12 @@ class BaseBall():
                 if is_approximately_equal(short_info[1],entry)   or is_approximately_equal(long_info[1],entry):
                     logger.warning("球员记分,编号: %s, 进场位 %f, 得分圈%f",label,entry,delta)
 
+    def base_run(self):
+        pass
 
 
-def run(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl):
+
+def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl):
 
     bb = BaseBall()
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
@@ -507,4 +500,4 @@ if __name__ == "__main__":
     symbol = 'BTCUSDT_UMCBL'
     marginCoin = 'USDT'
     logger.info("让场子热起来吧🔥！ 新一场棒球比赛即将开始⚾️～")
-    run(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl)
+    start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl)
