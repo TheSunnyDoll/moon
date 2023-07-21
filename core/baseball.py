@@ -357,11 +357,12 @@ class BaseBall():
                             huFu.mix_place_plan_order(symbol, marginCoin, base_qty, order[0], 'limit', order[1], "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
                         except Exception as e:
                             logger.warning(f"An unknown error occurred in mix_place_plan_order(): {e}")
+        return orders
 
 
-    def record(self,):
+    def record(self,pos,orders,track_orders):
 
-        pass
+        logger.debug("position info : %s , orders %s ,track_orders %s",pos , orders, track_orders)
 
 
 def run(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl):
@@ -416,7 +417,6 @@ def run(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl):
             b.insert(0,ft)
             trend.append(b)
             time.sleep(0.3)
-        print(last_trend)
         orders = bb.advortise(trend,fix_mode,fix_tp)
         bb.batch_orders(orders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price)
         for i in range(30):
@@ -428,8 +428,8 @@ def run(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl):
             except Exception as e:
                 logger.warning(f"An unknown error occurred in mix_get_single_position(): {e}")
             if long_qty <=0.6 and short_qty<= 0.6:
-                bb.on_track(last_trend,huFu,marginCoin,base_qty,debug_mode,base_sl,fix_mode,fix_tp)
-
+                track_orders = bb.on_track(last_trend,huFu,marginCoin,base_qty,debug_mode,base_sl,fix_mode,fix_tp)
+            bb.record(pos,orders,track_orders)
             time.sleep(30)
             if not debug_mode:
                 data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
