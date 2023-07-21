@@ -234,7 +234,7 @@ class BaseBall():
     def batch_orders(self,oders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price):
         for ft_orders in oders:
             for order in ft_orders:
-                time.sleep(0.3)
+                time.sleep(0.1)
                 if order[0] == 'open_long':
                     if current_price < order[1]:
                         continue
