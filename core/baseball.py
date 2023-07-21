@@ -287,23 +287,12 @@ class BaseBall():
                 sl1_idm = last_leg[1]
                 sl2_idm = idm1_entry - 20
 
-                if not fix_mode:
+                idm1_order1 = [derc,idm1_entry,tp1_idm,sl1_idm,'firsebase-idm1-1']
+                idm1_order2 = [derc,idm1_entry,tp2_idm,sl1_idm,'firsebase-idm1-2']
+                idm2_order1 = [derc,idm2_entry,tp1_idm,sl2_idm,'firsebase-idm2-1']
+                idm2_order2 = [derc,idm2_entry,tp2_idm,sl2_idm,'firsebase-idm2-2']
+                orders[len(orders):] = [idm1_order1,idm1_order2,idm2_order1,idm2_order2]
 
-                    idm1_order1 = [derc,idm1_entry,tp1_idm,sl1_idm,'firsebase-idm1-1']
-                    idm1_order2 = [derc,idm1_entry,tp2_idm,sl1_idm,'firsebase-idm1-2']
-                    idm2_order1 = [derc,idm2_entry,tp1_idm,sl2_idm,'firsebase-idm2-1']
-                    idm2_order2 = [derc,idm2_entry,tp2_idm,sl2_idm,'firsebase-idm2-2']
-                    orders[len(orders):] = [idm1_order1,idm1_order2,idm2_order1,idm2_order2]
-
-                else:
-                    idm1_tp = idm1_entry + fix_tp
-                    idm2_tp = idm2_entry + fix_tp
-
-                    idm1_order1_fix_tp = [derc,idm1_entry,idm1_tp,sl1_idm,'firsebase-idm1-1-fxtp']
-                    idm1_order2_fix_tp = [derc,idm1_entry,idm1_tp,sl1_idm,'firsebase-idm1-2-fxtp']
-                    idm2_order1_fix_tp = [derc,idm2_entry,idm2_tp,sl2_idm,'firsebase-idm2-1-fxtp']
-                    idm2_order2_fix_tp = [derc,idm2_entry,idm2_tp,sl2_idm,'firsebase-idm2-2-fxtp']
-                    orders[len(orders):] = [idm1_order1_fix_tp,idm1_order2_fix_tp,idm2_order1_fix_tp,idm2_order2_fix_tp]
 
             if last_leg[0] == 'bear':
                 derc = 'open_short'
