@@ -444,12 +444,13 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
     logger.critical("一")
     time.sleep(1)
     logger.critical("比赛开始 🏎️  🏎️ 🏎️ 🏎️🏎️ !!!")
-    max_pains = get_max_pains()
-    if max_pains != None:
-        rencent_max_pain = max_pains[0]
-    else:
-        rencent_max_pain = None
+
     while True:
+        max_pains = get_max_pains()
+        if max_pains != None:
+            rencent_max_pain = max_pains[0]
+        else:
+            rencent_max_pain = None
         if rencent_max_pain != None:
             logger.warning("临近options 交割时间 %s, max_pain %s",rencent_max_pain[0],rencent_max_pain[1])
 
