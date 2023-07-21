@@ -367,10 +367,10 @@ class BaseBall():
         delta = 0
         if short_info[0] > 0:
             delta = short_info[1] - current_price
-            logger.warning("朱雀队员已接球反击 : %f ,正在得分 :%f",short_info[1],delta)
+            logger.warning("LOL队员已接球反击 : %f ,正在得分 :%f",short_info[1],delta)
         if long_info[0] > 0:
             delta = current_price - long_info[1]
-            logger.warning("玄武队员已接球反击 : %f ,正在得分 :%f",long_info[1],delta)
+            logger.warning("SVS队员已接球反击 : %f ,正在得分 :%f",long_info[1],delta)
 
         for ft_orders in orders:
             for order in ft_orders:
