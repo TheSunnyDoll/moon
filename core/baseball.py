@@ -362,7 +362,7 @@ class BaseBall():
 
     def record(self,pos,orders,track_orders):
 
-        logger.debug("position info : %s , orders %s ,track_orders %s",pos , orders, track_orders)
+        logger.critical("position info : %s , orders %s ,track_orders %s",pos , orders, track_orders)
 
 
 def run(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl):
