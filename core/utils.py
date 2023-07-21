@@ -113,7 +113,7 @@ def get_logger(logfile='app.log'):
             'INFO': 'white',
             'WARNING': 'yellow',
             'ERROR': 'red',
-            'CRITICAL': 'red,bg_yellow',
+            'CRITICAL': 'cyan',
         },
         reset=True,
         secondary_log_colors={},
