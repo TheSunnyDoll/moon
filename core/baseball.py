@@ -382,13 +382,13 @@ class BaseBall():
             delta = short_info[1] - current_price
             if delta >= 40:
                 new_sl_point_delta = delta / 2
-                new_short_sl = short_info[1] - new_sl_point_delta
+                new_short_sl = round(short_info[1] - new_sl_point_delta)
                 ## move sl to new_short_sl
         if long_info[0] > 0:
             delta = current_price - long_info[1]
             if delta >= 40:
                 new_sl_point_delta = delta / 2
-                new_short_sl = short_info[1] - new_sl_point_delta
+                new_long_sl = round(long_info[1] + new_sl_point_delta)
                 ## move sl to new_long_sl
 
         try:
