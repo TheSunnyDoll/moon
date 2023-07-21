@@ -376,7 +376,7 @@ def run(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl):
     time.sleep(1)
     logger.warning("一")
     time.sleep(1)
-    logger.warning("比赛开始 🏎️  🏎️ 🏎️ 🏎️🏎️ ！！！")
+    logger.warning("比赛开始 🏎️  🏎️ 🏎️ 🏎️🏎️ !!!")
 
     while True:
         if not debug_mode:
@@ -439,7 +439,6 @@ def run(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl):
 
 
 if __name__ == "__main__":
-    logger = get_logger()
     # 解析命令行参数
     parser = argparse.ArgumentParser()
     parser.add_argument('-u', '--username', help='Username')
@@ -453,11 +452,11 @@ if __name__ == "__main__":
     heroname = args.username
     debug_mode = args.debug_mode
     fix_mode = args.fix_tp_mode
-    fix_tp = args.fix_tp_point
-    base_qty = args.base_qty
-    base_sl = args.base_sl
+    fix_tp = float(args.fix_tp_point)
+    base_qty = float(args.base_qty)
+    base_sl = float(args.base_sl)
 
-
+    logger = get_logger(heroname+'_record.log')
 
     config = get_config_file()
     hero = config[heroname]
