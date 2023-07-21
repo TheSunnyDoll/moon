@@ -129,3 +129,6 @@ def get_logger(logfile='app.log'):
     logger.addHandler(file_handler)
 
     return logger
+
+def is_approximately_equal(value1, value2, tolerance=10):
+    return abs(value1 - value2) <= tolerance

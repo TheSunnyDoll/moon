@@ -376,14 +376,14 @@ class BaseBall():
             for order in ft_orders:
                 entry = order[1]
                 label = order[4]
-                if short_info[1] == entry or long_info[1] == entry:
+                if is_approximately_equal(short_info[1],entry)   or is_approximately_equal(long_info[1],entry):
                     logger.warning("球员记分,编号: %s, 进场位 %f, 得分圈%f",label,entry,delta)
 
 
         for order in track_orders:
                 entry = order[1]
                 label = order[4]
-                if short_info[1] == entry or long_info[1] == entry:
+                if is_approximately_equal(short_info[1],entry)   or is_approximately_equal(long_info[1],entry):
                     logger.warning("球员记分,编号: %s, 进场位 %f, 得分圈%f",label,entry,delta)
 
 
