@@ -493,7 +493,6 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
             trend.append(b)
             time.sleep(0.3)
         orders = bb.advortise(trend,fix_mode,fix_tp)
-        bb.batch_orders(orders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price)
         for i in range(5):
             try:
                 result = huFu.mix_get_single_position(symbol,marginCoin)
@@ -527,7 +526,12 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                                 huFu.mix_cancel_plan_order(symbol, marginCoin, order['orderId'], 'normal_plan')
                             except Exception as e:
                                 logger.debug(f"An unknown error occurred in mix_cancel_plan_order(): {e}")
+        long_qty = float(pos[0]["total"])
+        short_qty = float(pos[1]["total"])
+        out_max_qty = max_qty * 4
+        if long_qty <= out_max_qty and short_qty<= out_max_qty:
 
+            bb.batch_orders(orders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price)
 
 
 
