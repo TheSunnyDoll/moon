@@ -419,8 +419,6 @@ class BaseBall():
                         except Exception as e:
                             logger.warning(f"move short sl faild, order id is {plan['orderId']},new_short_sl is {new_short_sl} ,{e}")
 
-        pass
-
 
 
 def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl):
