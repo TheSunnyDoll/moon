@@ -261,8 +261,11 @@ class ZigZag():
                     if sl_delta>=0:
                         if order[1] > 30900:
                             hft_qty = 0.6
+                        try:
+                            huFu.mix_place_plan_order(symbol, marginCoin, hft_qty, order[0], 'limit', order[1], "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
+                        except Exception as e:
+                            logger.warning(f"An unknown error occurred in mix_place_plan_order(): {e}")
 
-                        huFu.mix_place_plan_order(symbol, marginCoin, hft_qty, order[0], 'limit', order[1], "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
 
     def on_track(self,legs,huFu,marginCoin,base_qty,debug_mode,base_sl,fix_mode,fix_tp):
         base_point = 150
@@ -350,14 +353,16 @@ class ZigZag():
 
                 if not debug_mode:
                     if sl_delta>=0:
-                        huFu.mix_place_plan_order(symbol, marginCoin, base_qty, order[0], 'limit', order[1], "market_price", executePrice=order[1],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
+                        try:
+                            huFu.mix_place_plan_order(symbol, marginCoin, base_qty, order[0], 'limit', order[1], "market_price", executePrice=order[1],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
+                        except Exception as e:
+                            logger.warning(f"An unknown error occurred in mix_place_plan_order(): {e}")
 
 
 
 
-def run(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp):
-    base_sl = 88
-    base_qty = 0.05
+def run(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl):
+
     zz = ZigZag()
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
     if not debug_mode:
@@ -441,16 +446,22 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--debug_mode', action='store_true', default=False, help='Enable debug mode')
     parser.add_argument('-f', '--fix_tp_mode', action='store_true', default=False, help='Enable fix_tp mode')
     parser.add_argument('-fp', '--fix_tp_point', default=88,help='fix_tp_point')
+    parser.add_argument('-bq', '--base_qty', default=0.05,help='base_qty')
+    parser.add_argument('-bsl', '--base_sl', default=88,help='base_sl')
 
     args = parser.parse_args()
     heroname = args.username
     debug_mode = args.debug_mode
     fix_mode = args.fix_tp_mode
     fix_tp = args.fix_tp_point
+    base_qty = args.base_qty
+    base_sl = args.base_sl
+
+
 
     config = get_config_file()
     hero = config[heroname]
     symbol = 'BTCUSDT_UMCBL'
     marginCoin = 'USDT'
     logger.info("让场子热起来吧🔥！ 新一场棒球比赛即将开始⚾️～")
-    run(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp)
+    run(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl)
