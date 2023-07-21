@@ -397,34 +397,35 @@ class BaseBall():
 
         try:
             data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='profit_loss')['data']
+            for plan in data:
+                if plan['planType'] == 'loss_plan':
+                    if plan['side'] == 'close_long' and new_long_sl != 0:
+                        if new_long_sl > float(plan['triggerPrice']):
+                            ## modifiy the sl
+                            try:
+                                size = plan['size']
+                                huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
+                                huFu.mix_place_stop_order(symbol, marginCoin, new_long_sl, 'loss_plan', 'long',triggerType='fill_price', size=size, rangeRate=None)      
+                                logger.warning("LOL队员已在 %f 上垒击球,正在跑垒,得分区不断扩大,新失分区 : %f ",long_info[1],new_long_sl)
+
+                            except Exception as e:
+                                logger.warning(f"move long sl faild, order id is {plan['orderId']},new_long_sl is {new_long_sl} ,{e}")
+                            
+                    elif plan['side'] == 'close_short' and new_short_sl != 0:
+                        if new_short_sl < float(plan['triggerPrice']):
+                            ## modifiy the sl
+                            try:
+                                size = plan['size']
+                                huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
+                                huFu.mix_place_stop_order(symbol, marginCoin, new_short_sl, 'loss_plan', 'short',triggerType='fill_price', size=size, rangeRate=None)                            
+                                logger.warning("SVS队员已在 %f 上垒击球,正在跑垒,得分区不断扩大,新失分区 : %f ",short_info[1],new_short_sl)
+
+                            except Exception as e:
+                                logger.warning(f"move short sl faild, order id is {plan['orderId']},new_short_sl is {new_short_sl} ,{e}")
+
         except Exception as e:
             logger.warning(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
 
-        for plan in data:
-            if plan['planType'] == 'loss_plan':
-                if plan['side'] == 'close_long' and new_long_sl != 0:
-                    if new_long_sl > float(plan['triggerPrice']):
-                        ## modifiy the sl
-                        try:
-                            size = plan['size']
-                            huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
-                            huFu.mix_place_stop_order(symbol, marginCoin, new_long_sl, 'loss_plan', 'long',triggerType='fill_price', size=size, rangeRate=None)      
-                            logger.warning("LOL队员已在 %f 上垒击球,正在跑垒,得分区不断扩大,新失分区 : %f ",long_info[1],new_long_sl)
-
-                        except Exception as e:
-                            logger.warning(f"move long sl faild, order id is {plan['orderId']},new_long_sl is {new_long_sl} ,{e}")
-                        
-                elif plan['side'] == 'close_short' and new_short_sl != 0:
-                    if new_short_sl < float(plan['triggerPrice']):
-                        ## modifiy the sl
-                        try:
-                            size = plan['size']
-                            huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
-                            huFu.mix_place_stop_order(symbol, marginCoin, new_short_sl, 'loss_plan', 'short',triggerType='fill_price', size=size, rangeRate=None)                            
-                            logger.warning("SVS队员已在 %f 上垒击球,正在跑垒,得分区不断扩大,新失分区 : %f ",short_info[1],new_short_sl)
-
-                        except Exception as e:
-                            logger.warning(f"move short sl faild, order id is {plan['orderId']},new_short_sl is {new_short_sl} ,{e}")
 
 
 
