@@ -372,7 +372,7 @@ class BaseBall():
                     logger.warning("球员记分,编号: %s, 进场位 %f, 得分圈%f",label,entry,delta)
 
     def base_run(self,current_price,pos,huFu):
-        # a垒 ,40 开始,保一半
+        # a垒 ,36 开始,保一半
 
         # b垒 ,80 开始,保一半 
         long_info  = [float(pos[0]["total"]),float(pos[0]['averageOpenPrice']),pos[0]['achievedProfits'],pos[0]['unrealizedPL']]
