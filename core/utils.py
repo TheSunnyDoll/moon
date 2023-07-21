@@ -123,9 +123,12 @@ def get_logger(logfile='app.log'):
     console_handler.setFormatter(formatter)
     file_handler.setFormatter(formatter)
 
+    # 移除之前可能已经存在的处理器
+    for handler in logger.handlers:
+        logger.removeHandler(handler)
+
     # 将处理器添加到日志记录器
     logger.addHandler(console_handler)
     logger.addHandler(file_handler)
 
     return logger
-
