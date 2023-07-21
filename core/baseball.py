@@ -416,7 +416,7 @@ def run(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl):
             b.insert(0,ft)
             trend.append(b)
             time.sleep(0.3)
-
+        print(last_trend)
         orders = bb.advortise(trend,fix_mode,fix_tp)
         bb.batch_orders(orders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price)
         for i in range(30):
