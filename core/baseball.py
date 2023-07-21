@@ -494,7 +494,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
             time.sleep(0.3)
         orders = bb.advortise(trend,fix_mode,fix_tp)
         bb.batch_orders(orders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price)
-        for i in range(30):
+        for i in range(5):
             try:
                 result = huFu.mix_get_single_position(symbol,marginCoin)
                 pos = result['data']
@@ -512,7 +512,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
 
             bb.record(current_price,pos,orders,track_orders)
             bb.base_run(current_price,pos,huFu)
-            time.sleep(30)
+            time.sleep(60)
             if not debug_mode:
                 try:
                     data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
