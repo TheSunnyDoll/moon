@@ -88,47 +88,39 @@ def get_config_file():
     return config_data
 
 def get_logger(logfile='app.log'):
-    # 创建日志记录器
-    logger = logging.getLogger('rbreaker_logger')
-    logger.setLevel(logging.DEBUG)  # 设置日志记录器的级别为 DEBUG
 
-    # 如果已经存在处理器，则直接返回
-    if logger.hasHandlers():
-        return logger
-
-    # 创建控制台处理器
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.DEBUG)  # 设置控制台处理器的级别为 DEBUG
-
-    # 创建文件处理器，并指定追加模式 'a'
-    file_handler = logging.FileHandler(logfile, mode='a')
-    file_handler.setLevel(logging.DEBUG)  # 设置文件处理器的级别为 DEBUG
-
-    # 创建格式化器
-    formatter = colorlog.ColoredFormatter(
-        '%(asctime)s - %(log_color)s%(levelname)s - %(message)s',
-        log_colors={
-            'DEBUG': 'green',
-            'INFO': 'white',
-            'WARNING': 'yellow',
-            'ERROR': 'red',
-            'CRITICAL': 'red,bg_yellow',
-        },
-        reset=True,
-        secondary_log_colors={},
-        style='%'
-    )
-
-    # 将格式化器添加到处理器
-    console_handler.setFormatter(formatter)
-    file_handler.setFormatter(formatter)
-
-    # 移除之前可能已经存在的处理器
-    for handler in logger.handlers:
-        logger.removeHandler(handler)
-
-    # 将处理器添加到日志记录器
-    logger.addHandler(console_handler)
-    logger.addHandler(file_handler)
-
+  logger = logging.getLogger('rbreaker_logger')
+  
+  # 只记录debug级别  
+  logger.setLevel(logging.DEBUG) 
+  
+  if logger.hasHandlers():
     return logger
+
+  # 创建并设置处理器级别为DEBUG
+  console_handler = logging.StreamHandler()
+  console_handler.setLevel(logging.DEBUG)
+  
+  file_handler = logging.FileHandler(logfile, mode='a')
+  file_handler.setLevel(logging.DEBUG)
+
+  # 创建格式化器
+  formatter = colorlog.ColoredFormatter(
+    '%(asctime)s - %(log_color)s%(levelname)s - %(message)s',
+    log_colors = {
+      'DEBUG': 'cyan',  
+    }
+  )
+
+  # 添加格式化器
+  console_handler.setFormatter(formatter)
+  file_handler.setFormatter(formatter)
+
+  # 移除可能存在的旧处理器  
+  logger.handlers.clear()
+  
+  # 添加处理器
+  logger.addHandler(console_handler)
+  logger.addHandler(file_handler)
+
+  return logger
