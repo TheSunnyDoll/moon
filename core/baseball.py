@@ -407,18 +407,20 @@ def run(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl):
 
     while True:
         if not debug_mode:
-            data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
+            try:
+                data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
+            except Exception as e:
+                logger.warning(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
+
             if data != []:
                     ## clear all open orders
-                huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
+                try:
+                    huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
+                except Exception as e:
+                    logger.warning(f"An unknown error occurred in mix_cancel_all_trigger_orders(): {e}")
 
         startTime = get_previous_month_timestamp()
         endTime = get_previous_minute_timestamp()
-        if not debug_mode:
-            data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
-            if data != []:
-                    ## clear all open orders
-                huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
         trend = []
         ft_list = ['15m','30m','1H','4H','1D']
         last_trend = []
@@ -456,12 +458,20 @@ def run(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl):
             bb.record(current_price,pos,orders,track_orders)
             time.sleep(30)
             if not debug_mode:
-                data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
+                try:
+                    data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
+                except Exception as e:
+                    logger.warning(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
+
                 if data != []:
                     for order in data:
                         if '_' not in order['clientOid']:
                         ## clear all open orders
-                            huFu.mix_cancel_plan_order(symbol, marginCoin, order['orderId'], 'normal_plan')
+                            try:
+                                huFu.mix_cancel_plan_order(symbol, marginCoin, order['orderId'], 'normal_plan')
+                            except Exception as e:
+                                logger.warning(f"An unknown error occurred in mix_cancel_plan_order(): {e}")
+
 
 
 
