@@ -397,13 +397,13 @@ def run(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl):
         if data != []:
                 ## clear all open orders
             huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
-    logger.debug("三")
+    logger.critical("三")
     time.sleep(1)
-    logger.debug("二")
+    logger.critical("二")
     time.sleep(1)
-    logger.debug("一")
+    logger.critical("一")
     time.sleep(1)
-    logger.debug("比赛开始 🏎️  🏎️ 🏎️ 🏎️🏎️ !!!")
+    logger.critical("比赛开始 🏎️  🏎️ 🏎️ 🏎️🏎️ !!!")
 
     while True:
         try:

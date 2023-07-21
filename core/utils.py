@@ -109,7 +109,7 @@ def get_logger(logfile='app.log'):
     formatter = colorlog.ColoredFormatter(
         '%(asctime)s - %(log_color)s%(levelname)s - %(message)s',
         log_colors={
-            'DEBUG': 'yellow',
+            'DEBUG': 'green',
             'INFO': 'white',
             'WARNING': 'cyan',
             'ERROR': 'red',
