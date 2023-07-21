@@ -406,6 +406,13 @@ def run(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl):
     logger.warning("比赛开始 🏎️  🏎️ 🏎️ 🏎️🏎️ !!!")
 
     while True:
+        try:
+            result = huFu.mix_get_market_price(symbol)
+            current_price = float(result['data']['markPrice'])
+            logger.info("裁判播报员: ⚾️ 坐标 %s ",current_price)
+        except Exception as e:
+            logger.warning(f"An unknown error occurred in mix_get_market_price(): {e}")
+
         if not debug_mode:
             try:
                 data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
