@@ -290,7 +290,7 @@ class BaseBall():
                 if not fix_mode:
 
                     idm1_order1 = [derc,idm1_entry,tp1_idm,sl1_idm,'firsebase-idm1-1']
-                    idm1_order2 = [derc,idm1_entry,tp2_idm,sl1_idm,'firsebase-idm1_2']
+                    idm1_order2 = [derc,idm1_entry,tp2_idm,sl1_idm,'firsebase-idm1-2']
                     idm2_order1 = [derc,idm2_entry,tp1_idm,sl2_idm,'firsebase-idm2-1']
                     idm2_order2 = [derc,idm2_entry,tp2_idm,sl2_idm,'firsebase-idm2-2']
                     orders[len(orders):] = [idm1_order1,idm1_order2,idm2_order1,idm2_order2]
@@ -317,7 +317,7 @@ class BaseBall():
 
                 if not fix_mode:
                     idm1_order1 = [derc,idm1_entry,tp1_idm,sl1_idm,'firsebase-idm1-1']
-                    idm1_order2 = [derc,idm1_entry,tp2_idm,sl1_idm,'firsebase-idm1_2']
+                    idm1_order2 = [derc,idm1_entry,tp2_idm,sl1_idm,'firsebase-idm1-2']
                     idm2_order1 = [derc,idm2_entry,tp1_idm,sl2_idm,'firsebase-idm2-1']
                     idm2_order2 = [derc,idm2_entry,tp2_idm,sl2_idm,'firsebase-idm2-2']
                     orders[len(orders):] = [idm1_order1,idm1_order2,idm2_order1,idm2_order2]
