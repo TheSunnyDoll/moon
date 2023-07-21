@@ -183,7 +183,7 @@ class ZigZag():
             big_trend[len(big_trend):]=[idm_1,idm_2,tp1,tp2]
         return result,big_trend
 
-    def advortise(self,trend):
+    def advortise(self,trend,fix_mode,fix_tp):
         orders = []
         for td in trend:
             ft = td[0]
@@ -193,7 +193,6 @@ class ZigZag():
             idm2_entry = td[6]
             tp1 = td[7]
             tp2 = td[8]
-            fix_tp = 50
 
             if td[1] == 'bull':
                 drec = 'open_long'
@@ -211,20 +210,21 @@ class ZigZag():
 
 
             ft_orders = []
-            eng_order = [drec,eng_entry,tp1,sl1,ft+'_eng_order']
-            idm1_order1 = [drec,idm1_entry,tp1,sl2,ft+'_idm1_order1']
-            idm1_order2 = [drec,idm1_entry,tp2,sl2,ft+'_idm1_order2']
-            idm2_order1 = [drec,idm2_entry,tp1,sl2,ft+'_idm2_order1']
-            idm2_order2 = [drec,idm2_entry,tp2,sl2,ft+'_idm2_order2']
+            if not fix_mode:
+                eng_order = [drec,eng_entry,tp1,sl1,ft+'_eng_order']
+                idm1_order1 = [drec,idm1_entry,tp1,sl2,ft+'_idm1_order1']
+                idm1_order2 = [drec,idm1_entry,tp2,sl2,ft+'_idm1_order2']
+                idm2_order1 = [drec,idm2_entry,tp1,sl2,ft+'_idm2_order1']
+                idm2_order2 = [drec,idm2_entry,tp2,sl2,ft+'_idm2_order2']
+                ft_orders[len(ft_orders):] = [eng_order,idm1_order1,idm1_order2,idm2_order1,idm2_order2]
+            else:
+                eng_order_fix_tp = [drec,eng_entry,eng_tp3,sl1,ft+'_eng_order_fix_tp']
+                idm1_order1_fix_tp = [drec,idm1_entry,idm1_tp3,sl2,ft+'_idm1_order1_fix_tp']
+                idm1_order2_fix_tp = [drec,idm1_entry,idm1_tp3,sl2,ft+'_idm1_order2_fix_tp']
+                idm2_order1_fix_tp = [drec,idm2_entry,idm2_tp3,sl2,ft+'_idm2_order1_fix_tp']
+                idm2_order2_fix_tp = [drec,idm2_entry,idm2_tp3,sl2,ft+'_idm2_order2_fix_tp']
+                ft_orders[len(ft_orders):] = [eng_order_fix_tp,idm1_order1_fix_tp,idm1_order2_fix_tp,idm2_order1_fix_tp,idm2_order2_fix_tp]
 
-            eng_order_fix_tp = [drec,eng_entry,eng_tp3,sl1,ft+'_eng_order_fix_tp']
-            idm1_order1_fix_tp = [drec,idm1_entry,idm1_tp3,sl2,ft+'_idm1_order1_fix_tp']
-            idm1_order2_fix_tp = [drec,idm1_entry,idm1_tp3,sl2,ft+'_idm1_order2_fix_tp']
-            idm2_order1_fix_tp = [drec,idm2_entry,idm2_tp3,sl2,ft+'_idm2_order1_fix_tp']
-            idm2_order2_fix_tp = [drec,idm2_entry,idm2_tp3,sl2,ft+'_idm2_order2_fix_tp']
-
-            ft_orders[len(ft_orders):] = [eng_order,idm1_order1,idm1_order2,idm2_order1,idm2_order2]
-            ft_orders[len(ft_orders):] = [eng_order_fix_tp,idm1_order1_fix_tp,idm1_order2_fix_tp,idm2_order1_fix_tp,idm2_order2_fix_tp]
             orders.append(ft_orders)
 
         return orders
@@ -264,7 +264,7 @@ class ZigZag():
 
                         huFu.mix_place_plan_order(symbol, marginCoin, hft_qty, order[0], 'limit', order[1], "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
 
-    def on_track(self,legs,huFu,marginCoin,base_qty,debug_mode,base_sl):
+    def on_track(self,legs,huFu,marginCoin,base_qty,debug_mode,base_sl,fix_mode,fix_tp):
         base_point = 150
         last_leg = legs[-1]
         delta = abs(last_leg[1]-last_leg[2])
@@ -280,28 +280,27 @@ class ZigZag():
                 idm2_entry = round(last_leg[2] - delta_idm2 + 1)
                 tp1_idm = round(last_leg[2] - delta_tp1_idm - 1)
                 tp2_idm = round(last_leg[2] - delta_tp2_idm - 1)
-                fix_tp = 50
 
                 sl1_idm = last_leg[1]
                 sl2_idm = idm1_entry - 20
 
-                idm1_order1 = [derc,idm1_entry,tp1_idm,sl1_idm]
-                idm1_order2 = [derc,idm1_entry,tp2_idm,sl1_idm]
-                idm2_order1 = [derc,idm2_entry,tp1_idm,sl2_idm]
-                idm2_order2 = [derc,idm2_entry,tp2_idm,sl2_idm]
+                if not fix_mode:
 
+                    idm1_order1 = [derc,idm1_entry,tp1_idm,sl1_idm]
+                    idm1_order2 = [derc,idm1_entry,tp2_idm,sl1_idm]
+                    idm2_order1 = [derc,idm2_entry,tp1_idm,sl2_idm]
+                    idm2_order2 = [derc,idm2_entry,tp2_idm,sl2_idm]
+                    orders[len(orders):] = [idm1_order1,idm1_order2,idm2_order1,idm2_order2]
 
-                idm1_tp = idm1_entry + fix_tp
-                idm2_tp = idm2_entry + fix_tp
+                else:
+                    idm1_tp = idm1_entry + fix_tp
+                    idm2_tp = idm2_entry + fix_tp
 
-                idm1_order1_fix_tp = [derc,idm1_entry,idm1_tp,sl1_idm]
-                idm1_order2_fix_tp = [derc,idm1_entry,idm1_tp,sl1_idm]
-                idm2_order1_fix_tp = [derc,idm2_entry,idm2_tp,sl2_idm]
-                idm2_order2_fix_tp = [derc,idm2_entry,idm2_tp,sl2_idm]
-
-
-                orders[len(orders):] = [idm1_order1,idm1_order2,idm2_order1,idm2_order2]
-                orders[len(orders):] = [idm1_order1_fix_tp,idm1_order2_fix_tp,idm2_order1_fix_tp,idm2_order2_fix_tp]
+                    idm1_order1_fix_tp = [derc,idm1_entry,idm1_tp,sl1_idm]
+                    idm1_order2_fix_tp = [derc,idm1_entry,idm1_tp,sl1_idm]
+                    idm2_order1_fix_tp = [derc,idm2_entry,idm2_tp,sl2_idm]
+                    idm2_order2_fix_tp = [derc,idm2_entry,idm2_tp,sl2_idm]
+                    orders[len(orders):] = [idm1_order1_fix_tp,idm1_order2_fix_tp,idm2_order1_fix_tp,idm2_order2_fix_tp]
 
             if last_leg[0] == 'bear':
                 derc = 'open_short'
@@ -309,26 +308,26 @@ class ZigZag():
                 idm2_entry = round(last_leg[2] + delta_idm2 - 1)
                 tp1_idm = round(last_leg[2] + delta_tp1_idm + 1)
                 tp2_idm = round(last_leg[2] + delta_tp2_idm + 1)
-                fix_tp = 50
 
                 sl1_idm = last_leg[1]
                 sl2_idm = idm1_entry + 20
 
-                idm1_order1 = [derc,idm1_entry,tp1_idm,sl1_idm]
-                idm1_order2 = [derc,idm1_entry,tp2_idm,sl1_idm]
-                idm2_order1 = [derc,idm2_entry,tp1_idm,sl2_idm]
-                idm2_order2 = [derc,idm2_entry,tp2_idm,sl2_idm]
+                if not fix_mode:
+                    idm1_order1 = [derc,idm1_entry,tp1_idm,sl1_idm]
+                    idm1_order2 = [derc,idm1_entry,tp2_idm,sl1_idm]
+                    idm2_order1 = [derc,idm2_entry,tp1_idm,sl2_idm]
+                    idm2_order2 = [derc,idm2_entry,tp2_idm,sl2_idm]
+                    orders[len(orders):] = [idm1_order1,idm1_order2,idm2_order1,idm2_order2]
+                
+                else:
+                    idm1_tp = idm1_entry - fix_tp
+                    idm2_tp = idm2_entry - fix_tp
 
-                idm1_tp = idm1_entry - fix_tp
-                idm2_tp = idm2_entry - fix_tp
-
-                idm1_order1_fix_tp = [derc,idm1_entry,idm1_tp,sl1_idm]
-                idm1_order2_fix_tp = [derc,idm1_entry,idm1_tp,sl1_idm]
-                idm2_order1_fix_tp = [derc,idm2_entry,idm2_tp,sl2_idm]
-                idm2_order2_fix_tp = [derc,idm2_entry,idm2_tp,sl2_idm]
-
-                orders[len(orders):] = [idm1_order1,idm1_order2,idm2_order1,idm2_order2]
-                orders[len(orders):] = [idm1_order1_fix_tp,idm1_order2_fix_tp,idm2_order1_fix_tp,idm2_order2_fix_tp]
+                    idm1_order1_fix_tp = [derc,idm1_entry,idm1_tp,sl1_idm]
+                    idm1_order2_fix_tp = [derc,idm1_entry,idm1_tp,sl1_idm]
+                    idm2_order1_fix_tp = [derc,idm2_entry,idm2_tp,sl2_idm]
+                    idm2_order2_fix_tp = [derc,idm2_entry,idm2_tp,sl2_idm]
+                    orders[len(orders):] = [idm1_order1_fix_tp,idm1_order2_fix_tp,idm2_order1_fix_tp,idm2_order2_fix_tp]
 
             for order in orders:
                 if order[0] == 'open_long':
@@ -356,11 +355,10 @@ class ZigZag():
 
 
 
-def run(hero,symbol,marginCoin,debug_mode):
+def run(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp):
     base_sl = 88
     base_qty = 0.05
     zz = ZigZag()
-
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
     if not debug_mode:
         data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
@@ -411,7 +409,7 @@ def run(hero,symbol,marginCoin,debug_mode):
             trend.append(b)
             time.sleep(0.3)
 
-        orders = zz.advortise(trend)
+        orders = zz.advortise(trend,fix_mode,fix_tp)
         zz.batch_orders(orders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price)
         for i in range(30):
             try:
@@ -422,7 +420,7 @@ def run(hero,symbol,marginCoin,debug_mode):
             except Exception as e:
                 logger.warning(f"An unknown error occurred in mix_get_single_position(): {e}")
             if long_qty <=0.6 and short_qty<= 0.6:
-                zz.on_track(last_trend,huFu,marginCoin,base_qty,debug_mode,base_sl)
+                zz.on_track(last_trend,huFu,marginCoin,base_qty,debug_mode,base_sl,fix_mode,fix_tp)
 
             time.sleep(30)
             if not debug_mode:
@@ -437,19 +435,22 @@ def run(hero,symbol,marginCoin,debug_mode):
 
 if __name__ == "__main__":
     logger = get_logger()
-    logger.setLevel(logging.DEBUG)
     # 解析命令行参数
     parser = argparse.ArgumentParser()
     parser.add_argument('-u', '--username', help='Username')
     parser.add_argument('-d', '--debug_mode', action='store_true', default=False, help='Enable debug mode')
+    parser.add_argument('-f', '--fix_tp_mode', action='store_true', default=False, help='Enable fix_tp mode')
+    parser.add_argument('-fp', '--fix_tp_point', default=88,help='fix_tp_point')
 
     args = parser.parse_args()
     heroname = args.username
     debug_mode = args.debug_mode
+    fix_mode = args.fix_tp_mode
+    fix_tp = args.fix_tp_point
 
     config = get_config_file()
     hero = config[heroname]
     symbol = 'BTCUSDT_UMCBL'
     marginCoin = 'USDT'
     logger.info("让场子热起来吧🔥！ 新一场棒球比赛即将开始⚾️～")
-    run(hero,symbol,marginCoin,debug_mode)
+    run(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp)

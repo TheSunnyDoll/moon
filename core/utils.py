@@ -87,12 +87,18 @@ def get_config_file():
         config_data = yaml.safe_load(file)
     return config_data
 
-def get_logger():
+def get_logger(logfile='record.log'):
     # 创建日志记录器
     logger = logging.getLogger('rbreaker_logger')
+    logger.setLevel(logging.DEBUG)  # 设置日志记录器的级别为 DEBUG
 
     # 创建控制台处理器
     console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.DEBUG)  # 设置控制台处理器的级别为 DEBUG
+
+    # 创建文件处理器，并指定追加模式 'a'
+    file_handler = logging.FileHandler(logfile, mode='a')
+    file_handler.setLevel(logging.DEBUG)  # 设置文件处理器的级别为 DEBUG
 
     # 创建格式化器
     formatter = colorlog.ColoredFormatter(
@@ -108,9 +114,13 @@ def get_logger():
         secondary_log_colors={},
         style='%'
     )
+
     # 将格式化器添加到处理器
     console_handler.setFormatter(formatter)
+    file_handler.setFormatter(formatter)
 
     # 将处理器添加到日志记录器
     logger.addHandler(console_handler)
+    logger.addHandler(file_handler)
+
     return logger
