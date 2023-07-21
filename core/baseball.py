@@ -360,9 +360,32 @@ class BaseBall():
         return orders
 
 
-    def record(self,pos,orders,track_orders):
+    def record(self,current_price,pos,orders,track_orders):
+        
+        long_info  = [float(pos[0]["total"]),float(pos[0]['averageOpenPrice']),pos[0]['achievedProfits'],pos[0]['unrealizedPL']]
+        short_info = [float(pos[1]["total"]),float(pos[1]['averageOpenPrice']),pos[1]['achievedProfits'],pos[1]['unrealizedPL']]
+        delta = 0
+        if short_info[0] > 0:
+            delta = short_info[1] - current_price
+            logger.critical("short position : %f ,得分圈 :%f",short_info[1],delta)
+        if long_info[0] > 0:
+            delta = current_price - long_info[0]
+            logger.critical("long position : %f ,得分圈 :%f",long_info[1],delta)
 
-        logger.critical("position info : %s , orders %s ,track_orders %s",pos , orders, track_orders)
+        for ft_orders in orders:
+            for order in ft_orders:
+                entry = order[1]
+                label = order[4]
+                if short_info[1] == entry or long_info[1] == entry:
+                    logger.critical("球员记分,编号: %s, 进场位 %f, 得分圈%f",label,entry,delta)
+
+
+        for order in track_orders:
+                entry = order[1]
+                label = order[4]
+                if short_info[1] == entry or long_info[1] == entry:
+                    logger.critical("球员记分,编号: %s, 进场位 %f, 得分圈%f",label,entry,delta)
+
 
 
 def run(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl):
@@ -388,12 +411,6 @@ def run(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl):
             if data != []:
                     ## clear all open orders
                 huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
-        try:
-            result = huFu.mix_get_market_price(symbol)
-            current_price = float(result['data']['markPrice'])
-            logger.info("裁判播报员: ⚾️ 坐标 %s ",current_price)
-        except Exception as e:
-            logger.warning(f"An unknown error occurred in mix_get_market_price(): {e}")
 
         startTime = get_previous_month_timestamp()
         endTime = get_previous_minute_timestamp()
@@ -429,7 +446,14 @@ def run(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl):
                 logger.warning(f"An unknown error occurred in mix_get_single_position(): {e}")
             if long_qty <=0.6 and short_qty<= 0.6:
                 track_orders = bb.on_track(last_trend,huFu,marginCoin,base_qty,debug_mode,base_sl,fix_mode,fix_tp)
-            bb.record(pos,orders,track_orders)
+            try:
+                result = huFu.mix_get_market_price(symbol)
+                current_price = float(result['data']['markPrice'])
+                logger.info("裁判播报员: ⚾️ 坐标 %s ",current_price)
+            except Exception as e:
+                logger.warning(f"An unknown error occurred in mix_get_market_price(): {e}")
+
+            bb.record(current_price,pos,orders,track_orders)
             time.sleep(30)
             if not debug_mode:
                 data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
