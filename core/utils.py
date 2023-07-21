@@ -103,7 +103,7 @@ def get_logger(logfile='app.log'):
 
     # 创建文件处理器，并指定追加模式 'a'
     file_handler = logging.FileHandler(logfile, mode='a')
-    file_handler.setLevel(logging.CRITICAL)  # 设置文件处理器的级别为 DEBUG
+    file_handler.setLevel(logging.WARNING)  # 设置文件处理器的级别为 warning
 
     # 创建格式化器
     formatter = colorlog.ColoredFormatter(
@@ -111,9 +111,9 @@ def get_logger(logfile='app.log'):
         log_colors={
             'DEBUG': 'green',
             'INFO': 'white',
-            'WARNING': 'yellow',
+            'WARNING': 'cyan',
             'ERROR': 'red',
-            'CRITICAL': 'cyan',
+            'CRITICAL': 'yellow',
         },
         reset=True,
         secondary_log_colors={},
