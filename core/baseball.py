@@ -447,7 +447,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl):
             except Exception as e:
                 logger.debug(f"An unknown error occurred in mix_get_single_position(): {e}")
             if long_qty <=0.6 and short_qty<= 0.6:
-                track_orders = bb.on_track(last_trend,huFu,marginCoin,base_qty,debug_mode,base_sl,fix_mode,fix_tp)
+                track_orders = bb.on_track(last_trend,huFu,marginCoin,base_qty,debug_mode,base_sl)
             try:
                 result = huFu.mix_get_market_price(symbol)
                 current_price = float(result['data']['markPrice'])
