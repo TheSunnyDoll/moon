@@ -369,7 +369,7 @@ class BaseBall():
             delta = short_info[1] - current_price
             logger.critical("short position : %f ,得分圈 :%f",short_info[1],delta)
         if long_info[0] > 0:
-            delta = current_price - long_info[0]
+            delta = current_price - long_info[1]
             logger.critical("long position : %f ,得分圈 :%f",long_info[1],delta)
 
         for ft_orders in orders:
