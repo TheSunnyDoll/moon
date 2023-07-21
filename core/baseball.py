@@ -356,7 +356,7 @@ class BaseBall():
                         try:
                             huFu.mix_place_plan_order(symbol, marginCoin, base_qty, order[0], 'limit', order[1], "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
                         except Exception as e:
-                            logger.warning(f"An unknown error occurred in mix_place_plan_order(): {e}")
+                            logger.warning(f"An unknown error occurred in mix_place_plan_order() ,orderOid(): {e} {order[4]}")
         return orders
 
 
