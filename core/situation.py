@@ -14,14 +14,24 @@ api_exchange_address = "https://www.deribit.com"
 
 def get_book_summary_by_currency(currency, kind):
     url = "/api/v2/public/get_book_summary_by_currency"
-    parameters = {'currency': currency,
-                  'kind': kind}
-    # send HTTPS GET request
-    json_response = requests.get((api_exchange_address + url + "?"), params=parameters)
-    response_dict = json.loads(json_response.content)
-    instrument_details = response_dict["result"]
+    parameters = {'currency': currency, 'kind': kind}
 
-    return instrument_details
+    try:
+        # 发送HTTPS GET请求
+        json_response = requests.get((api_exchange_address + url + "?"), params=parameters)
+        json_response.raise_for_status()  # 检查请求是否成功，如果不成功会抛出异常
+        response_dict = json_response.json()
+        instrument_details = response_dict["result"]
+        return instrument_details
+    except requests.exceptions.RequestException as e:
+        print(f"请求异常：{e}")
+        return None
+    except json.JSONDecodeError as e:
+        print(f"JSON解码错误：{e}")
+        return None
+    except KeyError as e:
+        print(f"找不到指定的键：{e}")
+        return None
 def option_value_expiry(strike, size, underlying_price, option_type):
     # calculates the intrinsic value in dollars at expiry of a linear options
 
@@ -40,6 +50,8 @@ class Situation():
     def fetch_data(self,currency):
         # fetch book summary and place into dataframe
         all_option_book_summary = get_book_summary_by_currency(currency, 'option')
+        if all_option_book_summary == None:
+            return None,None
         df = pd.DataFrame(all_option_book_summary)
 
         # split the instrument name into separate columns
@@ -88,7 +100,8 @@ class Situation():
 def get_max_pains():
     st = Situation()
     df, unique_expiry_dates = st.fetch_data('BTC')
-
+    if df.empty or unique_expiry_dates == None:
+        return None
     max_pains = []
     for selected_expiry in unique_expiry_dates:
         df_selected, unique_strikes_selected = st.calculate_max_pain(df,selected_expiry)
