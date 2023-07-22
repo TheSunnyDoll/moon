@@ -551,8 +551,8 @@ if __name__ == "__main__":
     parser.add_argument('-f', '--fix_tp_mode', action='store_true', default=False, help='Enable fix_tp mode')
     parser.add_argument('-fp', '--fix_tp_point', default=88,help='fix_tp_point')
     parser.add_argument('-bsl', '--base_sl', default=88,help='base_sl')
-    parser.add_argument('-bq', '--base_qty', default=0.05,help='base_qty')
-    parser.add_argument('-mxq', '--max_qty', default=0.6,help='max_qty')
+    parser.add_argument('-bq', '--base_qty', default=0.1,help='base_qty')
+    parser.add_argument('-mxq', '--max_qty', default=1.2,help='max_qty')
 
     args = parser.parse_args()
     heroname = args.username
