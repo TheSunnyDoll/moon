@@ -151,16 +151,16 @@ class BaseBall():
 
             # 0.786
             delta =  price[high_index] - price[low_index]
-            idm_1 =  round(price[high_index] - 0.786 * delta + 1)
+            idm_1 =  round(price[high_index] - 0.786 * delta + 2)
 
             # 0.618
-            idm_2 =  round(price[high_index] - 0.618 * delta + 1)
+            idm_2 =  round(price[high_index] - 0.618 * delta + 2)
 
             # 0.382
-            tp1 =  round(price[high_index] - 0.382 * delta - 1)
+            tp1 =  round(price[high_index] - 0.382 * delta - 2)
 
             # 0.236
-            tp2 =  round(price[high_index] - 0.236 * delta - 1)
+            tp2 =  round(price[high_index] - 0.236 * delta - 2)
             big_trend[len(big_trend):]=[idm_1,idm_2,tp1,tp2]
 
         else:
@@ -171,16 +171,16 @@ class BaseBall():
 
             # 0.786
             delta =  price[high_index] - price[low_index]
-            idm_1 =  round(price[low_index] + 0.786 * delta - 1)
+            idm_1 =  round(price[low_index] + 0.786 * delta - 2)
 
             # 0.618
-            idm_2 =  round(price[low_index] + 0.618 * delta - 1)
+            idm_2 =  round(price[low_index] + 0.618 * delta - 2)
 
             # 0.382
-            tp1 =  round(price[low_index] + 0.382 * delta + 1)
+            tp1 =  round(price[low_index] + 0.382 * delta + 2)
 
             # 0.236
-            tp2 =  round(price[low_index] + 0.236 * delta + 1)
+            tp2 =  round(price[low_index] + 0.236 * delta + 2)
             big_trend[len(big_trend):]=[idm_1,idm_2,tp1,tp2]
         return result,big_trend
 
@@ -231,7 +231,13 @@ class BaseBall():
         return orders
         
 
-    def batch_orders(self,oders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price):
+    def batch_orders(self,oders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price,super_mode):
+        base_sl_delta = 100
+
+        if super_mode:
+            base_sl = 30
+            base_sl_delta = 40
+
         for ft_orders in oders:
             for order in ft_orders:
                 time.sleep(0.1)
@@ -240,7 +246,7 @@ class BaseBall():
                         continue
                     tp_delta = order[2] - order[1]
                     sl_delta = order[1] - order[3]
-                    if sl_delta <= 0 or sl_delta >= 100:
+                    if sl_delta <= 0 or sl_delta >= base_sl_delta:
                         sl = order[1] - base_sl
                         sl_delta = base_sl
                     else:
@@ -250,7 +256,7 @@ class BaseBall():
                         continue
                     tp_delta = order[1] - order[2]
                     sl_delta = order[3] - order[1]
-                    if sl_delta <= 0 or sl_delta >= 100:
+                    if sl_delta <= 0 or sl_delta >= base_sl_delta:
                         sl = order[1] + base_sl
                         sl_delta = base_sl
                     else:
@@ -346,10 +352,12 @@ class BaseBall():
         return orders
 
 
-    def record(self,current_price,pos,orders,track_orders):
-        
+    def record(self,current_price,pos,orders,track_orders,debug_mode):
         long_info  = [float(pos[0]["total"]),float(pos[0]['averageOpenPrice']),pos[0]['achievedProfits'],pos[0]['unrealizedPL']]
         short_info = [float(pos[1]["total"]),float(pos[1]['averageOpenPrice']),pos[1]['achievedProfits'],pos[1]['unrealizedPL']]
+        if debug_mode:
+            print(long_info)
+            print(short_info)
         delta = 0
         if short_info[0] > 0:
             delta = short_info[1] - current_price
@@ -372,10 +380,12 @@ class BaseBall():
                 if is_approximately_equal(short_info[1],entry)   or is_approximately_equal(long_info[1],entry):
                     logger.warning("球员记分,编号: %s, 进场位 %f, 得分圈%f",label,entry,delta)
 
-    def base_run(self,current_price,pos,huFu):
+    def base_run(self,current_price,pos,huFu,super_mode):
         # a垒 ,36 开始,保一半
-
-        # b垒 ,80 开始,保一半 
+        a_base = 36
+        # b垒 ,72 开始,保一半 
+        if super_mode:
+            a_base = a_base * 2
         long_info  = [float(pos[0]["total"]),float(pos[0]['averageOpenPrice']),pos[0]['achievedProfits'],pos[0]['unrealizedPL']]
         short_info = [float(pos[1]["total"]),float(pos[1]['averageOpenPrice']),pos[1]['achievedProfits'],pos[1]['unrealizedPL']]
         delta = 0
@@ -384,13 +394,13 @@ class BaseBall():
 
         if short_info[0] > 0:
             delta = short_info[1] - current_price
-            if delta >= 36:
+            if delta >= a_base:
                 new_sl_point_delta = delta / 2
                 new_short_sl = round(short_info[1] - new_sl_point_delta)
                 ## move sl to new_short_sl
         if long_info[0] > 0:
             delta = current_price - long_info[1]
-            if delta >= 36:
+            if delta >= a_base:
                 new_sl_point_delta = delta / 2
                 new_long_sl = round(long_info[1] + new_sl_point_delta)
                 ## move sl to new_long_sl
@@ -429,7 +439,7 @@ class BaseBall():
 
 
 
-def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty):
+def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty,super_mode):
 
     bb = BaseBall()
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
@@ -504,28 +514,31 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
         short_qty = float(pos[1]["total"])
         out_max_qty = max_qty * 2
         if long_qty <= out_max_qty and short_qty<= out_max_qty:
-            bb.batch_orders(orders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price)
+            bb.batch_orders(orders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price,super_mode)
 
         time.sleep(0.3)
-
-        for i in range(5):
+        batch_refresh_interval = 5
+        if super_mode:
+            batch_refresh_interval = 120
+        for i in range(batch_refresh_interval):
             try:
                 result = huFu.mix_get_single_position(symbol,marginCoin)
                 pos = result['data']
 
             except Exception as e:
                 logger.debug(f"An unknown error occurred in mix_get_single_position(): {e}")
-            
-            track_orders = bb.on_track(last_trend,huFu,marginCoin,base_qty,debug_mode,base_sl,pos,max_qty)
+            if not super_mode:
+                track_orders = bb.on_track(last_trend,huFu,marginCoin,base_qty,debug_mode,base_sl,pos,max_qty)
             try:
                 result = huFu.mix_get_market_price(symbol)
                 current_price = float(result['data']['markPrice'])
                 logger.info("裁判播报员: ⚾️ 坐标 %s ",current_price)
             except Exception as e:
                 logger.debug(f"An unknown error occurred in mix_get_market_price(): {e}")
-
-            bb.record(current_price,pos,orders,track_orders)
-            bb.base_run(current_price,pos,huFu)
+            if super_mode:
+                track_orders = []
+            bb.record(current_price,pos,orders,track_orders,debug_mode)
+            bb.base_run(current_price,pos,huFu,super_mode)
             time.sleep(60)
             if not debug_mode:
                 try:
@@ -549,6 +562,8 @@ if __name__ == "__main__":
     parser.add_argument('-u', '--username', help='Username')
     parser.add_argument('-d', '--debug_mode', action='store_true', default=False, help='Enable debug mode')
     parser.add_argument('-f', '--fix_tp_mode', action='store_true', default=False, help='Enable fix_tp mode')
+    parser.add_argument('-s', '--super_mode', action='store_true', default=False, help='Enable super_mode')
+
     parser.add_argument('-fp', '--fix_tp_point', default=88,help='fix_tp_point')
     parser.add_argument('-bsl', '--base_sl', default=88,help='base_sl')
     parser.add_argument('-bq', '--base_qty', default=0.1,help='base_qty')
@@ -558,6 +573,7 @@ if __name__ == "__main__":
     heroname = args.username
     debug_mode = args.debug_mode
     fix_mode = args.fix_tp_mode
+    super_mode = args.super_mode
     fix_tp = float(args.fix_tp_point)
     base_qty = float(args.base_qty)
     base_sl = float(args.base_sl)
@@ -570,4 +586,4 @@ if __name__ == "__main__":
     symbol = 'BTCUSDT_UMCBL'
     marginCoin = 'USDT'
     logger.info("让场子热起来吧🔥！ 新一场棒球比赛即将开始⚾️～")
-    start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty)
+    start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty,super_mode)
