@@ -457,13 +457,6 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
     logger.critical("比赛开始 🏎️  🏎️ 🏎️ 🏎️🏎️ !!!")
 
     while True:
-        max_pains = get_max_pains()
-        if max_pains != None:
-            rencent_max_pain = max_pains[0]
-        else:
-            rencent_max_pain = None
-        if rencent_max_pain != None:
-            logger.warning("季末赛 options 临近时间 %s, 最终目标得分区 %s",rencent_max_pain[0],rencent_max_pain[1])
 
         try:
             result = huFu.mix_get_market_price(symbol)
@@ -471,6 +464,19 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
             logger.info("裁判播报员: ⚾️ 坐标 %s ",current_price)
         except Exception as e:
             logger.debug(f"An unknown error occurred in mix_get_market_price(): {e}")
+
+        max_pains = get_max_pains()
+        if max_pains != None:
+            rencent_max_pain = max_pains[0]
+        else:
+            rencent_max_pain = None
+        if rencent_max_pain != None:
+            if current_price >= float(rencent_max_pain[1]):
+                notice = '当前 ⚾️ 坐标位置大于最终得分区,LOL队员请小心~'
+            else:
+                notice = '当前 ⚾️ 坐标位置小于最终得分区,SVS队员请小心~'
+
+            logger.warning("季末赛 options 临近时间 %s, 最终目标得分区 %s , %s",rencent_max_pain[0],rencent_max_pain[1],notice)
 
         if not debug_mode:
             try:
