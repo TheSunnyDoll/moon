@@ -444,18 +444,31 @@ class BaseBall():
         except Exception as e:
             logger.warning(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
 
-    def consolidation(self,last_klines):
+    def consolidation(self,last_klines,debug_mode):
         # 如果当前价格往前8根15m k range<=30,判定为巩固, 不做单,休息3h
         klines = last_klines[-8:]
         klines = np.array(object=klines, dtype=np.float64)
         high = klines[:, 2]
         low = klines[:, 3]
         delta = max(high) - min(low)
+        if debug_mode:
+            print(f"最新震荡范围: {delta}")
         if delta <=30:
             return True
         else:
             return False
 
+    def earn_or_loss(self,huFu):
+        startTime = get_previous_three_hour_timestamp()
+        endTime = get_previous_minute_timestamp()
+        orders = huFu.mix_get_history_orders(symbol, startTime, endTime, 50, lastEndId='', isPre=False)['data']['orderList']
+        loss_list = []
+        for order in orders:
+            if float(order['totalProfits']) < 0:
+                loss_list.append(order['uTime'])
+        stop_loss_time = loss_list[0]
+        return is_more_than_8hours(stop_loss_time)
+            
 
 def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty,super_mode):
 
@@ -540,7 +553,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
             b.insert(0,ft)
             trend.append(b)
             time.sleep(0.3)
-        consolidating = bb.consolidation(last_klines)
+        consolidating = bb.consolidation(last_klines,debug_mode)
         orders = bb.advortise(trend,fix_mode,fix_tp)
         try:
             result = huFu.mix_get_single_position(symbol,marginCoin)
@@ -551,8 +564,11 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
         
         long_qty = float(pos[0]["total"])
         short_qty = float(pos[1]["total"])
+
+        loss_away = bb.earn_or_loss(huFu)
+        print(loss_away)
         out_max_qty = max_qty * 2
-        if long_qty <= out_max_qty and short_qty<= out_max_qty and not consolidating:
+        if long_qty <= out_max_qty and short_qty<= out_max_qty and not consolidating and loss_away:
             bb.batch_orders(orders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price,super_mode)
 
         time.sleep(0.3)
@@ -579,10 +595,10 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                 time.sleep(5)
             logger.info("裁判播报员: ⚾️ 坐标 %s ",current_price)
 
-            if not super_mode and not consolidating:
+            if not super_mode and not consolidating and loss_away:
                 track_orders = bb.on_track(last_trend,huFu,marginCoin,base_qty,debug_mode,base_sl,pos,max_qty)
 
-            if super_mode or consolidating:
+            if super_mode or consolidating or not loss_away:
                 track_orders = []
             bb.record(current_price,pos,orders,track_orders,debug_mode)
             if not debug_mode:
