@@ -151,16 +151,16 @@ class BaseBall():
 
             # 0.786
             delta =  price[high_index] - price[low_index]
-            idm_1 =  round(price[high_index] - 0.786 * delta + 2)
+            idm_1 =  round(price[high_index] - 0.786 * delta + 1)
 
             # 0.618
-            idm_2 =  round(price[high_index] - 0.618 * delta + 2)
+            idm_2 =  round(price[high_index] - 0.618 * delta + 1)
 
             # 0.382
-            tp1 =  round(price[high_index] - 0.382 * delta - 2)
+            tp1 =  round(price[high_index] - 0.382 * delta - 1)
 
             # 0.236
-            tp2 =  round(price[high_index] - 0.236 * delta - 2)
+            tp2 =  round(price[high_index] - 0.236 * delta - 1)
             big_trend[len(big_trend):]=[idm_1,idm_2,tp1,tp2]
 
         elif low_index > high_index:
@@ -172,16 +172,16 @@ class BaseBall():
 
             # 0.786
             delta =  price[high_index] - price[low_index]
-            idm_1 =  round(price[low_index] + 0.786 * delta - 2)
+            idm_1 =  round(price[low_index] + 0.786 * delta - 1)
 
             # 0.618
-            idm_2 =  round(price[low_index] + 0.618 * delta - 2)
+            idm_2 =  round(price[low_index] + 0.618 * delta - 1)
 
             # 0.382
-            tp1 =  round(price[low_index] + 0.382 * delta + 2)
+            tp1 =  round(price[low_index] + 0.382 * delta + 1)
 
             # 0.236
-            tp2 =  round(price[low_index] + 0.236 * delta + 2)
+            tp2 =  round(price[low_index] + 0.236 * delta + 1)
             big_trend[len(big_trend):]=[idm_1,idm_2,tp1,tp2]
         return result,big_trend
 
