@@ -1,8 +1,11 @@
 import subprocess
 import time
 import argparse
+from utils import *
 
 def run_baseball(username, debug_mode, fix_tp_mode, super_mode, fix_tp_point, base_sl, base_qty, max_qty):
+    logger = get_logger(username+'down_error.log')
+
     while True:
         # 运行baseball.py命令
         try:
@@ -19,7 +22,8 @@ def run_baseball(username, debug_mode, fix_tp_mode, super_mode, fix_tp_point, ba
             command.append(f'-mxq={max_qty}')
             subprocess.run(command, check=True)
         except subprocess.CalledProcessError as e:
-            print(f"Error occurred while running baseball.py: {e}")
+            current_time = get_current_time()
+            logger.error(f"Error occurred while running baseball.py: {e} {current_time}")
         # 休眠一段时间后再次运行
         time.sleep(10)
 

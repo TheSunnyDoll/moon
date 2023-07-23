@@ -80,6 +80,9 @@ def get_current_minute():
 def get_current_second():
     return datetime.datetime.now().second
 
+def get_current_time():
+    # 获取当前时间
+    return datetime.datetime.now()
 
 def get_config_file():
     file_path = "../config/config.yaml"
