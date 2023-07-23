@@ -459,15 +459,18 @@ class BaseBall():
             return False
 
     def earn_or_loss(self,huFu):
-        startTime = get_previous_three_hour_timestamp()
+        startTime = get_previous_eight_hour_timestamp()
         endTime = get_previous_minute_timestamp()
-        orders = huFu.mix_get_history_orders(symbol, startTime, endTime, 50, lastEndId='', isPre=False)['data']['orderList']
+        orders = huFu.mix_get_history_orders(symbol, startTime, endTime, 100, lastEndId='', isPre=False)['data']['orderList']
         loss_list = []
         for order in orders:
             if float(order['totalProfits']) < 0:
                 loss_list.append(order['uTime'])
-        stop_loss_time = loss_list[0]
-        return is_more_than_8hours(stop_loss_time)
+        if loss_list != []:
+            stop_loss_time = loss_list[0]
+            return is_more_than_8hours(stop_loss_time)
+        else:
+            return True
             
 
 def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty,super_mode):
@@ -566,7 +569,6 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
         short_qty = float(pos[1]["total"])
 
         loss_away = bb.earn_or_loss(huFu)
-        print(loss_away)
         out_max_qty = max_qty * 2
         if long_qty <= out_max_qty and short_qty<= out_max_qty and not consolidating and loss_away:
             bb.batch_orders(orders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price,super_mode)
