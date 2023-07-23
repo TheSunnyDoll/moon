@@ -163,7 +163,8 @@ class BaseBall():
             tp2 =  round(price[high_index] - 0.236 * delta - 2)
             big_trend[len(big_trend):]=[idm_1,idm_2,tp1,tp2]
 
-        else:
+        elif low_index > high_index:
+
             big_trend[len(big_trend):] = ['bear', price[high_index], price[low_index]]
             # 将price列表按大小排序，取第二高的值
             price_sorted = sorted(price, reverse=True)
@@ -497,11 +498,22 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
         ft_list = ['15m','30m','1H','4H','1D']
         last_trend = []
         for ft in ft_list:
-            try:
-                klines = huFu.mix_get_candles(symbol, ft, startTime, endTime)
-            except Exception as e:
-                logger.debug(f"An unknown error occurred in mix_get_candles(): {e}")
 
+            max_retries = 3
+            retry_delay = 1  # 延迟时间，单位为秒
+            retry_count = 0
+            klines = []
+
+            while not klines and retry_count < max_retries:
+                try:
+                    klines = huFu.mix_get_candles(symbol, ft, startTime, endTime)
+                except Exception as e:
+                    logger.debug(f"An unknown error occurred in mix_get_candles(): {e} ,{ft}")
+                
+                if not klines:
+                    retry_count += 1
+                    print("再来一次")
+                    time.sleep(retry_delay)
             r,b = bb.zigzag(klines=klines, min_size=0.0055, percent=True)
             if ft == '15m':
                 last_trend = r
