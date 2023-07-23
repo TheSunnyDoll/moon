@@ -381,12 +381,14 @@ class BaseBall():
                 if is_approximately_equal(short_info[1],entry)   or is_approximately_equal(long_info[1],entry):
                     logger.warning("球员记分,编号: %s, 进场位 %f, 得分圈%f",label,entry,delta)
 
-    def base_run(self,current_price,pos,huFu,super_mode):
+    def base_run(self,current_price,pos,huFu,super_mode,consolidating):
         # a垒 ,36 开始,保一半
         a_base = 36
         # b垒 ,72 开始,保一半 
         if super_mode:
             a_base = a_base * 2
+        if consolidating:
+            a_base = 8
         long_info  = [float(pos[0]["total"]),float(pos[0]['averageOpenPrice']),pos[0]['achievedProfits'],pos[0]['unrealizedPL']]
         short_info = [float(pos[1]["total"]),float(pos[1]['averageOpenPrice']),pos[1]['achievedProfits'],pos[1]['unrealizedPL']]
         delta = 0
@@ -419,6 +421,8 @@ class BaseBall():
                                 huFu.mix_place_stop_order(symbol, marginCoin, new_long_sl, 'loss_plan', 'long',triggerType='fill_price', size=size, rangeRate=None)      
                                 logger.warning("LOL队员已在 %f 上垒击球,正在跑垒,得分区不断扩大,新失分区 : %f ",long_info[1],new_long_sl)
 
+                                if consolidating:
+                                    time.sleep(60*60*3)
                             except Exception as e:
                                 logger.warning(f"move long sl faild, order id is {plan['orderId']},new_long_sl is {new_long_sl} ,{e}")
                             
@@ -430,14 +434,25 @@ class BaseBall():
                                 huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
                                 huFu.mix_place_stop_order(symbol, marginCoin, new_short_sl, 'loss_plan', 'short',triggerType='fill_price', size=size, rangeRate=None)                            
                                 logger.warning("SVS队员已在 %f 上垒击球,正在跑垒,得分区不断扩大,新失分区 : %f ",short_info[1],new_short_sl)
-
+                                if consolidating:
+                                    time.sleep(60*60*3)
                             except Exception as e:
                                 logger.warning(f"move short sl faild, order id is {plan['orderId']},new_short_sl is {new_short_sl} ,{e}")
 
         except Exception as e:
             logger.warning(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
 
-
+    def consolidation(self,last_klines):
+        # 如果当前价格往前8根15m k range<=30,判定为巩固, 不做单,休息3h
+        klines = last_klines[-8:]
+        klines = np.array(object=klines, dtype=np.float64)
+        high = klines[:, 2]
+        low = klines[:, 3]
+        delta = max(high) - min(low)
+        if delta <=30:
+            return True
+        else:
+            return False
 
 
 def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty,super_mode):
@@ -497,6 +512,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
         trend = []
         ft_list = ['15m','30m','1H','4H','1D']
         last_trend = []
+        last_klines = []
         for ft in ft_list:
 
             max_retries = 3
@@ -517,9 +533,12 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
             r,b = bb.zigzag(klines=klines, min_size=0.0055, percent=True)
             if ft == '15m':
                 last_trend = r
+                last_klines = klines
+
             b.insert(0,ft)
             trend.append(b)
             time.sleep(0.3)
+        consolidating = bb.consolidation(last_klines)
         orders = bb.advortise(trend,fix_mode,fix_tp)
         try:
             result = huFu.mix_get_single_position(symbol,marginCoin)
@@ -531,7 +550,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
         long_qty = float(pos[0]["total"])
         short_qty = float(pos[1]["total"])
         out_max_qty = max_qty * 2
-        if long_qty <= out_max_qty and short_qty<= out_max_qty:
+        if long_qty <= out_max_qty and short_qty<= out_max_qty and not consolidating:
             bb.batch_orders(orders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price,super_mode)
 
         time.sleep(0.3)
@@ -554,14 +573,14 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                 except Exception as e:
                     logger.debug(f"An unknown error occurred in mix_get_market_price(): {e}")
 
-                bb.base_run(current_price,pos,huFu,super_mode)
+                bb.base_run(current_price,pos,huFu,super_mode,consolidating)
                 time.sleep(5)
             logger.info("裁判播报员: ⚾️ 坐标 %s ",current_price)
 
-            if not super_mode:
+            if not super_mode and not consolidating:
                 track_orders = bb.on_track(last_trend,huFu,marginCoin,base_qty,debug_mode,base_sl,pos,max_qty)
 
-            if super_mode:
+            if super_mode or consolidating:
                 track_orders = []
             bb.record(current_price,pos,orders,track_orders,debug_mode)
             if not debug_mode:
