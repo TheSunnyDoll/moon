@@ -267,7 +267,7 @@ class BaseBall():
 
                 logger.info("来吧全垒打⚾️ !我准备好啦! 🥖击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s,出手数: %s",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta,hft_qty)
                 if not debug_mode:
-                    if sl_delta>=0:
+                    if sl_delta>=0 and tp_delta>=0:
                         try:
                             huFu.mix_place_plan_order(symbol, marginCoin, hft_qty, order[0], 'limit', order[1], "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
                         except Exception as e:
