@@ -422,6 +422,7 @@ class BaseBall():
                                 logger.warning("LOL队员已在 %f 上垒击球,正在跑垒,得分区不断扩大,新失分区 : %f ",long_info[1],new_long_sl)
 
                                 if consolidating:
+                                    logger.warning("consolidating~ sleep 2 hours")
                                     time.sleep(60*60*2)
                             except Exception as e:
                                 logger.warning(f"move long sl faild, order id is {plan['orderId']},new_long_sl is {new_long_sl} ,{e}")
@@ -435,6 +436,7 @@ class BaseBall():
                                 huFu.mix_place_stop_order(symbol, marginCoin, new_short_sl, 'loss_plan', 'short',triggerType='fill_price', size=size, rangeRate=None)                            
                                 logger.warning("SVS队员已在 %f 上垒击球,正在跑垒,得分区不断扩大,新失分区 : %f ",short_info[1],new_short_sl)
                                 if consolidating:
+                                    logger.warning("consolidating~ sleep 2 hours")
                                     time.sleep(60*60*2)
                             except Exception as e:
                                 logger.warning(f"move short sl faild, order id is {plan['orderId']},new_short_sl is {new_short_sl} ,{e}")
