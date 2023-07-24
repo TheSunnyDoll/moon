@@ -181,18 +181,17 @@ def is_more_than_10hours(timestamps):
     else:
         return False
 
-def time_until_midnight():
+def time_until_8am_tomorrow():
     # 获取当前时间
     now = datetime.datetime.now()
 
-    # 获取明天0点时间
-    midnight = now.replace(hour=0, minute=0, second=0, microsecond=0) + datetime.timedelta(days=1)
+    # 获取明天8点时间
+    tomorrow_8am = now.replace(hour=8, minute=0, second=0, microsecond=0) + datetime.timedelta(days=1)
 
-    # 计算当前时间距离明天0点的时间间隔
-    time_remaining = str(midnight - now)
+    # 计算当前时间距离明天8点的时间间隔
+    time_remaining = str(tomorrow_8am - now)
 
     return time_remaining
-
 
 def parse_date(date_str):
     # 定义日期格式
