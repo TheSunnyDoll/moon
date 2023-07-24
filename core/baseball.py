@@ -430,7 +430,7 @@ class BaseBall():
 
         if consolidating:
             logger.warning("请注意!!! 准备休息,开始修理场地 ~~~~")
-            time.sleep(6*3600)
+            time.sleep(4*3600)
 
         try:
             data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='profit_loss')['data']
