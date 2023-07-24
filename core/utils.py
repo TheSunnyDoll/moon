@@ -163,3 +163,22 @@ def is_more_than_8hours(timestamps):
         return True
     else:
         return False
+
+def is_more_than_10hours(timestamps):
+# 给定的时间戳
+    timestamp = float(timestamps) / 1000  # 将毫秒转换为秒
+
+    # 获取当前时间戳
+    current_timestamp = time.time()
+
+    # 将时间戳转换为datetime对象
+    given_time = datetime.datetime.fromtimestamp(timestamp)
+    current_time = datetime.datetime.fromtimestamp(current_timestamp)
+    print(given_time)
+    # 计算时间差
+    time_difference = current_time - given_time
+    # 判断时间差是否大于等于8小时
+    if time_difference.total_seconds() >= 10 * 3600:
+        return True
+    else:
+        return False
