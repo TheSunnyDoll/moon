@@ -21,7 +21,7 @@ def get_log():
     with open(log_file, 'r') as file:
         log_lines = file.readlines()
     # 将最新的25行内容加入队列
-    log_queue.extend(log_lines[-25:])
+    log_queue.extend(log_lines[-88:])
     
     # 转换ANSI颜色代码为HTML格式
     converter = Ansi2HTMLConverter()
