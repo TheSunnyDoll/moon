@@ -569,9 +569,10 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
             logger.warning("%s options 临近时间 %s, 最终目标得分区 %s , %s , %s",date_type,rencent_max_pain[0],rencent_max_pain[1],remain_notice,notice)
             if len(max_pains) > 5:
                 logger.warning("稍后比赛临近时间及得分区:")
-                for max_pain in max_pains[1:5]:
-                    logger.warning("\t \t \t      %s",max_pain)
-                    
+                for i in range(0, 4, 2):
+                    max_pain_pair = max_pains[i:i+2]
+                    logger.warning("\t \t \t      %s", ' '.join(str(p) for p in max_pain_pair))
+
         if not debug_mode:
             try:
                 data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
