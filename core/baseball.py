@@ -397,7 +397,7 @@ class BaseBall():
                 if is_approximately_equal(short_info[1],entry)   or is_approximately_equal(long_info[1],entry):
                     logger.warning("球员记分,编号: %s, 进场位 %f, 得分圈%f",label,entry,delta)
 
-    def base_run(self,current_price,pos,huFu,super_mode,consolidating):
+    def base_run(self,current_price,pos,huFu,super_mode,consolidating,debug_mode):
         # a垒 ,36 开始,保一半
         a_base = 36
         # b垒 ,72 开始,保一半 
@@ -411,7 +411,8 @@ class BaseBall():
 
         if short_info[0] > 0:
             if consolidating:
-                huFu.mix_place_order(symbol,'USDT',short_info[0],'close_short','market',reduceOnly=True)
+                if not debug_mode:
+                    huFu.mix_place_order(symbol,'USDT',short_info[0],'close_short','market',reduceOnly=True)
             delta = short_info[1] - current_price
             if delta >= a_base:
                 new_sl_point_delta = delta / 2
@@ -419,7 +420,8 @@ class BaseBall():
                 ## move sl to new_short_sl
         if long_info[0] > 0:
             if consolidating:
-                huFu.mix_place_order(symbol,'USDT',short_info[0],'close_short','market',reduceOnly=True)
+                if not debug_mode:
+                    huFu.mix_place_order(symbol,'USDT',short_info[0],'close_short','market',reduceOnly=True)
             delta = current_price - long_info[1]
             if delta >= a_base:
                 new_sl_point_delta = delta / 2
@@ -439,8 +441,9 @@ class BaseBall():
                             ## modifiy the sl
                             try:
                                 size = plan['size']
-                                huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
-                                huFu.mix_place_stop_order(symbol, marginCoin, new_long_sl, 'loss_plan', 'long',triggerType='fill_price', size=size, rangeRate=None)      
+                                if not debug_mode:
+                                    huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
+                                    huFu.mix_place_stop_order(symbol, marginCoin, new_long_sl, 'loss_plan', 'long',triggerType='fill_price', size=size, rangeRate=None)      
                                 logger.warning("LOL队员已在 %f 上垒击球,正在跑垒,得分区不断扩大,新失分区 : %f ",long_info[1],new_long_sl)
 
                             except Exception as e:
@@ -451,8 +454,9 @@ class BaseBall():
                             ## modifiy the sl
                             try:
                                 size = plan['size']
-                                huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
-                                huFu.mix_place_stop_order(symbol, marginCoin, new_short_sl, 'loss_plan', 'short',triggerType='fill_price', size=size, rangeRate=None)                            
+                                if not debug_mode:
+                                    huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
+                                    huFu.mix_place_stop_order(symbol, marginCoin, new_short_sl, 'loss_plan', 'short',triggerType='fill_price', size=size, rangeRate=None)                            
                                 logger.warning("SVS队员已在 %f 上垒击球,正在跑垒,得分区不断扩大,新失分区 : %f ",short_info[1],new_short_sl)
 
                             except Exception as e:
@@ -646,7 +650,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                 except Exception as e:
                     logger.debug(f"An unknown error occurred in mix_get_market_price(): {e}")
 
-                bb.base_run(current_price,pos,huFu,super_mode,consolidating)
+                bb.base_run(current_price,pos,huFu,super_mode,consolidating,debug_mode)
                 time.sleep(1.5)
             logger.info("裁判播报员: ⚾️ 坐标 %s ",current_price)
 
