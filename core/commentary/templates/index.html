@@ -7,11 +7,38 @@
             font-family: Arial, sans-serif;
             line-height: 1.6;
             padding: 20px;
+            background-color: #f8f9fa;
+            color: #212529;
+            background-image: url("/static/baseball.png");
+            background-size: cover;
+            background-position: center;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #007bff;
         }
         .log-content {
             border: 1px solid #ccc;
             padding: 10px;
-            white-space: pre-line;
+            background-color: #ffffff;
+            overflow-y: scroll;
+            max-height: 300px;
+        }
+        .log-line {
+            white-space: pre-wrap;
+            margin-bottom: 5px;
+        }
+        .log-time {
+            font-weight: bold;
+            color: #007bff;
+        }
+        .log-level {
+            font-weight: bold;
+            color: #17a2b8;
+        }
+        .log-message {
+            color: #212529;
         }
     </style>
     <script>
@@ -19,7 +46,12 @@
             fetch('/get_log')
             .then(response => response.text())
             .then(data => {
-                document.getElementById('log-content').innerHTML = data;
+                const logContent = document.getElementById('log-content');
+                const isScrolledToBottom = logContent.scrollHeight - logContent.clientHeight <= logContent.scrollTop + 1;
+                logContent.innerHTML = data;
+                if (isScrolledToBottom) {
+                    logContent.scrollTop = logContent.scrollHeight - logContent.clientHeight;
+                }
             });
         }
 
