@@ -578,8 +578,8 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
         if super_mode:
             batch_refresh_interval = 120
         for i in range(batch_refresh_interval):
-            for k in range(30):
-                time.sleep(1)
+            for k in range(20):
+                time.sleep(1.5)
                 try:
                     result = huFu.mix_get_single_position(symbol,marginCoin)
                     pos = result['data']
@@ -594,7 +594,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                     logger.debug(f"An unknown error occurred in mix_get_market_price(): {e}")
 
                 bb.base_run(current_price,pos,huFu,super_mode,consolidating)
-                time.sleep(1)
+                time.sleep(1.5)
             logger.info("裁判播报员: ⚾️ 坐标 %s ",current_price)
 
             if not super_mode and not consolidating and loss_away:
