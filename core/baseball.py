@@ -571,7 +571,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                 logger.warning("稍后比赛临近时间及得分区:")
                 for i in range(0, 4, 2):
                     max_pain_pair = max_pains[i:i+2]
-                    logger.warning("\t \t \t      %s", ' '.join(str(p) for p in max_pain_pair))
+                    logger.warning("\t \t %s", ' '.join(str(p) for p in max_pain_pair))
 
         if not debug_mode:
             try:
