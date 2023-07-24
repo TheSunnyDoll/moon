@@ -194,3 +194,55 @@ def time_until_midnight():
     time_remaining = str(midnight - now)
 
     return time_remaining
+
+
+def parse_date(date_str):
+    # 定义日期格式
+    date_format = "%d%b%y"
+
+    # 解析日期字符串为datetime对象
+    return datetime.datetime.strptime(date_str, date_format)
+
+def get_date_type(end_time):
+    # 解析日期字符串
+    end_date = parse_date(end_time)
+
+    # 获取周几（0表示周一，6表示周日）
+    weekday = end_date.weekday()
+
+    # 获取月份和年份
+    month = end_date.month
+    year = end_date.year
+
+    # 获取本月最后一天
+    last_day_of_month = (end_date.replace(day=28) + datetime.timedelta(days=4)).replace(day=1) - datetime.timedelta(days=1)
+
+    # 获取本季度最后一天
+    current_quarter = (month - 1) // 3 + 1
+    last_day_of_quarter = datetime.datetime(year, current_quarter * 3, 1) + datetime.timedelta(days=90) - datetime.timedelta(days=1)
+
+    # 判断日期类型
+    if weekday == 4:
+        if end_date == last_day_of_quarter:
+            return '季末赛'
+        elif end_date == last_day_of_month:
+            return '月末赛'
+        else:
+            return '周决赛'
+    else:
+        return '日内赛'
+    
+
+def is_less_than_10_minutes(time_str):
+    # 将时间字符串转换成datetime对象
+    time_format = "%H:%M:%S.%f"
+    given_time = datetime.datetime.strptime(time_str, time_format)
+
+    # 获取当前时间
+    current_time = datetime.datetime.now()
+
+    # 计算时间差
+    time_difference = current_time - given_time
+
+    # 判断时间差是否小于10分钟
+    return time_difference.total_seconds() < 600

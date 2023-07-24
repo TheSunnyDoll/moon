@@ -427,6 +427,7 @@ class BaseBall():
                 ## move sl to new_long_sl
 
         if consolidating:
+            logger.warning("请注意!!! 准备休息,开始修理场地 ~~~~")
             time.sleep(6*3600)
 
         try:
@@ -487,18 +488,23 @@ class BaseBall():
             return False,trend
 
     def earn_or_loss(self,huFu):
-        startTime = get_previous_eight_hour_timestamp()
+        startTime = get_previous_day_timestamp()
         endTime = get_previous_minute_timestamp()
         orders = huFu.mix_get_history_orders(symbol, startTime, endTime, 100, lastEndId='', isPre=False)['data']['orderList']
         loss_list = []
+        loss_side_list = []
+        total_profits = 0
         for order in orders:
             if float(order['totalProfits']) < 0:
                 loss_list.append(order['uTime'])
+                loss_side_list.append(order['side'])
+            total_profits += order['totalProfits']
         if loss_list != []:
             stop_loss_time = loss_list[0]
-            return is_more_than_8hours(stop_loss_time),stop_loss_time
+            loss_side = loss_side_list[0]
+            return is_more_than_8hours(stop_loss_time),stop_loss_time,loss_side,total_profits
         else:
-            return True,None
+            return True,None,None,total_profits
         
     def cooling_off(self,stop_loss_time,current_trend):
         if is_more_than_10hours(stop_loss_time):
@@ -547,8 +553,9 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
 
             time_remaining = time_until_midnight()
             remain_notice = '本场比赛结束倒计时: ' + time_remaining
+            date_type = get_date_type(rencent_max_pain[0])
 
-            logger.warning("季末赛 options 临近时间 %s, 最终目标得分区 %s , %s , %s",rencent_max_pain[0],rencent_max_pain[1],remain_notice,notice)
+            logger.warning("%s options 临近时间 %s, 最终目标得分区 %s , %s , %s",date_type,rencent_max_pain[0],rencent_max_pain[1],remain_notice,notice)
 
         if not debug_mode:
             try:
@@ -606,7 +613,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
         long_qty = float(pos[0]["total"])
         short_qty = float(pos[1]["total"])
 
-        loss_away,stop_loss_time = bb.earn_or_loss(huFu)
+        loss_away,stop_loss_time,loss_side,total_profits = bb.earn_or_loss(huFu)
         co_derc = bb.cooling_off(stop_loss_time,current_trend)
         out_max_qty = max_qty * 2
         if long_qty <= out_max_qty and short_qty<= out_max_qty and not consolidating and loss_away:
@@ -636,6 +643,13 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                 time.sleep(1.5)
             logger.info("裁判播报员: ⚾️ 坐标 %s ",current_price)
 
+            if not loss_away:
+                winner = ''
+                if loss_side == 'close_long':
+                    winner = 'SVS队'
+                elif loss_side == 'close_short':
+                    winner = 'LOL队'
+                logger.warning("半场赛结束,胜方 %s  \n 球员们休息调整中,下半场比赛即将开始~ %s",winner,total_profits)
             if not super_mode and not consolidating and loss_away:
                 track_orders = bb.on_track(last_trend,huFu,marginCoin,base_qty,debug_mode,base_sl,pos,max_qty,co_derc)
 
@@ -656,6 +670,13 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                                 huFu.mix_cancel_plan_order(symbol, marginCoin, order['orderId'], 'normal_plan')
                             except Exception as e:
                                 logger.debug(f"An unknown error occurred in mix_cancel_plan_order(): {e}")
+
+        if is_less_than_10_minutes(time_remaining):
+            if total_profits >= 0:
+                note = '今天又是个大满贯!!!'
+            elif total_profits < 0:
+                note = '请选手们不要气馁,再接再厉 ~'
+            logger.critical("今日比赛临近末尾,当前总得分: %s ,%s",total_profits,note)
 
 
 if __name__ == "__main__":
