@@ -387,8 +387,6 @@ class BaseBall():
         # b垒 ,72 开始,保一半 
         if super_mode:
             a_base = a_base * 2
-        # if consolidating:
-        #     a_base = 8
         long_info  = [float(pos[0]["total"]),float(pos[0]['averageOpenPrice']),pos[0]['achievedProfits'],pos[0]['unrealizedPL']]
         short_info = [float(pos[1]["total"]),float(pos[1]['averageOpenPrice']),pos[1]['achievedProfits'],pos[1]['unrealizedPL']]
         delta = 0
@@ -396,17 +394,24 @@ class BaseBall():
         new_short_sl = 0
 
         if short_info[0] > 0:
+            if consolidating:
+                huFu.mix_place_order(symbol,'USDT',short_info[0],'close_short','market',reduceOnly=True)
             delta = short_info[1] - current_price
             if delta >= a_base:
                 new_sl_point_delta = delta / 2
                 new_short_sl = round(short_info[1] - new_sl_point_delta)
                 ## move sl to new_short_sl
         if long_info[0] > 0:
+            if consolidating:
+                huFu.mix_place_order(symbol,'USDT',short_info[0],'close_short','market',reduceOnly=True)
             delta = current_price - long_info[1]
             if delta >= a_base:
                 new_sl_point_delta = delta / 2
                 new_long_sl = round(long_info[1] + new_sl_point_delta)
                 ## move sl to new_long_sl
+
+        if consolidating:
+            time.sleep(6*3600)
 
         try:
             data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='profit_loss')['data']
@@ -421,9 +426,6 @@ class BaseBall():
                                 huFu.mix_place_stop_order(symbol, marginCoin, new_long_sl, 'loss_plan', 'long',triggerType='fill_price', size=size, rangeRate=None)      
                                 logger.warning("LOL队员已在 %f 上垒击球,正在跑垒,得分区不断扩大,新失分区 : %f ",long_info[1],new_long_sl)
 
-                                # if consolidating:
-                                #     logger.warning("consolidating~ sleep 2 hours")
-                                #     time.sleep(60*60*2)
                             except Exception as e:
                                 logger.warning(f"move long sl faild, order id is {plan['orderId']},new_long_sl is {new_long_sl} ,{e}")
                             
@@ -435,9 +437,7 @@ class BaseBall():
                                 huFu.mix_cancel_plan_order(symbol, marginCoin, plan['orderId'], 'loss_plan')
                                 huFu.mix_place_stop_order(symbol, marginCoin, new_short_sl, 'loss_plan', 'short',triggerType='fill_price', size=size, rangeRate=None)                            
                                 logger.warning("SVS队员已在 %f 上垒击球,正在跑垒,得分区不断扩大,新失分区 : %f ",short_info[1],new_short_sl)
-                                # if consolidating:
-                                #     logger.warning("consolidating~ sleep 2 hours")
-                                #     time.sleep(60*60*2)
+
                             except Exception as e:
                                 logger.warning(f"move short sl faild, order id is {plan['orderId']},new_short_sl is {new_short_sl} ,{e}")
 
