@@ -173,7 +173,6 @@ def is_more_than_10hours(timestamps):
     # 将时间戳转换为datetime对象
     given_time = datetime.datetime.fromtimestamp(timestamp)
     current_time = datetime.datetime.fromtimestamp(current_timestamp)
-    print(given_time)
     # 计算时间差
     time_difference = current_time - given_time
     # 判断时间差是否大于等于8小时
