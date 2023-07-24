@@ -502,7 +502,6 @@ class BaseBall():
         if loss_list != []:
             stop_loss_time = loss_list[0]
             loss_side = loss_side_list[0]
-            print(stop_loss_time)
             return is_more_than_8hours(stop_loss_time),stop_loss_time,loss_side,total_profits
         else:
             return True,None,None,total_profits
