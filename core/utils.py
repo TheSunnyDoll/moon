@@ -253,7 +253,7 @@ def remaining_time_to_8_hours(stop_loss_time):
     current_time = datetime.datetime.now()
 
     # 计算时间差
-    time_difference = stop_loss_time - current_time
+    time_difference = current_time - stop_loss_time
 
     # 计算距离8小时还有多久
     remaining_time = datetime.timedelta(hours=8) - time_difference
