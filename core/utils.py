@@ -145,6 +145,25 @@ def get_logger(logfile='app.log'):
 def is_approximately_equal(value1, value2, tolerance=10):
     return abs(value1 - value2) <= tolerance
 
+def is_more_than_2hours(timestamps):
+# 给定的时间戳
+    timestamp = float(timestamps) / 1000  # 将毫秒转换为秒
+
+    # 获取当前时间戳
+    current_timestamp = time.time()
+
+    # 将时间戳转换为datetime对象
+    given_time = datetime.datetime.fromtimestamp(timestamp)
+    current_time = datetime.datetime.fromtimestamp(current_timestamp)
+    # 计算时间差
+    time_difference = current_time - given_time
+    # 判断时间差是否大于等于8小时
+    if time_difference.total_seconds() >= 2 * 3600:
+        return True
+    else:
+        return False
+
+
 def is_more_than_4hours(timestamps):
 # 给定的时间戳
     timestamp = float(timestamps) / 1000  # 将毫秒转换为秒
@@ -311,6 +330,24 @@ def remaining_time_to_4_hours(stop_loss_time):
 
     # 计算距离4小时还有多久
     remaining_time = datetime.timedelta(hours=4) - time_difference
+
+    # 将remaining_time转换为字符串格式
+    remaining_time_str = str(remaining_time)
+
+    return remaining_time_str
+
+def remaining_time_to_2_hours(stop_loss_time):
+    # 将stop_loss_time转换为datetime对象
+    stop_loss_time = datetime.datetime.fromtimestamp(int(stop_loss_time) / 1000)
+
+    # 获取当前时间
+    current_time = datetime.datetime.now()
+
+    # 计算时间差
+    time_difference = current_time - stop_loss_time
+
+    # 计算距离4小时还有多久
+    remaining_time = datetime.timedelta(hours=2) - time_difference
 
     # 将remaining_time转换为字符串格式
     remaining_time_str = str(remaining_time)

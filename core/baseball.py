@@ -513,12 +513,12 @@ class BaseBall():
         if loss_list != []:
             stop_loss_time = loss_list[0]
             loss_side = loss_side_list[0]
-            return is_more_than_6hours(stop_loss_time),stop_loss_time,loss_side,total_profits
+            return is_more_than_2hours(stop_loss_time),stop_loss_time,loss_side,total_profits
         else:
             return True,None,None,total_profits
         
     def cooling_off(self,stop_loss_time,current_trend):
-        if is_more_than_6hours(stop_loss_time):
+        if is_more_than_4hours(stop_loss_time):
             return None
         else:
             return current_trend
@@ -665,7 +665,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                     winner = 'SVS队'
                 elif loss_side == 'close_short':
                     winner = 'LOL队'
-                remaining_time = remaining_time_to_4_hours(stop_loss_time)
+                remaining_time = remaining_time_to_2_hours(stop_loss_time)
                 logger.warning("半场赛结束 ~ 🚩胜方 %s ",winner)
                 logger.warning("球员们休息调整中 ☕️~ 距离下半场比赛开始还有:  %s",remaining_time)
             if not super_mode and not consolidating and loss_away:
