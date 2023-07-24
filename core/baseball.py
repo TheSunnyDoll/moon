@@ -480,20 +480,18 @@ class BaseBall():
             trend = "bull"
 
         delta = max(high) - min(low)
-        if debug_mode:
-            print(f"最新震荡范围: {delta}")
         if delta <=30:
-            logger.warning("比赛评论员: 看起来双方打得难舍难分,比赛进入僵持阶段 🪵 ")
+            logger.warning("比赛评论员: 看起来双方打得难舍难分,比赛进入僵持阶段 🪵 (%f)")
             return True,trend
         else:
             if 30 < delta <= 100:
-                note = '看起来形势不错,相当勇猛啊'
+                note = '看起来形势不错,相当勇猛'
             if 100 < delta:
-                note = '正在大杀特杀,势不可挡啊'
+                note = '正在大杀特杀,势不可挡'
             if trend == 'bear':
-                logger.warning("比赛评论员: S队 %s",note)
+                logger.warning("比赛评论员: S队 %s (%f)",note,delta)
             elif trend == 'bull':
-                logger.warning("比赛评论员: L队 %s",note)
+                logger.warning("比赛评论员: L队 %s (%f)",note,delta)
             return False,trend
 
     def earn_or_loss(self,huFu):

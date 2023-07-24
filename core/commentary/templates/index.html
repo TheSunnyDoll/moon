@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>棒球比赛实时解说</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .log-content {
+            border: 1px solid #ccc;
+            padding: 10px;
+            white-space: pre-line;
+        }
+    </style>
+    <script>
+        function getLogContent() {
+            fetch('/get_log')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('log-content').innerHTML = data;
+            });
+        }
+
+        // 定时刷新页面内容，每5秒执行一次
+        setInterval(getLogContent, 5000);
+
+        // 页面加载时初始获取一次日志内容
+        window.onload = getLogContent;
+    </script>
+</head>
+<body>
+    <h1>棒球比赛实时解说</h1>
+    <div class="log-content" id="log-content">
+        <!-- 这里将显示实时解说内容 -->
+    </div>
+</body>
+</html>
