@@ -155,7 +155,6 @@ def is_more_than_8hours(timestamps):
     # 将时间戳转换为datetime对象
     given_time = datetime.datetime.fromtimestamp(timestamp)
     current_time = datetime.datetime.fromtimestamp(current_timestamp)
-    print(given_time)
     # 计算时间差
     time_difference = current_time - given_time
     # 判断时间差是否大于等于8小时
@@ -246,3 +245,21 @@ def is_less_than_10_minutes(time_str):
 
     # 判断时间差是否小于10分钟
     return time_difference.total_seconds() < 600
+
+def remaining_time_to_8_hours(stop_loss_time):
+    # 将stop_loss_time转换为datetime对象
+    stop_loss_time = datetime.datetime.fromtimestamp(int(stop_loss_time) / 1000)
+
+    # 获取当前时间
+    current_time = datetime.datetime.now()
+
+    # 计算时间差
+    time_difference = stop_loss_time - current_time
+
+    # 计算距离8小时还有多久
+    remaining_time = datetime.timedelta(hours=8) - time_difference
+
+    # 将remaining_time转换为字符串格式
+    remaining_time_str = str(remaining_time)
+
+    return remaining_time_str

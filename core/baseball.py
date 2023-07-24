@@ -502,6 +502,7 @@ class BaseBall():
         if loss_list != []:
             stop_loss_time = loss_list[0]
             loss_side = loss_side_list[0]
+            print(stop_loss_time)
             return is_more_than_8hours(stop_loss_time),stop_loss_time,loss_side,total_profits
         else:
             return True,None,None,total_profits
@@ -649,7 +650,9 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                     winner = 'SVS队'
                 elif loss_side == 'close_short':
                     winner = 'LOL队'
-                logger.warning("半场赛结束,胜方 %s  \n 球员们休息调整中,下半场比赛即将开始~ %s",winner,total_profits)
+                remaining_time = remaining_time_to_8_hours(stop_loss_time)
+                logger.warning("半场赛结束,胜方 %s ",winner)
+                logger.warning("球员们休息调整中,距离下半场比赛开始还有:  %s",remaining_time)
             if not super_mode and not consolidating and loss_away:
                 track_orders = bb.on_track(last_trend,huFu,marginCoin,base_qty,debug_mode,base_sl,pos,max_qty,co_derc)
 
