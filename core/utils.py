@@ -182,3 +182,15 @@ def is_more_than_10hours(timestamps):
         return True
     else:
         return False
+
+def time_until_midnight():
+    # 获取当前时间
+    now = datetime.datetime.now()
+
+    # 获取明天0点时间
+    midnight = now.replace(hour=0, minute=0, second=0, microsecond=0) + datetime.timedelta(days=1)
+
+    # 计算当前时间距离明天0点的时间间隔
+    time_remaining = str(midnight - now)
+
+    return time_remaining

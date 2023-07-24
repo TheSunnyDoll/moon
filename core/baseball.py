@@ -545,7 +545,10 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
             else:
                 notice = '当前 ⚾️ 坐标位置小于最终得分区,SVS队员请小心~'
 
-            logger.warning("季末赛 options 临近时间 %s, 最终目标得分区 %s , %s",rencent_max_pain[0],rencent_max_pain[1],notice)
+            time_remaining = time_until_midnight()
+            remain_notice = '本场比赛结束倒计时: ' + time_remaining
+
+            logger.warning("季末赛 options 临近时间 %s, 最终目标得分区 %s , %s , %s",rencent_max_pain[0],rencent_max_pain[1],remain_notice,notice)
 
         if not debug_mode:
             try:
