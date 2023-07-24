@@ -686,6 +686,9 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
             elif total_profits < 0:
                 note = '请选手们不要气馁,再接再厉 ~'
             logger.critical("今日比赛临近末尾,当前总得分: %s ,%s",total_profits,note)
+            delta = abs(current_price - rencent_max_pain[1])
+            logger.critical("赛末通告 - 最终目标区: %s ,当前 ⚾️ 位置: %f , 差值 %f",rencent_max_pain[1],current_price,delta)
+             
 
 
 if __name__ == "__main__":
