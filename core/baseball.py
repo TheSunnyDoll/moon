@@ -562,7 +562,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
             else:
                 notice = '当前 ⚾️ 坐标位置小于最终得分区,SVS队员请小心~'
 
-            time_remaining = time_until_8am_tomorrow()
+            time_remaining = time_until_nearest_8am()
             remain_notice = '本场比赛结束倒计时: ' + time_remaining
             date_type = get_date_type(rencent_max_pain[0])
 
