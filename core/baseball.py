@@ -184,32 +184,22 @@ class BaseBall():
             big_trend[len(big_trend):]=[idm_1,idm_2,tp1,tp2]
         return result,big_trend
 
-    def determine_trend(self,zigzag_pattern):
+    def determine_trend(zigzag_pattern):
         trend = []
-        prev_trend = None
-
         for i in range(1, len(zigzag_pattern)):
             prev_leg = zigzag_pattern[i - 1]
             current_leg = zigzag_pattern[i]
 
             if prev_leg[0] == 'bear' and current_leg[0] == 'bull':
                 if current_leg[1] > prev_leg[1]:
-                    if prev_trend == 'bull':
-                        trend.append('bull')
-                    else:
-                        trend.append('reversal-bull')
+                    trend.append('reversal-bull')
                 else:
                     trend.append('bear')
             elif prev_leg[0] == 'bull' and current_leg[0] == 'bear':
                 if current_leg[2] < prev_leg[2]:
-                    if prev_trend == 'bear':
-                        trend.append('bear')
-                    else:
-                        trend.append('reversal-bear')
+                    trend.append('reversal-bear')
                 else:
                     trend.append('bull')
-
-            prev_trend = trend[-1] if trend else None
 
         return trend
 
@@ -648,7 +638,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
             if ft == '15m':
                 last_legs = r
                 last_klines = klines
-            if ft == '1H':
+            if ft == '4H':
                 one_H_legs = r
             b.insert(0,ft)
             trend.append(b)
