@@ -186,22 +186,33 @@ class BaseBall():
 
     def determine_trend(self,zigzag_pattern):
         trend = []
+        prev_trend = None
+
         for i in range(1, len(zigzag_pattern)):
             prev_leg = zigzag_pattern[i - 1]
             current_leg = zigzag_pattern[i]
 
             if prev_leg[0] == 'bear' and current_leg[0] == 'bull':
-                if current_leg[1] > prev_leg[1]:
-                    trend.append('reversal-bull')
+                if current_leg[2] > prev_leg[1]:  # Compare bull leg's highest with bear leg's lowest
+                    if prev_trend == 'bull':
+                        trend.append('bull')
+                    else:
+                        trend.append('reversal-bull')
                 else:
                     trend.append('bear')
             elif prev_leg[0] == 'bull' and current_leg[0] == 'bear':
-                if current_leg[2] < prev_leg[2]:
-                    trend.append('reversal-bear')
+                if current_leg[1] < prev_leg[2]:  # Compare bear leg's lowest with bull leg's highest
+                    if prev_trend == 'bear':
+                        trend.append('bear')
+                    else:
+                        trend.append('reversal-bear')
                 else:
                     trend.append('bull')
 
+            prev_trend = trend[-1] if trend else None
+
         return trend
+
 
     def advortise(self,trend,fix_mode,fix_tp):
         orders = []
