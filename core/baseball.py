@@ -698,6 +698,8 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
         out_max_qty = max_qty * 2
         if long_qty <= out_max_qty and short_qty<= out_max_qty and not consolidating and loss_away:
             bb.batch_orders(orders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price,super_mode,dtrend)
+        if not super_mode and not consolidating and loss_away:
+            track_orders = bb.on_track(last_legs,huFu,marginCoin,base_qty,debug_mode,base_sl,pos,max_qty,dtrend)
 
         time.sleep(0.3)
         batch_refresh_interval = 2
