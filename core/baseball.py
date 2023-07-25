@@ -310,7 +310,13 @@ class BaseBall():
                 if not debug_mode:
                     if sl_delta>=0 and tp_delta>=0:
                         try:
-                            huFu.mix_place_plan_order(symbol, marginCoin, hft_qty, order[0], 'limit', order[1], "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
+                            trigger_price = order[1]
+                            if order[0] == 'open_long':
+                                trigger_price += 2
+                            if order[0] == 'open_short':
+                                trigger_price -= 2
+
+                            huFu.mix_place_plan_order(symbol, marginCoin, hft_qty, order[0], 'limit', trigger_price, "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
                         except Exception as e:
                             logger.debug(f"An unknown error occurred in mix_place_plan_order(): {e}")
 
@@ -401,7 +407,13 @@ class BaseBall():
                             cent_qty = base_qty
                             if order[4] == 'firsebase-idm1-1':
                                 cent_qty = base_qty*2
-                            huFu.mix_place_plan_order(symbol, marginCoin, cent_qty, order[0], 'limit', order[1], "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
+                            trigger_price = order[1]
+                            if order[0] == 'open_long':
+                                trigger_price += 2
+                            if order[0] == 'open_short':
+                                trigger_price -= 2
+
+                            huFu.mix_place_plan_order(symbol, marginCoin, cent_qty, order[0], 'limit', trigger_price, "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
                             logger.info("一垒就交给我了!⛳️  击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta)   
 
                         except Exception as e:
@@ -688,11 +700,11 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
             bb.batch_orders(orders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price,super_mode,dtrend)
 
         time.sleep(0.3)
-        batch_refresh_interval = 5
+        batch_refresh_interval = 2
         if super_mode:
-            batch_refresh_interval = 120
+            batch_refresh_interval = 60
         for i in range(batch_refresh_interval):
-            for k in range(20):
+            for k in range(60):
                 time.sleep(1.5)
                 try:
                     result = huFu.mix_get_single_position(symbol,marginCoin)
@@ -711,6 +723,17 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                 time.sleep(1.5)
             logger.info("裁判播报员: ⚾️ 坐标 %s ",current_price)
 
+
+            if not loss_away:
+                winner = ''
+                if loss_side == 'close_long':
+                    winner = 'SVS队'
+                elif loss_side == 'close_short':
+                    winner = 'LOL队'
+                remaining_time = remaining_time_to_2_hours(stop_loss_time)
+                logger.warning("半场赛结束 ~ 🚩胜方 %s ",winner)
+                logger.warning("球员们休息调整中 ☕️~ 距离下半场比赛开始还有:  %s",remaining_time)
+
             if not debug_mode:
                 try:
                     data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
@@ -726,15 +749,6 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                             except Exception as e:
                                 logger.debug(f"An unknown error occurred in mix_cancel_plan_order(): {e}")
 
-            if not loss_away:
-                winner = ''
-                if loss_side == 'close_long':
-                    winner = 'SVS队'
-                elif loss_side == 'close_short':
-                    winner = 'LOL队'
-                remaining_time = remaining_time_to_2_hours(stop_loss_time)
-                logger.warning("半场赛结束 ~ 🚩胜方 %s ",winner)
-                logger.warning("球员们休息调整中 ☕️~ 距离下半场比赛开始还有:  %s",remaining_time)
             if not super_mode and not consolidating and loss_away:
                 track_orders = bb.on_track(last_legs,huFu,marginCoin,base_qty,debug_mode,base_sl,pos,max_qty,dtrend)
 
