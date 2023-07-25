@@ -390,6 +390,9 @@ class BaseBall():
                             continue
                 
                 if debug_mode:
+                    print(last_leg)
+                    print(delta)
+                    print(delta_idm1)
                     logger.info("一垒就交给我了!⛳️  击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta)  
 
                 if not debug_mode:
