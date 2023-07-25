@@ -534,7 +534,7 @@ class BaseBall():
                     logger.warning("比赛评论员: S队 %s (%f)",note,delta)
             elif trend == 'bull':
                 if dtrend[-1] == 'bear' or dtrend[-1] == 'reversal-bear' or dtrend[-1] == 'bear_pullback':
-                    logger.warning("比赛评论员: L队 %s (%f),,不过看起来S队大优势依旧在",note,delta)
+                    logger.warning("比赛评论员: L队 %s (%f),不过看起来S队大优势依旧在",note,delta)
                 else:
                     logger.warning("比赛评论员: L队 %s (%f)",note,delta)
             return False
@@ -710,7 +710,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                 bb.base_run(current_price,pos,huFu,super_mode,consolidating,debug_mode)
                 time.sleep(1.5)
             logger.info("裁判播报员: ⚾️ 坐标 %s ",current_price)
-            
+
             if not debug_mode:
                 try:
                     data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
