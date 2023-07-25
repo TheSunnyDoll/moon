@@ -709,6 +709,8 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                 try:
                     result = huFu.mix_get_single_position(symbol,marginCoin)
                     pos = result['data']
+                    if float(pos[0]["total"]) == 0 and float(pos[1]["total"]) == 0:
+                        break
 
                 except Exception as e:
                     logger.debug(f"An unknown error occurred in mix_get_single_position(): {e}")
