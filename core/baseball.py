@@ -398,7 +398,10 @@ class BaseBall():
                 if not debug_mode:
                     if sl_delta>=0 and long_qty <= max_qty and short_qty<= max_qty:
                         try:
-                            huFu.mix_place_plan_order(symbol, marginCoin, base_qty, order[0], 'limit', order[1], "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
+                            cent_qty = base_qty
+                            if order[4] == 'firsebase-idm1-1':
+                                cent_qty = base_qty*2
+                            huFu.mix_place_plan_order(symbol, marginCoin, cent_qty, order[0], 'limit', order[1], "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
                             logger.info("一垒就交给我了!⛳️  击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta)   
 
                         except Exception as e:
