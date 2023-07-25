@@ -494,7 +494,7 @@ class BaseBall():
         except Exception as e:
             logger.warning(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
 
-    def consolidation(self,last_klines,debug_mode):
+    def consolidation(self,last_klines,dtrend):
         # 如果当前价格往前8根15m k range<=30,判定为巩固, 不做单,休息3h
         trend = ''
         klines = last_klines[-8:]
@@ -522,8 +522,13 @@ class BaseBall():
             if 100 < delta:
                 note = '正在大杀特杀,势不可挡'
             if trend == 'bear':
+                if dtrend == 'bull':
+                    logger.warning("比赛评论员: S队 %s (%f),不过看起来L队大优势依旧在",note,delta)
+
                 logger.warning("比赛评论员: S队 %s (%f)",note,delta)
             elif trend == 'bull':
+                if dtrend == 'bear':
+                    logger.warning("比赛评论员: L队 %s (%f),,不过看起来S队大优势依旧在",note,delta)
                 logger.warning("比赛评论员: L队 %s (%f)",note,delta)
             return False
 
@@ -652,7 +657,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
         if debug_mode:
             print(one_H_legs)
             print(dtrend)
-        consolidating = bb.consolidation(last_klines,debug_mode)
+        consolidating = bb.consolidation(last_klines,dtrend)
         orders = bb.advortise(trend,fix_mode,fix_tp)
         try:
             result = huFu.mix_get_single_position(symbol,marginCoin)
