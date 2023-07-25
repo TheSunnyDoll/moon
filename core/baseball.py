@@ -194,20 +194,24 @@ class BaseBall():
 
             if prev_leg[0] == 'bear' and current_leg[0] == 'bull':
                 if current_leg[2] > prev_leg[1]:  # Compare bull leg's highest with bear leg's lowest
-                    if prev_trend == 'bull':
+                    if prev_trend == 'bull' or prev_trend == 'bull_pullback':
                         trend.append('bull')
+                    elif prev_trend == 'bear_pullback':
+                        trend.append('reversal-bull')
                     else:
                         trend.append('reversal-bull')
                 else:
-                    trend.append('bear')
+                    trend.append('bear_pullback')
             elif prev_leg[0] == 'bull' and current_leg[0] == 'bear':
                 if current_leg[2] < prev_leg[1]:  # Compare bear leg's lowest with bull leg's highest
-                    if prev_trend == 'bear':
+                    if prev_trend == 'bear' or prev_trend == 'bear_pullback':
                         trend.append('bear')
+                    elif prev_trend == 'bull_pullback':
+                        trend.append('reversal-bear')
                     else:
                         trend.append('reversal-bear')
                 else:
-                    trend.append('bull')
+                    trend.append('bull_pullback')
 
             prev_trend = trend[-1] if trend else None
 
@@ -295,10 +299,10 @@ class BaseBall():
 
                 hft_qty = round(base_qty * round(tp_delta/sl_delta),2)
                 if dtrend is not None:
-                    if dtrend[-1] == 'bear' or dtrend[-1] == 'reversal-bear':
+                    if dtrend[-1] == 'bear' or dtrend[-1] == 'reversal-bear' or dtrend[-1] == 'bear_pullback':
                         if order[0] != 'open_short':
                             continue
-                    elif dtrend[-1] == 'bull' or dtrend[-1] == 'reversal-bull':
+                    elif dtrend[-1] == 'bull' or dtrend[-1] == 'reversal-bull' or dtrend[-1] == 'bull_pullback':
                         if order[0] != 'open_long':
                             continue
                 
@@ -325,7 +329,7 @@ class BaseBall():
             delta_tp1_idm = delta * 0.382
             delta_tp2_idm = delta * 0.236
             orders = []
-            if last_leg[0] == 'bull':
+            if last_leg[0] == 'bull' or last_leg[0] == 'reversal-bull':
                 derc = 'open_long'
                 idm1_entry = round(last_leg[2] - delta_idm1 + 1)
                 idm2_entry = round(last_leg[2] - delta_idm2 + 1)
@@ -342,7 +346,7 @@ class BaseBall():
                 orders[len(orders):] = [idm1_order1,idm1_order2,idm2_order1,idm2_order2]
 
 
-            if last_leg[0] == 'bear':
+            if last_leg[0] == 'bear' or last_leg[0] == 'reversal-bear':
                 derc = 'open_short'
                 idm1_entry = round(last_leg[2] + delta_idm1 - 1)
                 idm2_entry = round(last_leg[2] + delta_idm2 - 1)
@@ -378,10 +382,10 @@ class BaseBall():
                         sl = order[3]
 
                 if dtrend is not None:
-                    if dtrend[-1] == 'bear' or dtrend[-1] == 'reversal-bear':
+                    if dtrend[-1] == 'bear' or dtrend[-1] == 'reversal-bear' or dtrend[-1] == 'bear_pullback':
                         if order[0] != 'open_short':
                             continue
-                    elif dtrend[-1] == 'bull' or dtrend[-1] == 'reversal-bull':
+                    elif dtrend[-1] == 'bull' or dtrend[-1] == 'reversal-bull' or dtrend[-1] == 'bull_pullback':
                         if order[0] != 'open_long':
                             continue
                 
@@ -523,12 +527,13 @@ class BaseBall():
             if 100 < delta:
                 note = '正在大杀特杀,势不可挡'
             if trend == 'bear':
-                if dtrend[-1] == 'bull':
+
+                if dtrend[-1] == 'bull' or dtrend[-1] == 'reversal-bull' or dtrend[-1] == 'bull_pullback':
                     logger.warning("比赛评论员: S队 %s (%f),不过看起来L队大优势依旧在",note,delta)
                 else:
                     logger.warning("比赛评论员: S队 %s (%f)",note,delta)
             elif trend == 'bull':
-                if dtrend[-1] == 'bear':
+                if dtrend[-1] == 'bear' or dtrend[-1] == 'reversal-bear' or dtrend[-1] == 'bear_pullback':
                     logger.warning("比赛评论员: L队 %s (%f),,不过看起来S队大优势依旧在",note,delta)
                 else:
                     logger.warning("比赛评论员: L队 %s (%f)",note,delta)
@@ -647,7 +652,6 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                     time.sleep(retry_delay)
             r,b = bb.zigzag(klines=klines, min_size=0.0055, percent=True)
             if ft == '15m':
-                last_legs = r
                 last_klines = klines
             if ft == '1H':
                 one_H_legs = r
@@ -656,9 +660,16 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
             time.sleep(0.3)
 
         dtrend = bb.determine_trend(one_H_legs)
+        one_H_legs = one_H_legs[1:]
+        legs = [[dtrend] + one_H_legs[1:] for dtrend, one_H_legs in zip(dtrend, one_H_legs)]
+        last_legs = [leg for leg in legs if leg[0] != 'bull_pullback' and leg[0] != 'bear_pullback']
+
         if debug_mode:
             print(one_H_legs)
             print(dtrend)
+
+            print(last_legs)
+
         consolidating = bb.consolidation(last_klines,dtrend)
         orders = bb.advortise(trend,fix_mode,fix_tp)
         try:
@@ -699,6 +710,21 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                 bb.base_run(current_price,pos,huFu,super_mode,consolidating,debug_mode)
                 time.sleep(1.5)
             logger.info("裁判播报员: ⚾️ 坐标 %s ",current_price)
+            
+            if not debug_mode:
+                try:
+                    data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
+                except Exception as e:
+                    logger.debug(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
+
+                if data != []:
+                    for order in data:
+                        if '_' not in order['clientOid']:
+                        ## clear all open orders
+                            try:
+                                huFu.mix_cancel_plan_order(symbol, marginCoin, order['orderId'], 'normal_plan')
+                            except Exception as e:
+                                logger.debug(f"An unknown error occurred in mix_cancel_plan_order(): {e}")
 
             if not loss_away:
                 winner = ''
@@ -715,20 +741,6 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
             if super_mode or consolidating or not loss_away:
                 track_orders = []
             bb.record(current_price,pos,orders,track_orders,debug_mode)
-            if not debug_mode:
-                try:
-                    data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
-                except Exception as e:
-                    logger.debug(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
-
-                if data != []:
-                    for order in data:
-                        if '_' not in order['clientOid']:
-                        ## clear all open orders
-                            try:
-                                huFu.mix_cancel_plan_order(symbol, marginCoin, order['orderId'], 'normal_plan')
-                            except Exception as e:
-                                logger.debug(f"An unknown error occurred in mix_cancel_plan_order(): {e}")
 
         if is_less_than_10_minutes(time_remaining):
             if total_profits >= 0:
