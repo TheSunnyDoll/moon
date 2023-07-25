@@ -145,7 +145,7 @@ def get_logger(logfile='app.log'):
 def is_approximately_equal(value1, value2, tolerance=10):
     return abs(value1 - value2) <= tolerance
 
-def is_more_than_2hours(timestamps):
+def is_more_than_1hours(timestamps):
 # 给定的时间戳
     timestamp = float(timestamps) / 1000  # 将毫秒转换为秒
 
@@ -158,7 +158,7 @@ def is_more_than_2hours(timestamps):
     # 计算时间差
     time_difference = current_time - given_time
     # 判断时间差是否大于等于8小时
-    if time_difference.total_seconds() >= 2 * 3600:
+    if time_difference.total_seconds() >= 1 * 3600:
         return True
     else:
         return False

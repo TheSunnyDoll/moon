@@ -554,17 +554,11 @@ class BaseBall():
         if loss_list != []:
             stop_loss_time = loss_list[0]
             loss_side = loss_side_list[0]
-            return is_more_than_2hours(stop_loss_time),stop_loss_time,loss_side,total_profits
+            return is_more_than_1hours(stop_loss_time),stop_loss_time,loss_side,total_profits
         else:
             return True,None,None,total_profits
         
-    def cooling_off(self,stop_loss_time,current_trend):
-        if is_more_than_4hours(stop_loss_time):
-            return None
-        else:
-            return current_trend
-            
-            
+   
 
 def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty,super_mode):
 
