@@ -524,12 +524,13 @@ class BaseBall():
             if trend == 'bear':
                 if dtrend[-1] == 'bull':
                     logger.warning("比赛评论员: S队 %s (%f),不过看起来L队大优势依旧在",note,delta)
-
-                logger.warning("比赛评论员: S队 %s (%f)",note,delta)
+                else:
+                    logger.warning("比赛评论员: S队 %s (%f)",note,delta)
             elif trend == 'bull':
                 if dtrend[-1] == 'bear':
                     logger.warning("比赛评论员: L队 %s (%f),,不过看起来S队大优势依旧在",note,delta)
-                logger.warning("比赛评论员: L队 %s (%f)",note,delta)
+                else:
+                    logger.warning("比赛评论员: L队 %s (%f)",note,delta)
             return False
 
     def earn_or_loss(self,huFu):
