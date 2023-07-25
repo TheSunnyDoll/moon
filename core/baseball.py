@@ -184,7 +184,7 @@ class BaseBall():
             big_trend[len(big_trend):]=[idm_1,idm_2,tp1,tp2]
         return result,big_trend
 
-    def determine_trend(zigzag_pattern):
+    def determine_trend(self,zigzag_pattern):
         trend = []
         for i in range(1, len(zigzag_pattern)):
             prev_leg = zigzag_pattern[i - 1]
