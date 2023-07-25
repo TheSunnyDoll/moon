@@ -522,12 +522,12 @@ class BaseBall():
             if 100 < delta:
                 note = '正在大杀特杀,势不可挡'
             if trend == 'bear':
-                if dtrend == 'bull':
+                if dtrend[-1] == 'bull':
                     logger.warning("比赛评论员: S队 %s (%f),不过看起来L队大优势依旧在",note,delta)
 
                 logger.warning("比赛评论员: S队 %s (%f)",note,delta)
             elif trend == 'bull':
-                if dtrend == 'bear':
+                if dtrend[-1] == 'bear':
                     logger.warning("比赛评论员: L队 %s (%f),,不过看起来S队大优势依旧在",note,delta)
                 logger.warning("比赛评论员: L队 %s (%f)",note,delta)
             return False
