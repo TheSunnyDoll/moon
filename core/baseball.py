@@ -117,7 +117,6 @@ class BaseBall():
                 out.append([time[i], low[i]])
         sorted_price = sorted(out, key=lambda x: x[0])
         price = [item[1] for item in sorted_price]
-
         ### 小周期
         # 创建空列表用于存储结果
         result = []
@@ -185,6 +184,35 @@ class BaseBall():
             big_trend[len(big_trend):]=[idm_1,idm_2,tp1,tp2]
         return result,big_trend
 
+    def determine_trend(self,zigzag_pattern):
+        trend = []
+        prev_trend = None
+
+        for i in range(1, len(zigzag_pattern)):
+            prev_leg = zigzag_pattern[i - 1]
+            current_leg = zigzag_pattern[i]
+
+            if prev_leg[0] == 'bear' and current_leg[0] == 'bull':
+                if current_leg[1] > prev_leg[1]:
+                    if prev_trend == 'bull':
+                        trend.append('bull')
+                    else:
+                        trend.append('reversal-bull')
+                else:
+                    trend.append('bear')
+            elif prev_leg[0] == 'bull' and current_leg[0] == 'bear':
+                if current_leg[2] < prev_leg[2]:
+                    if prev_trend == 'bear':
+                        trend.append('bear')
+                    else:
+                        trend.append('reversal-bear')
+                else:
+                    trend.append('bull')
+
+            prev_trend = trend[-1] if trend else None
+
+        return trend
+
     def advortise(self,trend,fix_mode,fix_tp):
         orders = []
         for td in trend:
@@ -232,7 +260,7 @@ class BaseBall():
         return orders
         
 
-    def batch_orders(self,oders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price,super_mode,co_derc):
+    def batch_orders(self,oders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price,super_mode,dtrend):
 
         base_sl_delta = 100
 
@@ -265,11 +293,11 @@ class BaseBall():
                         sl = order[3]
 
                 hft_qty = round(base_qty * round(tp_delta/sl_delta),2)
-                if co_derc is not None:
-                    if co_derc == 'bear':
+                if dtrend is not None:
+                    if dtrend[-1] == 'bear' or dtrend[-1] == 'reversal-bear':
                         if order[0] != 'open_short':
                             continue
-                    elif co_derc == 'bull':
+                    elif dtrend[-1] == 'bull' or dtrend[-1] == 'reversal-bull':
                         if order[0] != 'open_long':
                             continue
                 
@@ -282,7 +310,7 @@ class BaseBall():
                             logger.debug(f"An unknown error occurred in mix_place_plan_order(): {e}")
 
 
-    def on_track(self,legs,huFu,marginCoin,base_qty,debug_mode,base_sl,pos,max_qty,co_derc):
+    def on_track(self,legs,huFu,marginCoin,base_qty,debug_mode,base_sl,pos,max_qty,dtrend):
         long_qty = float(pos[0]["total"])
         short_qty = float(pos[1]["total"])
         base_point = 150
@@ -348,13 +376,14 @@ class BaseBall():
                     else:
                         sl = order[3]
 
-                if co_derc is not None:
-                    if co_derc == 'bear':
+                if dtrend is not None:
+                    if dtrend[-1] == 'bear' or dtrend[-1] == 'reversal-bear':
                         if order[0] != 'open_short':
                             continue
-                    elif co_derc == 'bull':
+                    elif dtrend[-1] == 'bull' or dtrend[-1] == 'reversal-bull':
                         if order[0] != 'open_long':
                             continue
+                
                 if debug_mode:
                     logger.info("一垒就交给我了!⛳️  击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta)  
 
@@ -485,8 +514,8 @@ class BaseBall():
 
         delta = max(high) - min(low)
         if delta <=30:
-            logger.warning("比赛评论员: 看起来双方打得难舍难分,比赛进入僵持阶段 🪵 (%f)")
-            return True,trend
+            logger.warning("比赛评论员: 看起来双方打得难舍难分,比赛进入僵持阶段 🪵 (%f)",delta)
+            return True
         else:
             if 30 < delta <= 100:
                 note = '看起来形势不错,相当勇猛'
@@ -496,7 +525,7 @@ class BaseBall():
                 logger.warning("比赛评论员: S队 %s (%f)",note,delta)
             elif trend == 'bull':
                 logger.warning("比赛评论员: L队 %s (%f)",note,delta)
-            return False,trend
+            return False
 
     def earn_or_loss(self,huFu):
         startTime = get_previous_day_timestamp()
@@ -590,7 +619,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
         endTime = get_previous_minute_timestamp()
         trend = []
         ft_list = ['15m','30m','1H','4H','1D']
-        last_trend = []
+        last_legs = []
         last_klines = []
         for ft in ft_list:
 
@@ -611,13 +640,19 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                     time.sleep(retry_delay)
             r,b = bb.zigzag(klines=klines, min_size=0.0055, percent=True)
             if ft == '15m':
-                last_trend = r
+                last_legs = r
                 last_klines = klines
-
+            if ft == '1H':
+                one_H_legs = r
             b.insert(0,ft)
             trend.append(b)
             time.sleep(0.3)
-        consolidating,current_trend = bb.consolidation(last_klines,debug_mode)
+
+        dtrend = bb.determine_trend(one_H_legs)
+        if debug_mode:
+            print(one_H_legs)
+            print(dtrend)
+        consolidating = bb.consolidation(last_klines,debug_mode)
         orders = bb.advortise(trend,fix_mode,fix_tp)
         try:
             result = huFu.mix_get_single_position(symbol,marginCoin)
@@ -630,10 +665,9 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
         short_qty = float(pos[1]["total"])
 
         loss_away,stop_loss_time,loss_side,total_profits = bb.earn_or_loss(huFu)
-        co_derc = bb.cooling_off(stop_loss_time,current_trend)
         out_max_qty = max_qty * 2
         if long_qty <= out_max_qty and short_qty<= out_max_qty and not consolidating and loss_away:
-            bb.batch_orders(orders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price,super_mode,co_derc)
+            bb.batch_orders(orders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price,super_mode,dtrend)
 
         time.sleep(0.3)
         batch_refresh_interval = 5
@@ -669,7 +703,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                 logger.warning("半场赛结束 ~ 🚩胜方 %s ",winner)
                 logger.warning("球员们休息调整中 ☕️~ 距离下半场比赛开始还有:  %s",remaining_time)
             if not super_mode and not consolidating and loss_away:
-                track_orders = bb.on_track(last_trend,huFu,marginCoin,base_qty,debug_mode,base_sl,pos,max_qty,co_derc)
+                track_orders = bb.on_track(last_legs,huFu,marginCoin,base_qty,debug_mode,base_sl,pos,max_qty,dtrend)
 
             if super_mode or consolidating or not loss_away:
                 track_orders = []
