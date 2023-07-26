@@ -375,7 +375,7 @@ def trading_time():
     current_minute = now.minute
 
     # 判断小时是否在7到9之间
-    if 7 <= current_hour <=9 or (current_hour == 15 and 30 <= current_minute <= 59) or (current_hour == 16 and current_minute <= 40):
+    if (current_hour == 7 and 30 <= current_minute <= 59) or (current_hour == 8 and current_minute <= 40) or current_hour == 23 or current_hour == 0 or current_hour == 1 :
         return False
     else:
         return True

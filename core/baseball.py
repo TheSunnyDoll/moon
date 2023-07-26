@@ -695,7 +695,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
         short_qty = float(pos[1]["total"])
 
         if not trading_time():
-            logger.warning("休息时间,比赛09:00准时开始 ~ ~")
+            logger.warning("球馆休息时间 ~ ~")
 
         loss_away,stop_loss_time,loss_side,total_profits = bb.earn_or_loss(huFu)
         out_max_qty = max_qty * 2
