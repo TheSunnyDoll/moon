@@ -412,7 +412,7 @@ class BaseBall():
                                 trigger_price += 2
                             if order[0] == 'open_short':
                                 trigger_price -= 2
-
+                            print(base_qty)
                             huFu.mix_place_plan_order(symbol, marginCoin, cent_qty, order[0], 'limit', trigger_price, "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
                             logger.info("一垒就交给我了!⛳️  击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s,手数 %f",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta,cent_qty)   
 
