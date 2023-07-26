@@ -802,4 +802,5 @@ if __name__ == "__main__":
     symbol = 'BTCUSDT_UMCBL'
     marginCoin = 'USDT'
     logger.info("让场子热起来吧🔥！ 新一场棒球比赛即将开始⚾️～")
+    print(base_qty)
     start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty,super_mode)
