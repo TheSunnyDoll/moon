@@ -397,8 +397,6 @@ class BaseBall():
                 
                 if debug_mode:
                     print(last_leg)
-                    print(delta)
-                    print(delta_idm1)
                     logger.info("一垒就交给我了!⛳️  击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta)  
 
                 if not debug_mode:
@@ -575,8 +573,8 @@ class BaseBall():
             return is_more_than_1hours(stop_loss_time),stop_loss_time,loss_side,total_profits
         else:
             return True,None,None,total_profits
-        
    
+
 
 def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty,super_mode):
 
@@ -694,11 +692,14 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
         long_qty = float(pos[0]["total"])
         short_qty = float(pos[1]["total"])
 
+        if not trading_time():
+            logger.warning("休息时间,比赛09:00准时开始 ~ ~")
+
         loss_away,stop_loss_time,loss_side,total_profits = bb.earn_or_loss(huFu)
         out_max_qty = max_qty * 2
-        if long_qty <= out_max_qty and short_qty<= out_max_qty and not consolidating and loss_away:
+        if long_qty <= out_max_qty and short_qty<= out_max_qty and not consolidating and loss_away and trading_time():
             bb.batch_orders(orders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price,super_mode,dtrend)
-        if not super_mode and not consolidating and loss_away:
+        if not super_mode and not consolidating and loss_away and trading_time():
             track_orders = bb.on_track(last_legs,huFu,marginCoin,base_qty,debug_mode,base_sl,pos,max_qty,dtrend)
 
         time.sleep(0.3)
@@ -751,7 +752,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                             except Exception as e:
                                 logger.debug(f"An unknown error occurred in mix_cancel_plan_order(): {e}")
 
-            if not super_mode and not consolidating and loss_away:
+            if not super_mode and not consolidating and loss_away and trading_time():
                 track_orders = bb.on_track(last_legs,huFu,marginCoin,base_qty,debug_mode,base_sl,pos,max_qty,dtrend)
 
             if super_mode or consolidating or not loss_away:
@@ -779,8 +780,8 @@ if __name__ == "__main__":
 
     parser.add_argument('-fp', '--fix_tp_point', default=88,help='fix_tp_point')
     parser.add_argument('-bsl', '--base_sl', default=88,help='base_sl')
-    parser.add_argument('-bq', '--base_qty', default=0.1,help='base_qty')
-    parser.add_argument('-mxq', '--max_qty', default=1.2,help='max_qty')
+    parser.add_argument('-bq', '--base_qty', default=0.05,help='base_qty')
+    parser.add_argument('-mxq', '--max_qty', default=0.6,help='max_qty')
 
     args = parser.parse_args()
     heroname = args.username

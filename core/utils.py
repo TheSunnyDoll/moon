@@ -68,6 +68,14 @@ def get_previous_month_timestamp():
     timestamp_ms = timestamp * 1000
     return timestamp_ms
 
+def get_previous_x_timestamp(x):
+    current_time = datetime.datetime.now()
+    previous_day = current_time - datetime.timedelta(days=x)
+    previous_day_midnight = previous_day.replace(hour=0, minute=0, second=0, microsecond=0)
+    timestamp = int(time.mktime(previous_day_midnight.timetuple()))
+    timestamp_ms = timestamp * 1000
+    return timestamp_ms
+
 
 def timestamp_to_hour(timestamp_ms):
     timestamp_sec = timestamp_ms // 1000
@@ -358,3 +366,14 @@ def remaining_time_to_2_hours(stop_loss_time):
     remaining_time_str = str(remaining_time)
 
     return remaining_time_str
+
+def trading_time():
+    # 获取当前时间
+    now = datetime.datetime.now()
+    # 获取当前时间的小时
+    current_hour = now.hour
+    # 判断小时是否在6到9之间
+    if 6 <= current_hour < 10:
+        return False
+    else:
+        return True
