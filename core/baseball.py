@@ -611,9 +611,9 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
             rencent_max_pain = None
         if rencent_max_pain != None:
             if current_price >= float(rencent_max_pain[1]):
-                notice = '当前 ⚾️ 坐标位置 '+current_price+' 大于最终得分区,LOL队员请小心~'
+                notice = '当前 ⚾️ 坐标位置 '+str(current_price)+' 大于最终得分区,LOL队员请小心~'
             else:
-                notice = '当前 ⚾️ 坐标位置 '+current_price+' 小于最终得分区,SVS队员请小心~'
+                notice = '当前 ⚾️ 坐标位置 '+str(current_price)+' 小于最终得分区,SVS队员请小心~'
 
             time_remaining = time_until_nearest_8am()
             remain_notice = '本日比赛结束倒计时: ' + time_remaining
