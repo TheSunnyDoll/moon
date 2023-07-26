@@ -28,6 +28,8 @@ from situation import get_max_pains
 ## 1d 级别 , 盈利 399 开始挪动, 可接受回撤 88 点
 
 
+## TODO:引入order_block , break_block 和 pin_bar
+
 
 class BaseBall():
     def __init__(self) -> None:
