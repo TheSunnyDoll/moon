@@ -372,8 +372,10 @@ def trading_time():
     now = datetime.datetime.now()
     # 获取当前时间的小时
     current_hour = now.hour
-    # 判断小时是否在6到9之间
-    if 6 <= current_hour < 10:
+    current_minute = now.minute
+
+    # 判断小时是否在7到9之间
+    if 7 <= current_hour <=9 or (current_hour == 15 and 30 <= current_minute <= 59) or (current_hour == 16 and current_minute <= 40):
         return False
     else:
         return True

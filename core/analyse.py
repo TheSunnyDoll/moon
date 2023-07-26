@@ -7,29 +7,27 @@ import datetime
 
 def earn_or_loss(huFu,x):
         startTime = get_previous_x_timestamp(x+2)
-        #endTime = get_previous_x_timestamp(x)
-        endTime = get_previous_minute_timestamp()
+        endTime = get_previous_x_timestamp(x)
+        # endTime = get_previous_minute_timestamp()
         orders = huFu.mix_get_history_orders(symbol, startTime, endTime, 100, lastEndId='', isPre=False)['data']['orderList']
         loss_list = []
         profit_list = []
         total_profits = 0
         total_loss = 0
         for order in orders:
-            print(order)
             if float(order['totalProfits']) < 0:
                 uTime = timestamp_to_time(float(order['uTime'])).strftime("%Y-%m-%d %H:%M:%S")
                 loss_list.append([uTime ,order['size'],order['side'],order['totalProfits']])
                 total_loss += order['totalProfits']
             if float(order['totalProfits']) > 0:
                 uTime = timestamp_to_time(float(order['uTime'])).strftime("%Y-%m-%d %H:%M:%S")
-                profit_list.append([uTime,order['side'],order['totalProfits']])
+                profit_list.append([uTime,order['size'],order['side'],order['totalProfits']])
                 total_profits += order['totalProfits']
         for i in loss_list:
             print(i)
         print(total_loss)
         for i in profit_list:
             print(i)
-        print(profit_list)
 
         print(total_profits)
 
@@ -66,7 +64,7 @@ if __name__ == "__main__":
     config = get_config_file()
     hero = config[heroname]
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
-    for i in range(1):
+    for i in range(10):
         earn_or_loss(huFu,i)
 
 
