@@ -760,7 +760,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
             if not super_mode and not consolidating and loss_away and trading_time():
                 track_orders = bb.on_track(last_legs,huFu,marginCoin,base_qty,debug_mode,base_sl,pos,max_qty,dtrend)
 
-            if super_mode or consolidating or not loss_away:
+            if super_mode or consolidating or not loss_away or not trading_time():
                 track_orders = []
             bb.record(current_price,pos,orders,track_orders,debug_mode)
 
