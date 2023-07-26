@@ -104,8 +104,8 @@ if close:
 new_short_sl = 0
 new_short_tp = 0
 
-new_long_sl = 29800
-new_long_tp = 30500
+new_long_sl = 29190
+new_long_tp = 0
 
 if move:
     data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='profit_loss')['data']
