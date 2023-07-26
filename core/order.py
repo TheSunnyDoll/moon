@@ -104,7 +104,7 @@ if close:
 new_short_sl = 0
 new_short_tp = 0
 
-new_long_sl = 29190
+new_long_sl = 29155
 new_long_tp = 0
 
 if move:
