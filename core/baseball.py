@@ -603,8 +603,6 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
             logger.info("裁判播报员: ⚾️ 坐标 %s ",current_price)
         except Exception as e:
             logger.debug(f"An unknown error occurred in mix_get_market_price(): {e}")
-        current_session, ltime_remaining, time_until_next_session = get_time_range()
-        logger.warning("现在是 %s ,本场比赛还有 %s 结束, 距离下场区域赛还有 %s 开始",current_session, ltime_remaining, time_until_next_session)
 
         max_pains = get_max_pains()
         if max_pains != None:
@@ -613,15 +611,18 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
             rencent_max_pain = None
         if rencent_max_pain != None:
             if current_price >= float(rencent_max_pain[1]):
-                notice = '当前 ⚾️ 坐标位置大于最终得分区,LOL队员请小心~'
+                notice = '当前 ⚾️ 坐标位置 '+current_price+' 大于最终得分区,LOL队员请小心~'
             else:
-                notice = '当前 ⚾️ 坐标位置小于最终得分区,SVS队员请小心~'
+                notice = '当前 ⚾️ 坐标位置 '+current_price+' 小于最终得分区,SVS队员请小心~'
 
             time_remaining = time_until_nearest_8am()
-            remain_notice = '本场比赛结束倒计时: ' + time_remaining
+            remain_notice = '本日比赛结束倒计时: ' + time_remaining
             date_type = get_date_type(rencent_max_pain[0])
 
-            logger.warning("%s options 临近时间 %s, 最终目标得分区 %s , %s , %s",date_type,rencent_max_pain[0],rencent_max_pain[1],remain_notice,notice)
+            current_session, ltime_remaining, time_until_next_session = get_time_range()
+            logger.warning("现在是 %s ,本场比赛还有 %s 结束, 距离下场区域赛还有 %s 开始",current_session, ltime_remaining, time_until_next_session)
+
+            logger.warning("%s %s ,本场比赛还有 %s 结束, 距离下场区域赛还有 %s 开始, 最近 options 临近时间 %s, options 最终目标得分区 %s , %s , %s",date_type,current_session, ltime_remaining, time_until_next_session,rencent_max_pain[0],rencent_max_pain[1],remain_notice,notice)
             if len(max_pains) > 5:
                 logger.warning("稍后比赛临近时间及得分区:")
                 for i in range(1, 4, 2):
@@ -729,8 +730,6 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                 bb.base_run(current_price,pos,huFu,super_mode,consolidating,debug_mode)
                 time.sleep(1.5)
             logger.info("裁判播报员: ⚾️ 坐标 %s ",current_price)
-            current_session, ltime_remaining, time_until_next_session = get_time_range()
-            logger.warning("现在是 %s ,本场比赛还有 %s 结束, 距离下场区域赛还有 %s 开始",current_session, ltime_remaining, time_until_next_session)
 
             if not loss_away:
                 winner = ''
