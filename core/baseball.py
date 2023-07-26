@@ -621,7 +621,9 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
 
             current_session, ltime_remaining, time_until_next_session = get_time_range()
 
-            logger.warning("%s %s ,本场比赛还有 %s 结束, 距离下场区域赛还有 %s 开始, 最近 options 临近时间 %s, options 最终目标得分区 %s , %s , %s",date_type,current_session, ltime_remaining, time_until_next_session,rencent_max_pain[0],rencent_max_pain[1],remain_notice,notice)
+            logger.warning("\n %s %s ,本场比赛还有 %s 结束, 距离下场区域赛还有 %s 开始",date_type,current_session, ltime_remaining, time_until_next_session)
+            logger.warning("最近 options 临近时间 %s, options 最终目标得分区 %s , %s , %s",rencent_max_pain[0],rencent_max_pain[1],remain_notice,notice)
+
             if len(max_pains) > 5:
                 logger.warning("稍后比赛临近时间及得分区:")
                 for i in range(1, 4, 2):
