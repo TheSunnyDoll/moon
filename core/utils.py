@@ -379,3 +379,63 @@ def trading_time():
         return False
     else:
         return True
+
+def get_time_range():
+    # 获取当前时间
+    now = datetime.datetime.now()
+    # 获取当前时间的小时和分钟
+    current_hour = now.hour
+    current_minute = now.minute
+
+    # 定义各个区域的时间范围
+    asia_session_start = datetime.time(0, 0)
+    asia_session_end = datetime.time(4, 0)
+    london_session_start = datetime.time(6, 0)
+    london_session_end = datetime.time(9, 0)
+    ny_am_session_start = datetime.time(13, 30)
+    ny_am_session_end = datetime.time(15, 0)
+    lunch_session_start = datetime.time(16, 0)
+    lunch_session_end = datetime.time(17, 0)
+    ny_pm_session_start = datetime.time(17, 30)
+    ny_pm_session_end = datetime.time(20, 0)
+
+    # 判断当前时间属于哪个区域
+    if asia_session_start <= now.time() < asia_session_end:
+        current_session = "亚洲小组赛"
+        end_time = datetime.datetime.combine(now.date(), asia_session_end)
+    elif london_session_start <= now.time() < london_session_end:
+        current_session = "伦敦区小组赛"
+        end_time = datetime.datetime.combine(now.date(), london_session_end)
+    elif ny_am_session_start <= now.time() < ny_am_session_end:
+        current_session = "纽约上午半场赛"
+        end_time = datetime.datetime.combine(now.date(), ny_am_session_end)
+    elif lunch_session_start <= now.time() < lunch_session_end:
+        current_session = "纽约场午饭时间"
+        end_time = datetime.datetime.combine(now.date(), lunch_session_end)
+    elif ny_pm_session_start <= now.time() < ny_pm_session_end:
+        current_session = "纽约下午半场赛"
+        end_time = datetime.datetime.combine(now.date(), ny_pm_session_end)
+    else:
+        # 超过所有区域的范围，说明是NY PM Session结束后到Asia Session开始之前的时间
+        current_session = "None (Between Sessions)"
+        end_time = datetime.datetime.combine(now.date(), asia_session_start) + datetime.timedelta(days=1)
+
+    # 计算距离当前区域结束的时间间隔
+    time_remaining = end_time - now
+
+    # 计算距离下一个区域开始的时间间隔
+    next_session_start_time = None
+    if current_session == "亚洲小组赛":
+        next_session_start_time = datetime.datetime.combine(now.date(), london_session_start)
+    elif current_session == "伦敦区小组赛":
+        next_session_start_time = datetime.datetime.combine(now.date(), ny_am_session_start)
+    elif current_session == "纽约上午半场赛":
+        next_session_start_time = datetime.datetime.combine(now.date(), lunch_session_start)
+    elif current_session == "纽约场午饭时间":
+        next_session_start_time = datetime.datetime.combine(now.date(), ny_pm_session_start)
+    elif current_session == "纽约下午半场赛" or current_session == "None (Between Sessions)":
+        next_session_start_time = datetime.datetime.combine(now.date() + datetime.timedelta(days=1), asia_session_start)
+
+    time_until_next_session = next_session_start_time - now
+
+    return current_session, time_remaining, time_until_next_session

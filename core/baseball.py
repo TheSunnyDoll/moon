@@ -603,6 +603,8 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
             logger.info("裁判播报员: ⚾️ 坐标 %s ",current_price)
         except Exception as e:
             logger.debug(f"An unknown error occurred in mix_get_market_price(): {e}")
+        current_session, ltime_remaining, time_until_next_session = get_time_range()
+        logger.warning("现在是 %s ,本场比赛还有 %s 结束, 距离下场区域赛还有 %s 开始",current_session, ltime_remaining, time_until_next_session)
 
         max_pains = get_max_pains()
         if max_pains != None:
@@ -727,7 +729,8 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                 bb.base_run(current_price,pos,huFu,super_mode,consolidating,debug_mode)
                 time.sleep(1.5)
             logger.info("裁判播报员: ⚾️ 坐标 %s ",current_price)
-
+            current_session, ltime_remaining, time_until_next_session = get_time_range()
+            logger.warning("现在是 %s ,本场比赛还有 %s 结束, 距离下场区域赛还有 %s 开始",current_session, ltime_remaining, time_until_next_session)
 
             if not loss_away:
                 winner = ''
@@ -782,7 +785,7 @@ if __name__ == "__main__":
 
     parser.add_argument('-fp', '--fix_tp_point', default=88,help='fix_tp_point')
     parser.add_argument('-bsl', '--base_sl', default=88,help='base_sl')
-    parser.add_argument('-bq', '--base_qty', default=0.005,help='base_qty')
+    parser.add_argument('-bq', '--base_qty', default=0.05,help='base_qty')
     parser.add_argument('-mxq', '--max_qty', default=0.4,help='max_qty')
 
     args = parser.parse_args()
