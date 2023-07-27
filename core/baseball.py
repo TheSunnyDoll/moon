@@ -413,6 +413,8 @@ class BaseBall():
                     if sl_delta>=0 and long_qty <= max_qty and short_qty<= max_qty:
                         try:
                             cent_qty = round(base_qty * round(tp_delta/sl_delta),2)
+                            if cent_qty > 2:
+                                cent_qty = 2
                             trigger_price = order[1]
                             if order[0] == 'open_long':
                                 trigger_price += 1
