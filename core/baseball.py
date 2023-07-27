@@ -412,9 +412,7 @@ class BaseBall():
                 if not debug_mode:
                     if sl_delta>=0 and long_qty <= max_qty and short_qty<= max_qty:
                         try:
-                            cent_qty = base_qty
-                            if order[4] == 'firsebase-idm1-1' or order[4] == 'firsebase-idm1-2':
-                                cent_qty = base_qty*2
+                            cent_qty = round(base_qty * round(tp_delta/sl_delta),2)
                             trigger_price = order[1]
                             if order[0] == 'open_long':
                                 trigger_price += 1
