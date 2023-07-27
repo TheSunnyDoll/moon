@@ -619,13 +619,21 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
     logger.critical("比赛开始 🏎️  🏎️ 🏎️ 🏎️🏎️ !!!")
 
     while True:
-        if is_reversal_time():
-            fix_base_qty = round(base_qty / 4,3)
-            re_notice = '反转区'
+
+        if is_wednesday_or_thursday():
+            fix_base_qty = base_qty *2 
+            week_notice = '热赛区'        
         else:
             fix_base_qty = base_qty
+            week_notice = ''
+
+        if is_reversal_time():
+            fix_base_qty = round(fix_base_qty / 4,3)
+            re_notice = '反转区'
+        else:
+            fix_base_qty = fix_base_qty
             re_notice = '非反转区'
-        logger.warning("当前是 %s , 调整后手数 :%s",re_notice,fix_base_qty)
+        logger.warning("当前是 %s %s , 调整后手数 :%s",week_notice,re_notice,fix_base_qty)
 
         try:
             result = huFu.mix_get_market_price(symbol)

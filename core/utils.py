@@ -470,3 +470,13 @@ def is_reversal_time():
             return True
 
     return False
+
+def is_wednesday_or_thursday():
+    # 获取当前日期的星期数，星期一为0，星期二为1，以此类推
+    current_day_of_week = datetime.datetime.now().weekday()
+
+    # 判断当前日期是否为周三（2）或周四（3）
+    if current_day_of_week == 2 or current_day_of_week == 3:
+        return True
+    else:
+        return False
