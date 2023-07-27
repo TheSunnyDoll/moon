@@ -300,6 +300,8 @@ class BaseBall():
                         sl = order[3]
 
                 hft_qty = round(base_qty * round(tp_delta/sl_delta),2)
+                if hft_qty > 5:
+                    hft_qty = 5
                 if dtrend is not None:
                     if dtrend[-1] == 'bear' or dtrend[-1] == 'reversal-bear' or dtrend[-1] == 'bear_pullback':
                         if order[0] != 'open_short':
