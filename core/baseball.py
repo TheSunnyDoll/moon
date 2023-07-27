@@ -307,9 +307,10 @@ class BaseBall():
                     elif dtrend[-1] == 'bull' or dtrend[-1] == 'reversal-bull' or dtrend[-1] == 'bull_pullback':
                         if order[0] != 'open_long':
                             continue
-
-
-                logger.info("来吧全垒打⚾️ !我准备好啦! 🥖击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s,出手数: %s",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta,hft_qty)
+                
+                if debug_mode:
+                    if ((float(order[1]) not in [entry[1] for entry in recent_open_long_list]) or long_qty <= 0) and ((float(order[1]) not in [entry[1] for entry in recent_open_short_list]) or short_qty <= 0):
+                        logger.info("来吧全垒打⚾️ !我准备好啦! 🥖击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s,出手数: %s",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta,hft_qty)
                 if not debug_mode:
                     if sl_delta>=0 and tp_delta>=0:
                         try:
@@ -318,8 +319,10 @@ class BaseBall():
                                 trigger_price += 1
                             if order[0] == 'open_short':
                                 trigger_price -= 1
-                            if (float(order[1]) not in recent_open_long_list or long_qty <= 0) and (float(order[1]) not in recent_open_short_list or short_qty <= 0):
+                            if ((float(order[1]) not in [entry[1] for entry in recent_open_long_list]) or long_qty <= 0) and ((float(order[1]) not in [entry[1] for entry in recent_open_short_list]) or short_qty <= 0):
                                 huFu.mix_place_plan_order(symbol, marginCoin, hft_qty, order[0], 'limit', trigger_price, "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
+                                logger.info("来吧全垒打⚾️ !我准备好啦! 🥖击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s,出手数: %s",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta,hft_qty)
+
                         except Exception as e:
                             logger.debug(f"An unknown error occurred in mix_place_plan_order(): {e}")
 
@@ -400,7 +403,9 @@ class BaseBall():
                 
                 if debug_mode:
                     print(last_leg)
-                    logger.info("一垒就交给我了!⛳️  击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta)  
+                    if ((float(order[1]) not in [entry[1] for entry in recent_open_long_list]) or long_qty <= 0) and ((float(order[1]) not in [entry[1] for entry in recent_open_short_list]) or short_qty <= 0):
+                        logger.info("一垒就交给我了!⛳️  击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta)  
+
 
                 if not debug_mode:
                     if sl_delta>=0 and long_qty <= max_qty and short_qty<= max_qty:
@@ -413,10 +418,9 @@ class BaseBall():
                                 trigger_price += 1
                             if order[0] == 'open_short':
                                 trigger_price -= 1
-                            print(base_qty)
-                            if (float(order[1]) not in recent_open_long_list or long_qty <= 0) and (float(order[1]) not in recent_open_short_list or short_qty <= 0):
+                            if ((float(order[1]) not in [entry[1] for entry in recent_open_long_list]) or long_qty <= 0) and ((float(order[1]) not in [entry[1] for entry in recent_open_short_list]) or short_qty <= 0):
                                 huFu.mix_place_plan_order(symbol, marginCoin, cent_qty, order[0], 'limit', trigger_price, "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
-                            logger.info("一垒就交给我了!⛳️  击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s,手数 %f",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta,cent_qty)   
+                                logger.info("一垒就交给我了!⛳️  击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s,手数 %f",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta,cent_qty)   
 
                         except Exception as e:
                             logger.debug(f"An unknown error occurred in mix_place_plan_order() ,orderOid(): {e} {order[4]}")
@@ -803,7 +807,7 @@ if __name__ == "__main__":
     parser.add_argument('-fp', '--fix_tp_point', default=88,help='fix_tp_point')
     parser.add_argument('-bsl', '--base_sl', default=88,help='base_sl')
     parser.add_argument('-bq', '--base_qty', default=0.05,help='base_qty')
-    parser.add_argument('-mxq', '--max_qty', default=0.4,help='max_qty')
+    parser.add_argument('-mxq', '--max_qty', default=1.5,help='max_qty')
 
     args = parser.parse_args()
     heroname = args.username
