@@ -620,10 +620,12 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
 
     while True:
         if is_reversal_time():
-            fix_base_qty = round(base_qty / 2,3)
+            fix_base_qty = round(base_qty / 4,3)
+            re_notice = '反转区'
         else:
             fix_base_qty = base_qty
-        print("fix_base_qty:",fix_base_qty)
+            re_notice = '非反转区'
+        logger.warning("当前是 %s , 调整后手数 :%s",re_notice,fix_base_qty)
 
         try:
             result = huFu.mix_get_market_price(symbol)
