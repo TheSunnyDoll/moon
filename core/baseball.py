@@ -307,8 +307,8 @@ class BaseBall():
                     elif dtrend[-1] == 'bull' or dtrend[-1] == 'reversal-bull' or dtrend[-1] == 'bull_pullback':
                         if order[0] != 'open_long':
                             continue
-                if (order[1] not in recent_open_long_list or long_qty <= 0) and (order[1] not in recent_open_short_list or short_qty <= 0):
-                    print("hi")
+                # if (order[1] not in recent_open_long_list or long_qty <= 0) and (order[1] not in recent_open_short_list or short_qty <= 0):
+                #     print("hi")
                 logger.info("来吧全垒打⚾️ !我准备好啦! 🥖击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s,出手数: %s",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta,hft_qty)
                 if not debug_mode:
                     if sl_delta>=0 and tp_delta>=0:
@@ -318,8 +318,8 @@ class BaseBall():
                                 trigger_price += 1
                             if order[0] == 'open_short':
                                 trigger_price -= 1
-                            if (order[1] not in recent_open_long_list or long_qty <= 0) and (order[1] not in recent_open_short_list or short_qty <= 0):
-                                huFu.mix_place_plan_order(symbol, marginCoin, hft_qty, order[0], 'limit', trigger_price, "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
+                            # if (order[1] not in recent_open_long_list or long_qty <= 0) and (order[1] not in recent_open_short_list or short_qty <= 0):
+                            huFu.mix_place_plan_order(symbol, marginCoin, hft_qty, order[0], 'limit', trigger_price, "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
                         except Exception as e:
                             logger.debug(f"An unknown error occurred in mix_place_plan_order(): {e}")
 
@@ -414,8 +414,8 @@ class BaseBall():
                             if order[0] == 'open_short':
                                 trigger_price -= 1
                             print(base_qty)
-                            if (order[1] not in recent_open_long_list or long_qty <= 0) and (order[1] not in recent_open_short_list or short_qty <= 0):
-                                huFu.mix_place_plan_order(symbol, marginCoin, cent_qty, order[0], 'limit', trigger_price, "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
+                            # if (order[1] not in recent_open_long_list or long_qty <= 0) and (order[1] not in recent_open_short_list or short_qty <= 0):
+                            huFu.mix_place_plan_order(symbol, marginCoin, cent_qty, order[0], 'limit', trigger_price, "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
                             logger.info("一垒就交给我了!⛳️  击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s,手数 %f",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta,cent_qty)   
 
                         except Exception as e:
