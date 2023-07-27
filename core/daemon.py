@@ -36,7 +36,7 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--super_mode', action='store_true', default=False, help='Enable super_mode')
     parser.add_argument('-fp', '--fix_tp_point', type=int, default=88, help='fix_tp_point')
     parser.add_argument('-bsl', '--base_sl', type=int, default=88, help='base_sl')
-    parser.add_argument('-bq', '--base_qty', type=float, default=0.1, help='base_qty')
+    parser.add_argument('-bq', '--base_qty', type=float, default=0.3, help='base_qty')
     parser.add_argument('-mxq', '--max_qty', type=float, default=1.2, help='max_qty')
 
     args = parser.parse_args()
