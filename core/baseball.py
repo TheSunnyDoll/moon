@@ -619,6 +619,11 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
     logger.critical("比赛开始 🏎️  🏎️ 🏎️ 🏎️🏎️ !!!")
 
     while True:
+        if is_reversal_time():
+            fix_base_qty = round(base_qty / 2,3)
+        else:
+            fix_base_qty = base_qty
+        print("fix_base_qty:",fix_base_qty)
 
         try:
             result = huFu.mix_get_market_price(symbol)
@@ -727,9 +732,9 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
         loss_away,stop_loss_time,loss_side,total_profits,recent_open_long_list,recent_open_short_list = bb.earn_or_loss(huFu)
         out_max_qty = max_qty * 2
         if long_qty <= out_max_qty and short_qty<= out_max_qty and not consolidating and loss_away and trading_time():
-            bb.batch_orders(orders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price,super_mode,dtrend,recent_open_long_list,recent_open_short_list,long_qty,short_qty)
+            bb.batch_orders(orders,huFu,marginCoin,fix_base_qty,debug_mode,base_sl,current_price,super_mode,dtrend,recent_open_long_list,recent_open_short_list,long_qty,short_qty)
         if not super_mode and not consolidating and loss_away and trading_time():
-            track_orders = bb.on_track(last_legs,huFu,marginCoin,base_qty,debug_mode,base_sl,pos,max_qty,dtrend,recent_open_long_list,recent_open_short_list,long_qty,short_qty)
+            track_orders = bb.on_track(last_legs,huFu,marginCoin,fix_base_qty,debug_mode,base_sl,pos,max_qty,dtrend,recent_open_long_list,recent_open_short_list,long_qty,short_qty)
 
         time.sleep(0.3)
         batch_refresh_interval = 2
@@ -781,7 +786,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                                 logger.debug(f"An unknown error occurred in mix_cancel_plan_order(): {e}")
 
             if not super_mode and not consolidating and loss_away and trading_time():
-                track_orders = bb.on_track(last_legs,huFu,marginCoin,base_qty,debug_mode,base_sl,pos,max_qty,dtrend,recent_open_long_list,recent_open_short_list,long_qty,short_qty)
+                track_orders = bb.on_track(last_legs,huFu,marginCoin,fix_base_qty,debug_mode,base_sl,pos,max_qty,dtrend,recent_open_long_list,recent_open_short_list,long_qty,short_qty)
 
             if super_mode or consolidating or not loss_away or not trading_time():
                 track_orders = []
@@ -828,5 +833,4 @@ if __name__ == "__main__":
     symbol = 'BTCUSDT_UMCBL'
     marginCoin = 'USDT'
     logger.info("让场子热起来吧🔥！ 新一场棒球比赛即将开始⚾️～")
-    print(base_qty)
     start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty,super_mode)

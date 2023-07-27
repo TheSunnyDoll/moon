@@ -375,7 +375,7 @@ def trading_time():
     current_minute = now.minute
 
     # 判断小时是否在7到9之间
-    if (current_hour == 7 and 30 <= current_minute <= 59) or (current_hour == 8 and current_minute <= 40) or current_hour == 23 or current_hour == 0 or current_hour == 1 :
+    if (current_hour == 7 and 30 <= current_minute <= 59) or (current_hour == 8 and current_minute <= 45) or current_hour == 23 or current_hour == 0 or (current_hour == 1 and current_minute <= 45):
         return False
     else:
         return True
@@ -439,3 +439,34 @@ def get_time_range():
     time_until_next_session = next_session_start_time - now
 
     return current_session, time_remaining, time_until_next_session
+
+
+def date_to_week(date_string):
+    # 将日期时间字符串转换为datetime对象
+    datetime_obj = datetime.datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
+
+    # 获取周几的整数表示（0代表周一，1代表周二，以此类推）
+    day_of_week_int = datetime_obj.weekday()
+
+    # 将整数表示转换为对应的周几字符串
+    weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    day_of_week_string = weekdays[day_of_week_int]
+    return day_of_week_string
+
+def is_reversal_time():
+    # 获取当前时间
+    now = datetime.datetime.utcnow().time()
+
+    # 定义反转区时间段
+    reversal_time_ranges = [
+        (datetime.time(4, 0, 0), datetime.time(6, 0, 0)),
+        (datetime.time(9, 0, 0), datetime.time(11, 0, 0)),
+        (datetime.time(17, 0, 0), datetime.time(18, 30, 0))
+    ]
+
+    # 检查当前时间是否在反转区时间段内
+    for start_time, end_time in reversal_time_ranges:
+        if start_time <= now <= end_time:
+            return True
+
+    return False
