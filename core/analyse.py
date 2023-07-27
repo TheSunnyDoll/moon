@@ -20,17 +20,18 @@ def earn_or_loss(huFu,x):
         for order in orders:
             uTime = timestamp_to_time(float(order['uTime'])).strftime("%Y-%m-%d %H:%M:%S")
             if float(order['totalProfits']) < 0:
-                loss_list.append([uTime ,order['size'],order['side'],order['totalProfits']])
+                loss_list.append([uTime ,order['size'],order['side'],order['priceAvg'],order['totalProfits']])
                 total_loss += order['totalProfits']
             if float(order['totalProfits']) > 0:
-                profit_list.append([uTime,order['size'],order['side'],order['totalProfits']])
+                profit_list.append([uTime,order['size'],order['side'],order['priceAvg'],order['totalProfits']])
                 total_profits += order['totalProfits']
             if order['side'] == 'open_long' and order['state'] == 'filled':
-                 recent_open_long_list.append([order['size'],order['priceAvg'],uTime])
+                 recent_open_long_list.append([uTime,order['size'],order['side'],order['priceAvg']])
             if order['side'] == 'open_short' and order['state'] == 'filled':
-                 recent_open_short_list.append([order['size'],order['priceAvg'],uTime])
+                 recent_open_short_list.append([uTime,order['size'],order['side'],order['priceAvg']])
         print(recent_open_long_list[0:5])
-             
+        for i in loss_list:
+            print(i)
         
         print(total_loss)
         for i in profit_list:

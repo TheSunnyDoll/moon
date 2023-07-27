@@ -596,6 +596,11 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
         if data != []:
                 ## clear all open orders
             huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
+        try:
+            huFu.mix_cancel_all_orders ('UMCBL', marginCoin)
+        except Exception as e:
+            logger.debug(f"An unknown error occurred in mix_cancel_all_orders(): {e}")
+
     logger.critical("三")
     time.sleep(1)
     logger.critical("二")
