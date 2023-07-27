@@ -267,7 +267,7 @@ class BaseBall():
         return orders
         
 
-    def batch_orders(self,oders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price,super_mode,dtrend):
+    def batch_orders(self,oders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price,super_mode,dtrend,recent_open_long_list,recent_open_short_list,long_qty,short_qty):
 
         base_sl_delta = 100
 
@@ -317,13 +317,13 @@ class BaseBall():
                                 trigger_price += 2
                             if order[0] == 'open_short':
                                 trigger_price -= 2
-
-                            huFu.mix_place_plan_order(symbol, marginCoin, hft_qty, order[0], 'limit', trigger_price, "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
+                            if (order[1] not in recent_open_long_list or long_qty <= 0) and (order[1] not in recent_open_short_list or short_qty <= 0):
+                                huFu.mix_place_plan_order(symbol, marginCoin, hft_qty, order[0], 'limit', trigger_price, "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
                         except Exception as e:
                             logger.debug(f"An unknown error occurred in mix_place_plan_order(): {e}")
 
 
-    def on_track(self,legs,huFu,marginCoin,base_qty,debug_mode,base_sl,pos,max_qty,dtrend):
+    def on_track(self,legs,huFu,marginCoin,base_qty,debug_mode,base_sl,pos,max_qty,dtrend,recent_open_long_list,recent_open_short_list,long_qty,short_qty):
         long_qty = float(pos[0]["total"])
         short_qty = float(pos[1]["total"])
         base_point = 150
@@ -413,7 +413,8 @@ class BaseBall():
                             if order[0] == 'open_short':
                                 trigger_price -= 2
                             print(base_qty)
-                            huFu.mix_place_plan_order(symbol, marginCoin, cent_qty, order[0], 'limit', trigger_price, "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
+                            if (order[1] not in recent_open_long_list or long_qty <= 0) and (order[1] not in recent_open_short_list or short_qty <= 0):
+                                huFu.mix_place_plan_order(symbol, marginCoin, cent_qty, order[0], 'limit', trigger_price, "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
                             logger.info("一垒就交给我了!⛳️  击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s,手数 %f",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta,cent_qty)   
 
                         except Exception as e:
@@ -564,17 +565,25 @@ class BaseBall():
         loss_list = []
         loss_side_list = []
         total_profits = 0
+        recent_open_long_list = []
+        recent_open_short_list = []
+
         for order in orders:
             if float(order['totalProfits']) < 0:
                 loss_list.append(order['uTime'])
                 loss_side_list.append(order['side'])
             total_profits += order['totalProfits']
+            if order['side'] == 'open_long' and order['state'] == 'filled':
+                 recent_open_long_list.append([order['size'],float(order['priceAvg'])])
+            if order['side'] == 'open_short' and order['state'] == 'filled':
+                 recent_open_short_list.append([order['size'],float(order['priceAvg'])])
+
         if loss_list != []:
             stop_loss_time = loss_list[0]
             loss_side = loss_side_list[0]
-            return is_more_than_1hours(stop_loss_time),stop_loss_time,loss_side,total_profits
+            return is_more_than_1hours(stop_loss_time),stop_loss_time,loss_side,total_profits,recent_open_long_list[:5],recent_open_short_list[:5]
         else:
-            return True,None,None,total_profits
+            return True,None,None,total_profits,recent_open_long_list,recent_open_short_list
    
 
 
@@ -701,12 +710,12 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
         if not trading_time():
             logger.warning("球馆休息时间 ~ ~")
 
-        loss_away,stop_loss_time,loss_side,total_profits = bb.earn_or_loss(huFu)
+        loss_away,stop_loss_time,loss_side,total_profits,recent_open_long_list,recent_open_short_list = bb.earn_or_loss(huFu)
         out_max_qty = max_qty * 2
         if long_qty <= out_max_qty and short_qty<= out_max_qty and not consolidating and loss_away and trading_time():
-            bb.batch_orders(orders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price,super_mode,dtrend)
+            bb.batch_orders(orders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price,super_mode,dtrend,recent_open_long_list,recent_open_short_list,long_qty,short_qty)
         if not super_mode and not consolidating and loss_away and trading_time():
-            track_orders = bb.on_track(last_legs,huFu,marginCoin,base_qty,debug_mode,base_sl,pos,max_qty,dtrend)
+            track_orders = bb.on_track(last_legs,huFu,marginCoin,base_qty,debug_mode,base_sl,pos,max_qty,dtrend,recent_open_long_list,recent_open_short_list,long_qty,short_qty)
 
         time.sleep(0.3)
         batch_refresh_interval = 2
@@ -758,7 +767,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                                 logger.debug(f"An unknown error occurred in mix_cancel_plan_order(): {e}")
 
             if not super_mode and not consolidating and loss_away and trading_time():
-                track_orders = bb.on_track(last_legs,huFu,marginCoin,base_qty,debug_mode,base_sl,pos,max_qty,dtrend)
+                track_orders = bb.on_track(last_legs,huFu,marginCoin,base_qty,debug_mode,base_sl,pos,max_qty,dtrend,recent_open_long_list,recent_open_short_list,long_qty,short_qty)
 
             if super_mode or consolidating or not loss_away or not trading_time():
                 track_orders = []
