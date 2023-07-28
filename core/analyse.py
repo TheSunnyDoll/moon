@@ -23,12 +23,12 @@ def earn_or_loss(huFu,x):
             if float(order['totalProfits']) < 0:
                 delta = abs(float(order['totalProfits']) / float(order['size']))
                 entry = float(order['priceAvg']) - float(order['totalProfits']) / float(order['size']) 
-                loss_list.append([uTime ,week,order['size'],order['side'],entry,order['priceAvg'],order['totalProfits'],delta])
+                loss_list.append([uTime ,entry,week,order['size'],order['side'],order['priceAvg'],order['totalProfits'],delta])
                 total_loss += order['totalProfits']
             if float(order['totalProfits']) > 0:
                 delta = abs(float(order['totalProfits']) / float(order['size']))
                 entry = float(order['priceAvg']) - float(order['totalProfits']) / float(order['size']) 
-                profit_list.append([uTime,week,order['size'],order['side'],entry,order['priceAvg'],order['totalProfits'],delta])
+                profit_list.append([uTime,entry,week,order['size'],order['side'],order['priceAvg'],order['totalProfits'],delta])
                 total_profits += order['totalProfits']
             if order['side'] == 'open_long' and order['state'] == 'filled':
                  recent_open_long_list.append([uTime,order['size'],order['side'],order['priceAvg']])
@@ -43,6 +43,11 @@ def earn_or_loss(huFu,x):
 
         print(total_profits)
 
+        count = loss_price_count(loss_list)
+        print(count)
+
+        renct = extract_recent_data(loss_list)
+        print("rec",renct)
         # 使用列表推导式找到在时间范围内的数据
         # 将数据按日期分组
         # grouped_data = {}
@@ -76,7 +81,7 @@ if __name__ == "__main__":
     config = get_config_file()
     hero = config[heroname]
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
-    for i in range(10):
+    for i in range(1):
         earn_or_loss(huFu,i)
 
 

@@ -1,4 +1,3 @@
-import numpy as np
 from math import floor
 from pybitget import Client
 import pandas as pd
@@ -570,6 +569,7 @@ class BaseBall():
         endTime = get_previous_minute_timestamp()
         orders = huFu.mix_get_history_orders(symbol, startTime, endTime, 100, lastEndId='', isPre=False)['data']['orderList']
         loss_list = []
+        loss_time_list = []
         loss_side_list = []
         total_profits = 0
         recent_open_long_list = []
@@ -577,7 +577,13 @@ class BaseBall():
 
         for order in orders:
             if float(order['totalProfits']) < 0:
-                loss_list.append(order['uTime'])
+                uTime = timestamp_to_time(float(order['uTime'])).strftime("%Y-%m-%d %H:%M:%S")
+                if order['side'] == 'close_long':
+                    entry = float(order['priceAvg']) - float(order['totalProfits']) / float(order['size']) 
+                elif order['side'] == 'close_short':
+                    entry = float(order['priceAvg']) + float(order['totalProfits']) / float(order['size']) 
+                loss_time_list.append(order['uTime'])
+                loss_list.append([uTime,entry])
                 loss_side_list.append(order['side'])
             total_profits += order['totalProfits']
             if order['side'] == 'open_long' and order['state'] == 'filled':
@@ -585,8 +591,16 @@ class BaseBall():
             if order['side'] == 'open_short' and order['state'] == 'filled':
                  recent_open_short_list.append([order['size'],float(order['priceAvg'])])
 
-        if loss_list != []:
-            stop_loss_time = loss_list[0]
+
+        loss_list = extract_recent_data(loss_list)
+        count = loss_price_count(loss_list)
+        print(count)
+
+        if count < 2:
+            return True,None,None,total_profits,recent_open_long_list,recent_open_short_list
+
+        if loss_time_list != []:
+            stop_loss_time = loss_time_list[0]
             loss_side = loss_side_list[0]
             return is_more_than_1hours(stop_loss_time),stop_loss_time,loss_side,total_profits,recent_open_long_list[:5],recent_open_short_list[:5]
         else:
@@ -776,7 +790,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                     winner = 'SVS队'
                 elif loss_side == 'close_short':
                     winner = 'LOL队'
-                remaining_time = remaining_time_to_2_hours(stop_loss_time)
+                remaining_time = remaining_time_to_1_hours(stop_loss_time)
                 logger.warning("半场赛结束 ~ 🚩胜方 %s ",winner)
                 logger.warning("球员们休息调整中 ☕️~ 距离下半场比赛开始还有:  %s",remaining_time)
 

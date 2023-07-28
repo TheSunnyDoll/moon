@@ -349,7 +349,7 @@ def remaining_time_to_4_hours(stop_loss_time):
 
     return remaining_time_str
 
-def remaining_time_to_2_hours(stop_loss_time):
+def remaining_time_to_1_hours(stop_loss_time):
     # 将stop_loss_time转换为datetime对象
     stop_loss_time = datetime.datetime.fromtimestamp(int(stop_loss_time) / 1000)
 
@@ -360,7 +360,7 @@ def remaining_time_to_2_hours(stop_loss_time):
     time_difference = current_time - stop_loss_time
 
     # 计算距离4小时还有多久
-    remaining_time = datetime.timedelta(hours=2) - time_difference
+    remaining_time = datetime.timedelta(hours=1) - time_difference
 
     # 将remaining_time转换为字符串格式
     remaining_time_str = str(remaining_time)
@@ -480,3 +480,33 @@ def is_wednesday_or_thursday():
         return True
     else:
         return False
+
+def loss_price_count(data):
+    # 创建一个空字典来记录价格和出现次数
+    price_count = {}
+
+    # 遍历data列表，记录价格和出现次数
+    for row in data:
+        price = round(row[1])  # 将价格取整数部分
+        if price in price_count:
+            price_count[price] += 1
+        else:
+            price_count[price] = 1
+    return len(price_count)
+
+def extract_recent_data(data, hours=1):
+    # 获取当前时间
+    current_time = datetime.datetime.now()
+
+    # 定义空列表来存储距离当前时间指定小时数的所有列表
+    recent_data = []
+
+    # 遍历data列表，筛选距离当前时间指定小时数的所有列表
+    for row in data:
+        time_str = row[0]
+        data_time = datetime.datetime.strptime(time_str, '%Y-%m-%d %H:%M:%S')
+        time_diff = current_time - data_time
+        if time_diff <= datetime.timedelta(hours=hours):
+            recent_data.append(row)
+
+    return recent_data
