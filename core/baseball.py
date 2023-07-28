@@ -267,7 +267,7 @@ class BaseBall():
         
 
     def batch_orders(self,oders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price,super_mode,dtrend,recent_open_long_list,recent_open_short_list,long_qty,short_qty):
-
+        min_sl = 30
         base_sl_delta = 100
 
         if super_mode:
@@ -285,6 +285,9 @@ class BaseBall():
                     if sl_delta <= 0 or sl_delta >= base_sl_delta:
                         sl = order[1] - base_sl
                         sl_delta = base_sl
+                    elif sl_delta < min_sl:
+                        sl = order[1] - min_sl
+                        sl_delta = min_sl
                     else:
                         sl = order[3]
                 if order[0] == 'open_short':
@@ -295,6 +298,9 @@ class BaseBall():
                     if sl_delta <= 0 or sl_delta >= base_sl_delta:
                         sl = order[1] + base_sl
                         sl_delta = base_sl
+                    elif sl_delta < min_sl:
+                        sl = order[1] + min_sl
+                        sl_delta = min_sl
                     else:
                         sl = order[3]
 
@@ -329,6 +335,7 @@ class BaseBall():
 
 
     def on_track(self,legs,huFu,marginCoin,base_qty,debug_mode,base_sl,pos,max_qty,dtrend,recent_open_long_list,recent_open_short_list,long_qty,short_qty):
+        min_sl = 30
         long_qty = float(pos[0]["total"])
         short_qty = float(pos[1]["total"])
         base_point = 150
@@ -383,6 +390,9 @@ class BaseBall():
                     if sl_delta <= 0 or sl_delta >= 100:
                         sl = order[1] - base_sl
                         sl_delta = base_sl
+                    elif sl_delta < min_sl:
+                        sl = order[1] - min_sl
+                        sl_delta = min_sl
                     else:
                         sl = order[3]
                 if order[0] == 'open_short':
@@ -391,6 +401,9 @@ class BaseBall():
                     if sl_delta <= 0 or sl_delta >= 100:
                         sl = order[1] + base_sl
                         sl_delta = base_sl
+                    elif sl_delta < min_sl:
+                        sl = order[1] + min_sl
+                        sl_delta = min_sl
                     else:
                         sl = order[3]
 
