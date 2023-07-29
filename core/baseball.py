@@ -707,7 +707,12 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                     huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
                 except Exception as e:
                     logger.debug(f"An unknown error occurred in mix_cancel_all_trigger_orders(): {e}")
-
+            try:
+                data = huFu.mix_get_open_order('BTCUSDT_UMCBL')['data']
+                if data != []:
+                    huFu.mix_cancel_all_orders ('UMCBL', marginCoin)
+            except Exception as e:
+                logger.debug(f"An unknown error occurred in mix_cancel_all_orders(): {e}")
         startTime = get_previous_month_timestamp()
         endTime = get_previous_minute_timestamp()
         trend = []
