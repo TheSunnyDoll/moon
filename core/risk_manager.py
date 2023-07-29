@@ -32,10 +32,11 @@
 
 
 class Risk_manager():
-    def __init__(self,initial_funds,loss_rate,AUM) -> None:
+    def __init__(self,initial_funds,loss_rate,AUM,balance_rate) -> None:
         self.initial_funds = initial_funds
         self.loss_rate = loss_rate
         self.AUM = AUM
+        self.balance_rate = balance_rate
 
     def get_current_loss_ratio(self,dex,stop_loss_points):
         # loss level
@@ -46,22 +47,45 @@ class Risk_manager():
         # leverage mark
         high = self.initial_funds
         medium = high - first_level
-        low = medium - second_level
 
         position_size = 0
         if dex >= high:
-            position_size = first_level/ stop_loss_points
+            position_size = dex * self.loss_rate/ stop_loss_points
         elif medium <= dex < high:
             position_size = second_level/ stop_loss_points
         elif dex <= medium:
             position_size = third_level/ stop_loss_points
         return round(position_size,3)
+    
+    def rebalance(self,future,spot):
+        delta = abs(future - spot)
+        if delta > 100:
+            totoal = future + spot
+            alt_future = totoal * self.balance_rate
+            trans_amount = abs(alt_future - future)
+
+            if alt_future > future:
+                return 'to_future',trans_amount
+            elif alt_future < future:
+                return 'to_spot',trans_amount
+            else:
+                return '',0
 
 
 
-# rsm = Risk_manager(1600,0.02,0.2)
 
-# for dex in range(1300,1700,10):
+
+
+
+rsm = Risk_manager(5000,0.01,0.2,0.5)
+
+future = 5000
+spot = 2000
+
+to_where,amount = rsm.rebalance(future,spot)
+
+print(to_where,amount )
+# for dex in range(4800,5200,10):
 
 #     pos = rsm.get_current_loss_ratio(dex,88)
 #     print(dex,pos)

@@ -624,7 +624,7 @@ class BaseBall():
    
 
 
-def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty,super_mode,init_fund,loss_ratio,loss_aum,lever_mark_mode):
+def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty,super_mode,init_fund,loss_ratio,loss_aum,lever_mark_mode,balance_rate):
 
     bb = BaseBall()
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
@@ -650,9 +650,24 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
 
     while True:
         if lever_mark_mode:
-            rsm = Risk_manager(init_fund,loss_ratio,loss_aum)
-            dex = huFu.mix_get_accounts(productType='UMCBL')['data'][0]['usdtEquity']
-            base_qty = rsm.get_current_loss_ratio(float(dex),base_sl)
+            rsm = Risk_manager(init_fund,loss_ratio,loss_aum,balance_rate)
+            try :
+                dex = huFu.mix_get_accounts(productType='UMCBL')['data'][0]['usdtEquity']
+                base_qty = rsm.get_current_loss_ratio(float(dex),base_sl)
+                if rsm.balance_rate > 0:
+                    dex_spot = huFu.spot_get_account_assets(coin='USDT')['data'][0]['available']
+                    to_where,amount = rsm.rebalance(float(dex),float(dex_spot))
+                    if to_where != '':
+                        if not debug_mode:
+                            if to_where == 'to_future':
+                                huFu.spot_transfer('spot', 'mix_usdt', amount, 'USDT', clientOrderId=None)
+                            elif to_where == 'to_spot':
+                                huFu.spot_transfer('mix_usdt','spot', amount, 'USDT', clientOrderId=None)
+                        logger.warning("平衡获利: %s %f",to_where,amount)
+            except Exception as e:
+                logger.debug(f"An unknown error occurred in rebalance(): {e}")
+
+
 
         if is_wednesday_or_thursday():
             fix_base_qty = base_qty *2 
@@ -869,6 +884,7 @@ if __name__ == "__main__":
     parser.add_argument('-if', '--init_fund', default=5000,help='init_fund')
     parser.add_argument('-lr', '--loss_ratio', default=0.01,help='loss_ratio')
     parser.add_argument('-aum', '--AUM', default=0.2,help='AUM')
+    parser.add_argument('-br', '--balance_rate', default=0.5,help='balance_rate')
 
 
     args = parser.parse_args()
@@ -886,6 +902,7 @@ if __name__ == "__main__":
     init_fund = float(args.init_fund)
     loss_ratio = float(args.loss_ratio)
     loss_aum = float(args.AUM)
+    balance_rate = float(args.balance_rate)
 
     logger = get_logger(heroname+'_record.log')
 
@@ -894,4 +911,4 @@ if __name__ == "__main__":
     symbol = 'BTCUSDT_UMCBL'
     marginCoin = 'USDT'
     logger.info("让场子热起来吧🔥！ 新一场棒球比赛即将开始⚾️～")
-    start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty,super_mode,init_fund,loss_ratio,loss_aum,lever_mark_mode)
+    start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty,super_mode,init_fund,loss_ratio,loss_aum,lever_mark_mode,balance_rate)
