@@ -656,7 +656,8 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                 base_qty = rsm.get_current_loss_ratio(float(dex),base_sl)
                 if rsm.balance_rate > 0:
                     dex_spot = huFu.spot_get_account_assets(coin='USDT')['data'][0]['available']
-                    to_where,amount = rsm.rebalance(float(dex),float(dex_spot))
+
+                    to_where,amount = rsm.rebalance(round(float(dex)),round(float(dex_spot)))
                     if to_where != '':
                         if not debug_mode:
                             if to_where == 'to_future':

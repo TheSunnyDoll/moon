@@ -11,10 +11,11 @@ def start(hero,balance_rate,debug_mode):
     while True:
         try :
             dex = huFu.mix_get_accounts(productType='UMCBL')['data'][0]['usdtEquity']
+
             if rsm.balance_rate > 0:
                 dex_spot = huFu.spot_get_account_assets(coin='USDT')['data'][0]['available']
+
                 to_where,amount = rsm.rebalance(float(dex),float(dex_spot))
-                print(dex_spot,to_where,amount)
                 if to_where != '':
                     if not debug_mode:
                         if to_where == 'to_future':

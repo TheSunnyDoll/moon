@@ -70,6 +70,8 @@ class Risk_manager():
                 return 'to_spot',trans_amount
             else:
                 return '',0
+        else:
+            return '',0
 
 
 
