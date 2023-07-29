@@ -5,6 +5,7 @@ import numpy as np
 import argparse
 from utils import *
 from situation import get_max_pains
+from risk_manager import *
 # zigzag with fib
 
 ## inner circle
@@ -304,7 +305,8 @@ class BaseBall():
                     else:
                         sl = order[3]
 
-                hft_qty = round(base_qty * round(tp_delta/sl_delta),2)
+                # hft_qty = round(base_qty * round(tp_delta/sl_delta),2)
+                hft_qty = base_qty
                 if hft_qty > 5:
                     hft_qty = 5
                 if dtrend is not None:
@@ -424,7 +426,8 @@ class BaseBall():
                 if not debug_mode:
                     if sl_delta>=0 and long_qty <= max_qty and short_qty<= max_qty:
                         try:
-                            cent_qty = round(base_qty * round(tp_delta/sl_delta),2)
+                            # cent_qty = round(base_qty * round(tp_delta/sl_delta),2)
+                            cent_qty = base_qty
                             if cent_qty > 2:
                                 cent_qty = 2
                             trigger_price = order[1]
@@ -621,7 +624,7 @@ class BaseBall():
    
 
 
-def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty,super_mode):
+def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty,super_mode,init_fund,loss_ratio,loss_aum,lever_mark_mode):
 
     bb = BaseBall()
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
@@ -646,6 +649,10 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
     logger.critical("比赛开始 🏎️  🏎️ 🏎️ 🏎️🏎️ !!!")
 
     while True:
+        if lever_mark_mode:
+            rsm = Risk_manager(init_fund,loss_ratio,loss_aum)
+            dex = huFu.mix_get_accounts(productType='UMCBL')['data'][0]['usdtEquity']
+            base_qty = rsm.get_current_loss_ratio(float(dex),base_sl)
 
         if is_wednesday_or_thursday():
             fix_base_qty = base_qty *2 
@@ -852,21 +859,35 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--debug_mode', action='store_true', default=False, help='Enable debug mode')
     parser.add_argument('-f', '--fix_tp_mode', action='store_true', default=False, help='Enable fix_tp mode')
     parser.add_argument('-s', '--super_mode', action='store_true', default=False, help='Enable super_mode')
+    parser.add_argument('-lm', '--lever_mark_mode', action='store_true', default=True, help='Enable lever_mark_mode')
+
 
     parser.add_argument('-fp', '--fix_tp_point', default=88,help='fix_tp_point')
     parser.add_argument('-bsl', '--base_sl', default=88,help='base_sl')
     parser.add_argument('-bq', '--base_qty', default=0.05,help='base_qty')
     parser.add_argument('-mxq', '--max_qty', default=1.5,help='max_qty')
+    parser.add_argument('-if', '--init_fund', default=5000,help='init_fund')
+    parser.add_argument('-lr', '--loss_ratio', default=0.01,help='loss_ratio')
+    parser.add_argument('-aum', '--AUM', default=0.2,help='AUM')
+
+
+
 
     args = parser.parse_args()
     heroname = args.username
     debug_mode = args.debug_mode
     fix_mode = args.fix_tp_mode
     super_mode = args.super_mode
+    lever_mark_mode = args.lever_mark_mode
+
     fix_tp = float(args.fix_tp_point)
     base_qty = float(args.base_qty)
     base_sl = float(args.base_sl)
     max_qty = float(args.max_qty)
+
+    init_fund = float(args.init_fund)
+    loss_ratio = float(args.loss_ratio)
+    loss_aum = float(args.AUM)
 
     logger = get_logger(heroname+'_record.log')
 
@@ -875,4 +896,4 @@ if __name__ == "__main__":
     symbol = 'BTCUSDT_UMCBL'
     marginCoin = 'USDT'
     logger.info("让场子热起来吧🔥！ 新一场棒球比赛即将开始⚾️～")
-    start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty,super_mode)
+    start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty,super_mode,init_fund,loss_ratio,loss_aum,lever_mark_mode)

@@ -32,5 +32,37 @@
 
 
 class Risk_manager():
-    def __init__(self) -> None:
-        pass
+    def __init__(self,initial_funds,loss_rate,AUM) -> None:
+        self.initial_funds = initial_funds
+        self.loss_rate = loss_rate
+        self.AUM = AUM
+
+    def get_current_loss_ratio(self,dex,stop_loss_points):
+        # loss level
+        first_level = self.initial_funds * self.loss_rate
+        second_level = first_level / 2
+        third_level = second_level / 2
+
+        # leverage mark
+        high = self.initial_funds
+        medium = high - first_level
+        low = medium - second_level
+
+        position_size = 0
+        if dex >= high:
+            position_size = first_level/ stop_loss_points
+        elif medium <= dex < high:
+            position_size = second_level/ stop_loss_points
+        elif dex <= medium:
+            position_size = third_level/ stop_loss_points
+        return round(position_size,3)
+
+
+
+# rsm = Risk_manager(1600,0.02,0.2)
+
+# for dex in range(1300,1700,10):
+
+#     pos = rsm.get_current_loss_ratio(dex,88)
+#     print(dex,pos)
+
