@@ -62,7 +62,7 @@ class Risk_manager():
         if delta > 100:
             totoal = future + spot
             alt_future = totoal * self.balance_rate
-            trans_amount = abs(alt_future - future)
+            trans_amount = round(abs(alt_future - future))
 
             if alt_future > future:
                 return 'to_future',trans_amount
