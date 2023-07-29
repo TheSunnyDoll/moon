@@ -77,14 +77,14 @@ class Risk_manager():
 
 
 
-rsm = Risk_manager(5000,0.01,0.2,0.5)
+# rsm = Risk_manager(5000,0.01,0.2,0.5)
 
-future = 5000
-spot = 2000
+# future = 5000
+# spot = 2000
 
-to_where,amount = rsm.rebalance(future,spot)
+# to_where,amount = rsm.rebalance(future,spot)
 
-print(to_where,amount )
+# print(to_where,amount )
 # for dex in range(4800,5200,10):
 
 #     pos = rsm.get_current_loss_ratio(dex,88)
