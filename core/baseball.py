@@ -871,8 +871,6 @@ if __name__ == "__main__":
     parser.add_argument('-aum', '--AUM', default=0.2,help='AUM')
 
 
-
-
     args = parser.parse_args()
     heroname = args.username
     debug_mode = args.debug_mode
