@@ -505,9 +505,6 @@ class BaseBall():
                 new_long_sl = round(long_info[1] + new_sl_point_delta)
                 ## move sl to new_long_sl
 
-        if consolidating:
-            logger.warning("请注意!!! 准备休息,开始修理场地 ~~~~")
-            time.sleep(1800)
 
         try:
             data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='profit_loss')['data']
@@ -858,6 +855,10 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
             if super_mode or consolidating or not loss_away or not trading_time():
                 track_orders = []
             bb.record(current_price,pos,orders,track_orders,debug_mode)
+
+        if consolidating:
+            logger.warning("请注意!!! 准备休息,开始修理场地 ~~~~")
+            time.sleep(1800)
 
         if is_less_than_10_minutes(time_remaining):
             if total_profits >= 0:
