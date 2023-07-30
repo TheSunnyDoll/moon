@@ -223,6 +223,8 @@ class BaseBall():
     def advortise(self,trend,fix_mode,fix_tp):
         orders = []
         for td in trend:
+            if len(td)<2:
+                continue
             ft = td[0]
             sl1 = td[2]
             eng_entry = td[4]
