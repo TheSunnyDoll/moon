@@ -553,7 +553,6 @@ def is_nfp_time():
     # Calculate the NFP release time range
     half_hour_before = first_friday - datetime.timedelta(minutes=30)
     half_hour_after = first_friday + datetime.timedelta(minutes=30)
-    print(current_time,half_hour_before,half_hour_after)
     # Check if the current time is within the NFP release time range
     if half_hour_before <= current_time <= half_hour_after:
         return True
