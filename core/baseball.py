@@ -621,6 +621,19 @@ class BaseBall():
         else:
             return True,None,None,total_profits,recent_open_long_list,recent_open_short_list
    
+    def mayber_reversal(self,last_klines):
+        # double 15m k , consolidation
+        klines = last_klines[-2:]
+        klines = np.array(object=klines, dtype=np.float64)
+        high = klines[:, 2]
+        low = klines[:, 3]
+
+        delta = max(high) - min(low)
+        if delta <=15:
+            logger.warning("看起来趋势可能要反转哦 ~ (%f)",delta)
+            return True
+        else:
+            return False
 
 
 def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty,super_mode,init_fund,loss_ratio,loss_aum,lever_mark_mode,balance_rate):
@@ -669,20 +682,6 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
 
 
 
-        if is_wednesday_or_thursday():
-            fix_base_qty = base_qty *2 
-            week_notice = '热赛区'        
-        else:
-            fix_base_qty = base_qty
-            week_notice = ''
-
-        if is_reversal_time():
-            fix_base_qty = round(fix_base_qty / 4,3)
-            re_notice = '反转区'
-        else:
-            fix_base_qty = fix_base_qty
-            re_notice = '非反转区'
-        logger.warning("当前是 %s %s , 调整后手数 :%s",week_notice,re_notice,fix_base_qty)
 
         try:
             result = huFu.mix_get_market_price(symbol)
@@ -777,6 +776,22 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
             print(dtrend)
 
             print(last_legs)
+
+        # reversal 
+        if is_wednesday_or_thursday():
+            fix_base_qty = base_qty *2 
+            week_notice = '热赛区'        
+        else:
+            fix_base_qty = base_qty
+            week_notice = ''
+
+        if is_reversal_time() or bb.mayber_reversal(last_klines):
+            fix_base_qty = round(fix_base_qty / 4,3)
+            re_notice = '反转区'
+        else:
+            fix_base_qty = fix_base_qty
+            re_notice = '非反转区'
+        logger.warning("当前是 %s %s , 调整后手数 :%s",week_notice,re_notice,fix_base_qty)
 
         consolidating = bb.consolidation(last_klines,dtrend)
         orders = bb.advortise(trend,fix_mode,fix_tp)
