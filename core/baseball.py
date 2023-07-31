@@ -802,7 +802,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
             fix_base_qty = base_qty
             week_notice = ''
 
-        if is_reversal_time() or bb.mayber_reversal(last_klines):
+        if is_reversal_time() or bb.mayber_reversal(last_klines) or is_nfp_time():
             fix_base_qty = round(fix_base_qty / 4,3)
             re_notice = '反转区'
         else:

@@ -3,6 +3,7 @@ import time
 import yaml
 import logging
 import colorlog
+import pytz
 
 def get_minute_timestamp():
     current_time = datetime.datetime.now()
@@ -538,3 +539,23 @@ def check_element_in_list(data_list, element):
             if sub_list[1] == element:
                 return True
     return False
+
+def is_nfp_time():
+    # Get the current time in the Eastern Time Zone (EST/EDT)
+    eastern_tz = pytz.timezone('US/Eastern')
+    current_time = datetime.datetime.now(eastern_tz)
+
+    # Get the first Friday of the current month
+    first_friday = current_time.replace(day=1, hour=8, minute=30, second=0, microsecond=0)
+    while first_friday.weekday() != 4:  # 4 represents Friday (Monday=0, Sunday=6)
+        first_friday += datetime.timedelta(days=1)
+
+    # Calculate the NFP release time range
+    half_hour_before = first_friday - datetime.timedelta(minutes=30)
+    half_hour_after = first_friday + datetime.timedelta(minutes=30)
+    print(current_time,half_hour_before,half_hour_after)
+    # Check if the current time is within the NFP release time range
+    if half_hour_before <= current_time <= half_hour_after:
+        return True
+    else:
+        return False
