@@ -266,6 +266,8 @@ class BaseBall():
 
             orders.append(ft_orders)
 
+        orders = remove_duplicates(orders)
+
         return orders
         
 

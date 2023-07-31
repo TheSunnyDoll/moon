@@ -510,3 +510,25 @@ def extract_recent_data(data, hours=1):
             recent_data.append(row)
 
     return recent_data
+
+def remove_duplicates(data):
+    # 取每项的前3个元素
+    flattened_data = [sub_list[:3] for sublist in data for sub_list in sublist]
+    # 去重后得到前3个元素
+    unique_items = list({tuple(sub_list) for sub_list in flattened_data})
+
+    # 将去重后的列表形式和原列表一样
+    # 重新构建结果列表
+    result = []
+    for sublist in data:
+        new_sublist = []
+        for sub_list in sublist:
+            if tuple(sub_list[:3]) in unique_items:
+                new_sublist.append(sub_list)
+                # 从去重后的集合中移除已添加的元素
+                unique_items.remove(tuple(sub_list[:3]))
+        if new_sublist:
+            result.append(new_sublist)
+    
+    return result
+
