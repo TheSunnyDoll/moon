@@ -223,6 +223,7 @@ class BaseBall():
     def advortise(self,trend,fix_mode,fix_tp):
         orders = []
         for td in trend:
+            positive = False
             if len(td)<2:
                 continue
             ft = td[0]
@@ -235,6 +236,8 @@ class BaseBall():
 
             if td[1] == 'bull':
                 drec = 'open_long'
+                if tp1 > eng_entry:
+                    positive = True
                 sl2 = td[4] - 20
                 eng_tp3 = eng_entry + fix_tp
                 idm1_tp3 = idm1_entry + fix_tp
@@ -242,6 +245,8 @@ class BaseBall():
 
             if td[1] == 'bear':
                 drec = 'open_short'
+                if tp1 < eng_entry:
+                    positive = True
                 sl2 = td[4] + 20
                 eng_tp3 = eng_entry - fix_tp
                 idm1_tp3 = idm1_entry - fix_tp
@@ -250,14 +255,16 @@ class BaseBall():
 
             ft_orders = []
             if not fix_mode:
-                eng_order = [drec,eng_entry,tp1,sl1,ft+'_eng_order']
+                if positive:
+                    eng_order = [drec,eng_entry,tp1,sl1,ft+'_eng_order']
                 idm1_order1 = [drec,idm1_entry,tp1,sl2,ft+'_idm1_order1']
                 idm1_order2 = [drec,idm1_entry,tp2,sl2,ft+'_idm1_order2']
                 idm2_order1 = [drec,idm2_entry,tp1,sl2,ft+'_idm2_order1']
                 idm2_order2 = [drec,idm2_entry,tp2,sl2,ft+'_idm2_order2']
                 ft_orders[len(ft_orders):] = [eng_order,idm1_order1,idm1_order2,idm2_order1,idm2_order2]
             else:
-                eng_order_fix_tp = [drec,eng_entry,eng_tp3,sl1,ft+'_eng_order_fix_tp']
+                if positive:
+                    eng_order_fix_tp = [drec,eng_entry,eng_tp3,sl1,ft+'_eng_order_fix_tp']
                 idm1_order1_fix_tp = [drec,idm1_entry,idm1_tp3,sl2,ft+'_idm1_order1_fix_tp']
                 idm1_order2_fix_tp = [drec,idm1_entry,idm1_tp3,sl2,ft+'_idm1_order2_fix_tp']
                 idm2_order1_fix_tp = [drec,idm2_entry,idm2_tp3,sl2,ft+'_idm2_order1_fix_tp']
@@ -311,6 +318,9 @@ class BaseBall():
 
                 # hft_qty = round(base_qty * round(tp_delta/sl_delta),2)
                 hft_qty = base_qty
+                if sl_delta>=0 and tp_delta>=0:
+                    if tp_delta < sl_delta:
+                        hft_qty = round(base_qty * tp_delta/sl_delta,3)
                 if hft_qty > 5:
                     hft_qty = 5
                 if dtrend is not None:
@@ -630,7 +640,6 @@ class BaseBall():
             return True,None,None,total_profits,recent_open_long_list,recent_open_short_list
    
     def mayber_reversal(self,last_klines):
-        # double 15m k , consolidation
         klines = last_klines[-2:]
         klines = np.array(object=klines, dtype=np.float64)
         high = klines[:, 2]
