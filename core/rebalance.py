@@ -29,7 +29,7 @@ def start(hero,balance_rate,debug_mode):
         except Exception as e:
             print(f"An unknown error occurred in rebalance(): {e}")
 
-        time.sleep(24*3600)
+        time.sleep(1*3600)
 
 
 
