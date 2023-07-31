@@ -532,3 +532,9 @@ def remove_duplicates(data):
     
     return result
 
+def check_element_in_list(data_list, element):
+    for sublist in data_list:
+        for sub_list in sublist:
+            if sub_list[1] == element:
+                return True
+    return False
