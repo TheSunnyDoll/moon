@@ -69,7 +69,8 @@ if order :
     tp = 29080
     sl = 28780
 
-    huFu.mix_place_plan_order(symbol, marginCoin, qty , side, 'limit', entry, "market_price", executePrice=entry,presetTakeProfitPrice=tp, presetStopLossPrice=sl, reduceOnly=False)
+    huFu.mix_place_order(symbol,'USDT',qty,side,'limit',reduceOnly=False)
+
 
 if orderId != 0:
     huFu.mix_cancel_plan_order(symbol, marginCoin, orderId, 'normal_plan')
