@@ -558,3 +558,10 @@ def is_nfp_time():
         return True
     else:
         return False
+    
+def check_string_type(string):
+    keyword_list = ["bull", "bear"]
+    for keyword in keyword_list:
+        if keyword.lower() in string.lower():
+            return keyword
+    return ''
