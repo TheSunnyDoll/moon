@@ -65,7 +65,7 @@ if order :
     side = 'open_long'
     #side = 'open_short'
 
-    entry = 28860
+    entry = 28835
     tp = 29080
     sl = 28780
 
