@@ -653,7 +653,7 @@ class BaseBall():
             return False
 
 
-def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty,super_mode,init_fund,loss_ratio,loss_aum,lever_mark_mode,balance_rate):
+def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty,super_mode,init_fund,loss_ratio,loss_aum,lever_mark_mode,balance_rate,hand_mode):
 
     bb = BaseBall()
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
@@ -662,12 +662,13 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
         if data != []:
                 ## clear all open orders
             huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
-        try:
-            data = huFu.mix_get_open_order('BTCUSDT_UMCBL')['data']
-            if data != []:
-                huFu.mix_cancel_all_orders ('UMCBL', marginCoin)
-        except Exception as e:
-            logger.debug(f"An unknown error occurred in mix_cancel_all_orders(): {e}")
+        if not hand_mode:
+            try:
+                data = huFu.mix_get_open_order('BTCUSDT_UMCBL')['data']
+                if data != []:
+                    huFu.mix_cancel_all_orders ('UMCBL', marginCoin)
+            except Exception as e:
+                logger.debug(f"An unknown error occurred in mix_cancel_all_orders(): {e}")
 
     logger.critical("三")
     time.sleep(1)
@@ -745,12 +746,13 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                     huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
                 except Exception as e:
                     logger.debug(f"An unknown error occurred in mix_cancel_all_trigger_orders(): {e}")
-            try:
-                data = huFu.mix_get_open_order('BTCUSDT_UMCBL')['data']
-                if data != []:
-                    huFu.mix_cancel_all_orders ('UMCBL', marginCoin)
-            except Exception as e:
-                logger.debug(f"An unknown error occurred in mix_cancel_all_orders(): {e}")
+            if not hand_mode:
+                try:
+                    data = huFu.mix_get_open_order('BTCUSDT_UMCBL')['data']
+                    if data != []:
+                        huFu.mix_cancel_all_orders ('UMCBL', marginCoin)
+                except Exception as e:
+                    logger.debug(f"An unknown error occurred in mix_cancel_all_orders(): {e}")
         startTime = get_previous_month_timestamp()
         endTime = get_previous_minute_timestamp()
         trend = []
@@ -911,6 +913,7 @@ if __name__ == "__main__":
     parser.add_argument('-f', '--fix_tp_mode', action='store_true', default=False, help='Enable fix_tp mode')
     parser.add_argument('-s', '--super_mode', action='store_true', default=False, help='Enable super_mode')
     parser.add_argument('-lm', '--lever_mark_mode', action='store_true', default=True, help='Enable lever_mark_mode')
+    parser.add_argument('-hm', '--hand_mode', action='store_true', default=False, help='Enable hand_mode')
 
 
     parser.add_argument('-fp', '--fix_tp_point', default=88,help='fix_tp_point')
@@ -929,6 +932,7 @@ if __name__ == "__main__":
     fix_mode = args.fix_tp_mode
     super_mode = args.super_mode
     lever_mark_mode = args.lever_mark_mode
+    hand_mode = args.hand_mode
 
     fix_tp = float(args.fix_tp_point)
     base_qty = float(args.base_qty)
@@ -947,4 +951,4 @@ if __name__ == "__main__":
     symbol = 'BTCUSDT_UMCBL'
     marginCoin = 'USDT'
     logger.info("让场子热起来吧🔥！ 新一场棒球比赛即将开始⚾️～")
-    start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty,super_mode,init_fund,loss_ratio,loss_aum,lever_mark_mode,balance_rate)
+    start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty,super_mode,init_fund,loss_ratio,loss_aum,lever_mark_mode,balance_rate,hand_mode)
