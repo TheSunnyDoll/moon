@@ -855,11 +855,11 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
 
         logger.warning("当前是 %s %s , 调整后手数 :%s ,所处区域 %s ",week_notice,re_notice,fix_base_qty,area)
 
-        reversal_w,old = bb.reversal_wait(old,dtrend,debug_mode)
+        reversal_w,new = bb.reversal_wait(old,dtrend,debug_mode)
         if reversal_w:
             logger.warning("交换球权 ,大家 休息5min 缓缓 ~")
             time.sleep(5*60)
-
+        old = new
         consolidating = bb.consolidation(last_klines,dtrend)
         orders = bb.advortise(trend,fix_mode,fix_tp)
         try:
