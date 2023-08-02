@@ -289,9 +289,11 @@ class BaseBall():
         for ft_orders in oders:
             for order in ft_orders:
                 time.sleep(0.1)
+                to_trend = False
+
                 if order[0] == 'open_long':
-                    # if current_price < order[1]:
-                    #     continue
+                    if current_price < order[1]:
+                        to_trend = True
                     tp_delta = order[2] - order[1]
                     sl_delta = order[1] - order[3]
                     if sl_delta <= 0 or sl_delta >= base_sl_delta:
@@ -303,8 +305,8 @@ class BaseBall():
                     else:
                         sl = order[3]
                 if order[0] == 'open_short':
-                    # if current_price > order[1]:
-                    #     continue
+                    if current_price > order[1]:
+                        to_trend = True
                     tp_delta = order[1] - order[2]
                     sl_delta = order[3] - order[1]
                     if sl_delta <= 0 or sl_delta >= base_sl_delta:
@@ -325,15 +327,15 @@ class BaseBall():
                     hft_qty = 5
                 ## TODO: test
 
-                dtrend = None
-                if dtrend is not None:
-                    if dtrend[-1] == 'bear' or dtrend[-1] == 'reversal-bear' or dtrend[-1] == 'bear_pullback':
-                        if order[0] != 'open_short':
-                            continue
-                    elif dtrend[-1] == 'bull' or dtrend[-1] == 'reversal-bull' or dtrend[-1] == 'bull_pullback':
-                        if order[0] != 'open_long':
-                            continue
-                
+                if not to_trend:
+                    if dtrend is not None:
+                        if dtrend[-1] == 'bear' or dtrend[-1] == 'reversal-bear' or dtrend[-1] == 'bear_pullback':
+                            if order[0] != 'open_short':
+                                continue
+                        elif dtrend[-1] == 'bull' or dtrend[-1] == 'reversal-bull' or dtrend[-1] == 'bull_pullback':
+                            if order[0] != 'open_long':
+                                continue
+                    
                 if debug_mode:
                     if ((float(order[1]) not in [entry[1] for entry in recent_open_long_list]) or long_qty <= 0) and ((float(order[1]) not in [entry[1] for entry in recent_open_short_list]) or short_qty <= 0):
                         logger.info("来吧全垒打⚾️ !我准备好啦! 🥖击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s,出手数: %s",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta,hft_qty)
