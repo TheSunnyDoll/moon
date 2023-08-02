@@ -919,7 +919,13 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                                 huFu.mix_cancel_plan_order(symbol, marginCoin, order['orderId'], 'normal_plan')
                             except Exception as e:
                                 logger.debug(f"An unknown error occurred in mix_cancel_plan_order(): {e}")
-
+                if not hand_mode:
+                    try:
+                        data = huFu.mix_get_open_order('BTCUSDT_UMCBL')['data']
+                        if data != []:
+                            huFu.mix_cancel_all_orders ('UMCBL', marginCoin)
+                    except Exception as e:
+                        logger.debug(f"An unknown error occurred in mix_cancel_all_orders(): {e}")
             if not super_mode and not consolidating and loss_away and trading_time():
                 track_orders = bb.on_track(last_legs,huFu,marginCoin,fix_base_qty,debug_mode,base_sl,pos,max_qty,dtrend,recent_open_long_list,recent_open_short_list,long_qty,short_qty,orders)
 
