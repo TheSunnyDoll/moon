@@ -675,7 +675,6 @@ class BaseBall():
         middle = (last_leg[1] + last_leg[2])/2
         middle_up = (max(last_leg[1],last_leg[2]) + middle) /2 
         middle_down = (min(last_leg[1],last_leg[2]) + middle) /2 
-        print('midele',middle_up,middle_down)
         if current_price >= middle_up:
             return 'premuim'
         if current_price <= middle_down:
