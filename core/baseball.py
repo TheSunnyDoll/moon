@@ -326,7 +326,7 @@ class BaseBall():
                 if hft_qty > 5:
                     hft_qty = 5
                 ## TODO: test
-
+                dtrend = None
                 if not to_trend:
                     if dtrend is not None:
                         if dtrend[-1] == 'bear' or dtrend[-1] == 'reversal-bear' or dtrend[-1] == 'bear_pullback':
@@ -673,7 +673,8 @@ class BaseBall():
             return False
 
     def reversal_wait(self,old,dtrend,debug_mode):
-        new = check_string_type(dtrend[-1])
+        if dtrend != []:
+            new = check_string_type(dtrend[-1])
         if debug_mode:
             print('old',old)
             print('new',new)
@@ -863,6 +864,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
         #     logger.warning("交换球权 ,大家 休息5min 缓缓 ~")
         #     time.sleep(5*60)
         # old = new
+        # print('new old',old)
         consolidating = bb.consolidation(last_klines,dtrend)
         orders = bb.advortise(trend,fix_mode,fix_tp)
         try:
