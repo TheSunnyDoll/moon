@@ -326,7 +326,6 @@ class BaseBall():
                 if hft_qty > 5:
                     hft_qty = 5
                 ## TODO: test
-                dtrend = None
                 if not to_trend:
                     if dtrend is not None:
                         if dtrend[-1] == 'bear' or dtrend[-1] == 'reversal-bear' or dtrend[-1] == 'bear_pullback':
