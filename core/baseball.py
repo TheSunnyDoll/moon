@@ -290,8 +290,8 @@ class BaseBall():
             for order in ft_orders:
                 time.sleep(0.1)
                 if order[0] == 'open_long':
-                    if current_price < order[1]:
-                        continue
+                    # if current_price < order[1]:
+                    #     continue
                     tp_delta = order[2] - order[1]
                     sl_delta = order[1] - order[3]
                     if sl_delta <= 0 or sl_delta >= base_sl_delta:
@@ -303,8 +303,8 @@ class BaseBall():
                     else:
                         sl = order[3]
                 if order[0] == 'open_short':
-                    if current_price > order[1]:
-                        continue
+                    # if current_price > order[1]:
+                    #     continue
                     tp_delta = order[1] - order[2]
                     sl_delta = order[3] - order[1]
                     if sl_delta <= 0 or sl_delta >= base_sl_delta:
@@ -324,6 +324,7 @@ class BaseBall():
                 if hft_qty > 5:
                     hft_qty = 5
                 ## TODO: test
+
                 dtrend = None
                 if dtrend is not None:
                     if dtrend[-1] == 'bear' or dtrend[-1] == 'reversal-bear' or dtrend[-1] == 'bear_pullback':
