@@ -672,6 +672,7 @@ class BaseBall():
             return False
 
     def reversal_wait(self,old,dtrend,debug_mode):
+        new = ''
         if dtrend != []:
             new = check_string_type(dtrend[-1])
         if debug_mode:
@@ -680,6 +681,8 @@ class BaseBall():
         if old != '' and new != '':
             if old != new:
                 return True,new
+            else:
+                return False,new
         else:
             return False,new
 
@@ -858,12 +861,11 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
 
         logger.warning("当前是 %s %s , 调整后手数 :%s ,所处区域 %s ",week_notice,re_notice,fix_base_qty,area)
 
-        # reversal_w,new = bb.reversal_wait(old,dtrend,debug_mode)
-        # if reversal_w:
-        #     logger.warning("交换球权 ,大家 休息5min 缓缓 ~")
-        #     time.sleep(5*60)
-        # old = new
-        # print('new old',old)
+        reversal_w,new = bb.reversal_wait(old,dtrend,debug_mode)
+        if reversal_w:
+            logger.warning("交换球权 ,大家 休息5min 缓缓 ~")
+            time.sleep(5*60)
+        old = new
         consolidating = bb.consolidation(last_klines,dtrend)
         orders = bb.advortise(trend,fix_mode,fix_tp)
         try:
@@ -889,9 +891,9 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
         time.sleep(0.3)
         batch_refresh_interval = 2
         if super_mode:
-            batch_refresh_interval = 60
+            batch_refresh_interval = 60      # 60
         for i in range(batch_refresh_interval):
-            for k in range(60):
+            for k in range(60):             # 60
                 time.sleep(1.5)
                 try:
                     result = huFu.mix_get_single_position(symbol,marginCoin)
