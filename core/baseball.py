@@ -342,10 +342,10 @@ class BaseBall():
                     if sl_delta>=0 and tp_delta>=0:
                         try:
                             trigger_price = order[1]
-                            if order[0] == 'open_long':
-                                trigger_price += 1
-                            if order[0] == 'open_short':
-                                trigger_price -= 1
+                            # if order[0] == 'open_long':
+                            #     trigger_price += 1
+                            # if order[0] == 'open_short':
+                            #     trigger_price -= 1
                             if ((float(order[1]) not in [entry[1] for entry in recent_open_long_list]) or long_qty <= 0) and ((float(order[1]) not in [entry[1] for entry in recent_open_short_list]) or short_qty <= 0):
                                 huFu.mix_place_plan_order(symbol, marginCoin, hft_qty, order[0], 'limit', trigger_price, "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
                                 logger.info("来吧全垒打⚾️ !我准备好啦! 🥖击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s,出手数: %s",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta,hft_qty)
