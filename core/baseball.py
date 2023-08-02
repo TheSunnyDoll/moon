@@ -492,7 +492,7 @@ class BaseBall():
                 if is_approximately_equal(short_info[1],entry)   or is_approximately_equal(long_info[1],entry):
                     logger.warning("球员记分,编号: %s, 进场位 %f, 得分圈%f",label,entry,delta)
 
-    def base_run(self,current_price,pos,huFu,super_mode,consolidating,debug_mode):
+    def base_run(self,current_price,pos,huFu,super_mode,consolidating,debug_mode,area):
         # a垒 ,36 开始,保一半
         a_base = 36
         # b垒 ,72 开始,保一半 
@@ -508,6 +508,9 @@ class BaseBall():
             if consolidating:
                 if not debug_mode:
                     huFu.mix_place_order(symbol,'USDT',short_info[0],'close_short','market',reduceOnly=True)
+            if area != '':
+                if area == 'premuim':
+                    a_base = a_base * 2
             delta = short_info[1] - current_price
             if delta >= a_base:
                 new_sl_point_delta = delta / 2
@@ -517,6 +520,9 @@ class BaseBall():
             if consolidating:
                 if not debug_mode:
                     huFu.mix_place_order(symbol,'USDT',short_info[0],'close_short','market',reduceOnly=True)
+            if area != '':
+                if area == 'premuim':
+                    a_base = a_base * 2
             delta = current_price - long_info[1]
             if delta >= a_base:
                 new_sl_point_delta = delta / 2
@@ -664,6 +670,18 @@ class BaseBall():
         else:
             return False
 
+    def dis_or_pre(self,legs,current_price):
+        last_leg = legs[-1]
+        middle = (last_leg[1] + last_leg[2])/2
+        middle_up = (max(last_leg[1],last_leg[2]) + middle) /2 
+        middle_down = (min(last_leg[1],last_leg[2]) + middle) /2 
+        print('midele',middle_up,middle_down)
+        if current_price >= middle_up:
+            return 'premuim'
+        if current_price <= middle_down:
+            return 'discount'
+        else:
+            return ''
 
 
 def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty,super_mode,init_fund,loss_ratio,loss_aum,lever_mark_mode,balance_rate,hand_mode):
@@ -825,9 +843,10 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
         logger.warning("当前是 %s %s , 调整后手数 :%s",week_notice,re_notice,fix_base_qty)
 
         if bb.reversal_wait(dtrend,debug_mode):
-            logger.warning("进入反转,给大家5min 缓缓 ~")
+            logger.warning("交换球权 ,大家 休息5min 缓缓 ~")
             time.sleep(5*60)
 
+        area = bb.dis_or_pre(last_legs,current_price)
         consolidating = bb.consolidation(last_klines,dtrend)
         orders = bb.advortise(trend,fix_mode,fix_tp)
         try:
@@ -870,7 +889,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                 except Exception as e:
                     logger.debug(f"An unknown error occurred in mix_get_market_price(): {e}")
 
-                bb.base_run(current_price,pos,huFu,super_mode,consolidating,debug_mode)
+                bb.base_run(current_price,pos,huFu,super_mode,consolidating,debug_mode,area)
                 time.sleep(1.5)
             logger.info("裁判播报员: ⚾️ 坐标 %s ",current_price)
 
