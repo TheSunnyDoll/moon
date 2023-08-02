@@ -667,17 +667,16 @@ class BaseBall():
         else:
             return False
 
-    def reversal_wait(self,dtrend,debug_mode):
-        old = check_string_type(dtrend[-2])
+    def reversal_wait(self,old,dtrend,debug_mode):
         new = check_string_type(dtrend[-1])
         if debug_mode:
             print('old',old)
             print('new',new)
         if old != '' and new != '':
             if old != new:
-                return True
+                return True,new
         else:
-            return False
+            return False,new
 
     def dis_or_pre(self,legs,current_price):
         last_leg = legs[-1]
@@ -694,6 +693,7 @@ class BaseBall():
 
 
 def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty,super_mode,init_fund,loss_ratio,loss_aum,lever_mark_mode,balance_rate,hand_mode):
+    old = ''
     bb = BaseBall()
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
     if not debug_mode:
@@ -853,7 +853,8 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
 
         logger.warning("当前是 %s %s , 调整后手数 :%s ,所处区域 %s ",week_notice,re_notice,fix_base_qty,area)
 
-        if bb.reversal_wait(dtrend,debug_mode):
+        reversal_w,old = bb.reversal_wait(old,dtrend,debug_mode)
+        if reversal_w:
             logger.warning("交换球权 ,大家 休息5min 缓缓 ~")
             time.sleep(5*60)
 
