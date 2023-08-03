@@ -941,6 +941,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
         if long_qty <= out_max_qty and short_qty<= out_max_qty and not consolidating and loss_away and trading_time() or test_mode:
             selected_batch_orders = bb.select_batch_orders(orders,fix_base_qty,base_sl,current_price,super_mode,dtrend,recent_open_long_list,recent_open_short_list,long_qty,short_qty)
             bb.place_batch_orders(symbol,marginCoin,huFu,selected_batch_orders,debug_mode)
+        print('outer last leg',last_legs)
 
         if not super_mode and not consolidating and loss_away and trading_time() or test_mode:
             track_orders = bb.on_track(last_legs,huFu,marginCoin,fix_base_qty,debug_mode,base_sl,pos,max_qty,dtrend,recent_open_long_list,recent_open_short_list,long_qty,short_qty,orders)
@@ -1025,6 +1026,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
             dtrend = bb.determine_trend(five_legs)
 
             last_legs = bb.get_last_legs(dtrend,five_legs)
+            print('inter last leg',last_legs)
             if not super_mode and not consolidating and loss_away and trading_time():
                 track_orders = bb.on_track(last_legs,huFu,marginCoin,fix_base_qty,debug_mode,base_sl,pos,max_qty,dtrend,recent_open_long_list,recent_open_short_list,long_qty,short_qty,orders)
 
