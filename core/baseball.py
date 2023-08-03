@@ -1010,7 +1010,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                 #                 huFu.mix_cancel_plan_order(symbol, marginCoin, order['orderId'], 'normal_plan')
                 #             except Exception as e:
                 #                 logger.debug(f"An unknown error occurred in mix_cancel_plan_order(): {e}")
-                ft == '5m'
+                ft = '5m'
                 try:
                     klines = huFu.mix_get_candles(symbol, ft, startTime, endTime)
                 except Exception as e:
