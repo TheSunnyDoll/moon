@@ -538,8 +538,10 @@ class BaseBall():
                 if not debug_mode:
                     huFu.mix_place_order(symbol,'USDT',short_info[0],'close_short','market',reduceOnly=True)
             if area != '':
-                if area == 'super_premuim':
+                if area == 'premuim':
                     a_base = a_base * 2
+                if area == 'super_premuim':
+                    a_base = a_base * 4
             delta = short_info[1] - current_price
             if delta >= a_base:
                 new_sl_point_delta = delta / 2
@@ -550,8 +552,10 @@ class BaseBall():
                 if not debug_mode:
                     huFu.mix_place_order(symbol,'USDT',short_info[0],'close_short','market',reduceOnly=True)
             if area != '':
-                if area == 'super_discount':
+                if area == 'discount':
                     a_base = a_base * 2
+                if area == 'super_discount':
+                    a_base = a_base * 4
             delta = current_price - long_info[1]
             if delta >= a_base:
                 new_sl_point_delta = delta / 2
@@ -880,15 +884,19 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                 five_legs = r
             time.sleep(0.3)
 
-        dtrend = bb.determine_trend(five_legs)
+        if test_mode:
+            d_legs = five_legs
+        else:
+            d_legs = one_H_legs
+        dtrend = bb.determine_trend(d_legs)
 
-        last_legs = bb.get_last_legs(dtrend,five_legs)
+        last_legs = bb.get_last_legs(dtrend,d_legs)
         # one_H_legs = one_H_legs[1:]
         # legs = [[dtrend] + one_H_legs[1:] for dtrend, one_H_legs in zip(dtrend, one_H_legs)]
         # last_legs = [leg for leg in legs if leg[0] != 'bull_pullback' and leg[0] != 'bear_pullback']
 
         if debug_mode:
-            print(five_legs)
+            print(d_legs)
             print(dtrend)
 
             print(last_legs)
@@ -1010,6 +1018,8 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                 #                 huFu.mix_cancel_plan_order(symbol, marginCoin, order['orderId'], 'normal_plan')
                 #             except Exception as e:
                 #                 logger.debug(f"An unknown error occurred in mix_cancel_plan_order(): {e}")
+            
+            if test_mode:
                 ft = '5m'
                 try:
                     klines = huFu.mix_get_candles(symbol, ft, startTime, endTime)
@@ -1023,10 +1033,11 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                 r,b = bb.zigzag(klines=klines, min_size=0.0015, percent=True)           # 0.0015
                 five_legs = r
 
-            dtrend = bb.determine_trend(five_legs)
+                dtrend = bb.determine_trend(five_legs)
 
-            last_legs = bb.get_last_legs(dtrend,five_legs)
-            print('inter last leg',last_legs)
+                last_legs = bb.get_last_legs(dtrend,five_legs)
+
+                print('inter last leg',last_legs)
             if not super_mode and not consolidating and loss_away and trading_time():
                 track_orders = bb.on_track(last_legs,huFu,marginCoin,fix_base_qty,debug_mode,base_sl,pos,max_qty,dtrend,recent_open_long_list,recent_open_short_list,long_qty,short_qty,orders)
 
