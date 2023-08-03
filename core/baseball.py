@@ -562,7 +562,6 @@ class BaseBall():
                 new_long_sl = round(long_info[1] + new_sl_point_delta)
                 ## move sl to new_long_sl
 
-        print('a_base',a_base)
 
         try:
             data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='profit_loss')['data']
