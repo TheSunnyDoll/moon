@@ -278,12 +278,12 @@ class BaseBall():
         return orders
         
 
-    def batch_orders(self,oders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price,super_mode,dtrend,recent_open_long_list,recent_open_short_list,long_qty,short_qty):
+    def select_batch_orders(self,oders,base_qty,base_sl,current_price,super_mode,dtrend,recent_open_long_list,recent_open_short_list,long_qty,short_qty):
         min_sl = 30
         base_sl_delta = 100
         base_mul = 1.5
         max_qty = 5
-
+        selected_batch_orders = []
         if super_mode:
             base_sl = 30
             base_sl_delta = 40
@@ -340,45 +340,35 @@ class BaseBall():
                             if order[0] != 'open_long':
                                 continue
                     
-                if debug_mode:
-                    if order[0] == 'open_long':
-                        t_index = find_index(order[1],sorted_open_long_items)
-                        print(t_index,hft_qty)
-                        hft_qty = round(hft_qty * base_mul ** t_index,3)
-                    if order[0] == 'open_short':
-                        t_index = find_index(order[1],sorted_open_short_items)
-                        hft_qty = round(hft_qty * base_mul ** t_index,3)
-                    if ((float(order[1]) not in [entry[1] for entry in recent_open_long_list]) or long_qty <= 0) and ((float(order[1]) not in [entry[1] for entry in recent_open_short_list]) or short_qty <= 0):
-                        logger.info("来吧全垒打⚾️ !我准备好啦! 🥖击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s,出手数: %s",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta,hft_qty)
-                if not debug_mode:
-                    if sl_delta>=0 and tp_delta>=0:
-                        try:
-                            trigger_price = order[1]
-                            if order[0] == 'open_long':
-                                if to_trend:
-                                    trigger_price -= 1
-                                    t_index = find_index(order[1],sorted_open_long_items)
-                                    if t_index > 0:
-                                        hft_qty = round(hft_qty * base_mul ** t_index,3)
-                                else:
-                                    trigger_price += 1
-                            if order[0] == 'open_short':
-                                if to_trend:
-                                    trigger_price += 1
-                                    t_index = find_index(order[1],sorted_open_short_items)
-                                    if t_index > 0:
-                                        hft_qty = round(hft_qty * base_mul ** t_index,3)
-                                else:
-                                    trigger_price -= 1
-                            if hft_qty > max_qty:
-                                hft_qty = max_qty
-                            if ((float(order[1]) not in [entry[1] for entry in recent_open_long_list]) or long_qty <= 0) and ((float(order[1]) not in [entry[1] for entry in recent_open_short_list]) or short_qty <= 0):
-                                huFu.mix_place_plan_order(symbol, marginCoin, hft_qty, order[0], 'limit', trigger_price, "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
-                                logger.info("来吧全垒打⚾️ !我准备好啦! 🥖击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s,出手数: %s",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta,hft_qty)
+                if sl_delta>=0 and tp_delta>=0:
+                    try:
+                        trigger_price = order[1]
+                        if order[0] == 'open_long':
+                            if to_trend:
+                                trigger_price -= 1
+                                t_index = find_index(order[1],sorted_open_long_items)
+                                if t_index > 0:
+                                    hft_qty = round(hft_qty * base_mul ** t_index,3)
+                            else:
+                                trigger_price += 1
+                        if order[0] == 'open_short':
+                            if to_trend:
+                                trigger_price += 1
+                                t_index = find_index(order[1],sorted_open_short_items)
+                                if t_index > 0:
+                                    hft_qty = round(hft_qty * base_mul ** t_index,3)
+                            else:
+                                trigger_price -= 1
+                        if hft_qty > max_qty:
+                            hft_qty = max_qty
+                        if ((float(order[1]) not in [entry[1] for entry in recent_open_long_list]) or long_qty <= 0) and ((float(order[1]) not in [entry[1] for entry in recent_open_short_list]) or short_qty <= 0):
+                            odr = [hft_qty, order[0], trigger_price, order[1], order[4],order[2], sl]
+                            selected_batch_orders.append(odr)
+                        
+                    except Exception as e:
+                        logger.debug(f"An unknown error occurred in mix_place_plan_order(): {e}")
 
-                        except Exception as e:
-                            logger.debug(f"An unknown error occurred in mix_place_plan_order(): {e}")
-
+        return selected_batch_orders
 
     def on_track(self,legs,huFu,marginCoin,base_qty,debug_mode,base_sl,pos,max_qty,dtrend,recent_open_long_list,recent_open_short_list,long_qty,short_qty,batch_orders):
         min_sl = 30
@@ -733,6 +723,17 @@ class BaseBall():
         else:
             return ''
 
+    def place_batch_orders(self,symbol, marginCoin,huFu,batch_orders,debug_mode):
+        # odr[0] = qty      odr[1]=derc     odr[2]=tirgger      odr[3]=execute      odr[4]=Oid      odr[5]=tp   odr[6]=sl
+        for odr in batch_orders:
+            try:
+                tp_delta = abs(odr[3] - odr[5])
+                sl_delta = abs(odr[3] - odr[6])
+                logger.info("来吧全垒打⚾️ !我准备好啦! 🥖击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s,出手数: %s",odr[1],odr[3],odr[5],odr[6],odr[4],tp_delta,sl_delta,odr[0])
+                if not debug_mode:
+                    huFu.mix_place_plan_order(symbol, marginCoin, odr[0], odr[1], 'limit', odr[2], "market_price", executePrice=odr[3], clientOrderId=odr[4],presetTakeProfitPrice=odr[5], presetStopLossPrice=odr[6], reduceOnly=False)
+            except Exception as e:
+                logger.debug(f"An unknown error occurred in mix_place_plan_order(): {e}")
 
 def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty,super_mode,init_fund,loss_ratio,loss_aum,lever_mark_mode,balance_rate,hand_mode):
     old = ''
@@ -897,8 +898,8 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
 
         reversal_w,new = bb.reversal_wait(old,dtrend,debug_mode)
         if reversal_w:
-            logger.warning("交换球权 ,大家 休息5min 缓缓 ~")
-            time.sleep(5*60)
+            logger.warning("交换球权 ,大家 休息10min 缓缓 ~")
+            time.sleep(10*60)
         old = new
         consolidating = bb.consolidation(last_klines,dtrend)
         orders = bb.advortise(trend,fix_mode,fix_tp)
@@ -918,7 +919,9 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
         loss_away,stop_loss_time,loss_side,total_profits,recent_open_long_list,recent_open_short_list = bb.earn_or_loss(huFu)
         out_max_qty = max_qty * 2
         if long_qty <= out_max_qty and short_qty<= out_max_qty and not consolidating and loss_away and trading_time():
-            bb.batch_orders(orders,huFu,marginCoin,fix_base_qty,debug_mode,base_sl,current_price,super_mode,dtrend,recent_open_long_list,recent_open_short_list,long_qty,short_qty)
+            selected_batch_orders = bb.select_batch_orders(orders,fix_base_qty,base_sl,current_price,super_mode,dtrend,recent_open_long_list,recent_open_short_list,long_qty,short_qty)
+            bb.place_batch_orders(symbol,marginCoin,huFu,selected_batch_orders,debug_mode)
+
         if not super_mode and not consolidating and loss_away and trading_time():
             track_orders = bb.on_track(last_legs,huFu,marginCoin,fix_base_qty,debug_mode,base_sl,pos,max_qty,dtrend,recent_open_long_list,recent_open_short_list,long_qty,short_qty,orders)
 
@@ -961,19 +964,13 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                     data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
                     if data != []:
                             ## clear all open orders
+                        ## if orders in open_orders 
                         huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
 
                 except Exception as e:
                     logger.debug(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
 
-                # if data != []:
-                #     for order in data:
-                #         if '_' not in order['clientOid']:
-                #         ## clear all open orders
-                #             try:
-                #                 huFu.mix_cancel_plan_order(symbol, marginCoin, order['orderId'], 'normal_plan')
-                #             except Exception as e:
-                #                 logger.debug(f"An unknown error occurred in mix_cancel_plan_order(): {e}")
+
                 if not hand_mode:
                     try:
                         data = huFu.mix_get_open_order('BTCUSDT_UMCBL')['data']
@@ -982,7 +979,16 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                     except Exception as e:
                         logger.debug(f"An unknown error occurred in mix_cancel_all_orders(): {e}")
             if long_qty <= out_max_qty and short_qty<= out_max_qty and not consolidating and loss_away and trading_time():
-                bb.batch_orders(orders,huFu,marginCoin,fix_base_qty,debug_mode,base_sl,current_price,super_mode,dtrend,recent_open_long_list,recent_open_short_list,long_qty,short_qty)
+                selected_batch_orders = bb.select_batch_orders(orders,fix_base_qty,base_sl,current_price,super_mode,dtrend,recent_open_long_list,recent_open_short_list,long_qty,short_qty)
+                bb.place_batch_orders(symbol,marginCoin,huFu,selected_batch_orders,debug_mode)
+                # if data != []:
+                #     for order in data:
+                #         if '_' not in order['clientOid']:
+                #         ## clear all open orders
+                #             try:
+                #                 huFu.mix_cancel_plan_order(symbol, marginCoin, order['orderId'], 'normal_plan')
+                #             except Exception as e:
+                #                 logger.debug(f"An unknown error occurred in mix_cancel_plan_order(): {e}")
 
             if not super_mode and not consolidating and loss_away and trading_time():
                 track_orders = bb.on_track(last_legs,huFu,marginCoin,fix_base_qty,debug_mode,base_sl,pos,max_qty,dtrend,recent_open_long_list,recent_open_short_list,long_qty,short_qty,orders)
