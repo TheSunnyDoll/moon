@@ -907,7 +907,10 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
         else:
             fix_base_qty = fix_base_qty
             re_notice = '非反转区'
-        area = bb.dis_or_pre(last_legs,current_price)
+        one_H_dtrend = bb.determine_trend(one_H_legs)
+
+        one_H_last_legs = bb.get_last_legs(one_H_dtrend,one_H_legs)
+        area = bb.dis_or_pre(one_H_last_legs,current_price)
 
         logger.warning("当前是 %s %s , 调整后手数 :%s ,所处区域 %s ",week_notice,re_notice,fix_base_qty,area)
 
