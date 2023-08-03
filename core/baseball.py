@@ -735,6 +735,14 @@ class BaseBall():
             except Exception as e:
                 logger.debug(f"An unknown error occurred in mix_place_plan_order(): {e}")
 
+    def get_last_legs(self,dtrend,trend_legs):
+        trend_legs = trend_legs[1:]
+        legs = [[dtrend] + trend_legs[1:] for dtrend, trend_legs in zip(dtrend, trend_legs)]
+        last_legs = [leg for leg in legs if leg[0] != 'bull_pullback' and leg[0] != 'bear_pullback']
+        return last_legs
+
+
+
 def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty,super_mode,init_fund,loss_ratio,loss_aum,lever_mark_mode,balance_rate,hand_mode,test_mode):
     old = ''
     bb = BaseBall()
@@ -861,6 +869,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
             r,b = bb.zigzag(klines=klines, min_size=0.0055, percent=True)
             if ft == '15m':
                 last_klines = klines
+                fif_legs = r
             if ft == '1H':
                 one_H_legs = r
             b.insert(0,ft)
@@ -868,9 +877,11 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
             time.sleep(0.3)
 
         dtrend = bb.determine_trend(one_H_legs)
-        one_H_legs = one_H_legs[1:]
-        legs = [[dtrend] + one_H_legs[1:] for dtrend, one_H_legs in zip(dtrend, one_H_legs)]
-        last_legs = [leg for leg in legs if leg[0] != 'bull_pullback' and leg[0] != 'bear_pullback']
+
+        last_legs = bb.get_last_legs(dtrend,one_H_legs)
+        # one_H_legs = one_H_legs[1:]
+        # legs = [[dtrend] + one_H_legs[1:] for dtrend, one_H_legs in zip(dtrend, one_H_legs)]
+        # last_legs = [leg for leg in legs if leg[0] != 'bull_pullback' and leg[0] != 'bear_pullback']
 
         if debug_mode:
             print(one_H_legs)
