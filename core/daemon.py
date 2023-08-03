@@ -21,7 +21,7 @@ def run_baseball(username, debug_mode, fix_tp_mode, super_mode, fix_tp_point, ba
             if hand_mode:
                 command.append('-hm')
             if test_mode:
-                command.append('tm')
+                command.append('-tm')
 
             command.append(f'-fp={fix_tp_point}')
             command.append(f'-bsl={base_sl}')
