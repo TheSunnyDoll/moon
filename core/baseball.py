@@ -358,14 +358,16 @@ class BaseBall():
                                 if to_trend:
                                     trigger_price -= 1
                                     t_index = find_index(order[1],sorted_open_long_items)
-                                    hft_qty = round(hft_qty * base_mul ** t_index,3)
+                                    if t_index > 0:
+                                        hft_qty = round(hft_qty * base_mul ** t_index,3)
                                 else:
                                     trigger_price += 1
                             if order[0] == 'open_short':
                                 if to_trend:
                                     trigger_price += 1
                                     t_index = find_index(order[1],sorted_open_short_items)
-                                    hft_qty = round(hft_qty * base_mul ** t_index,3)
+                                    if t_index > 0:
+                                        hft_qty = round(hft_qty * base_mul ** t_index,3)
                                 else:
                                     trigger_price -= 1
                             if hft_qty > max_qty:
