@@ -866,7 +866,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                     retry_count += 1
                     print("再来一次")
                     time.sleep(retry_delay)
-            r,b = bb.zigzag(klines=klines, min_size=0.0035, percent=True)           # 0.0055
+            r,b = bb.zigzag(klines=klines, min_size=0.0015, percent=True)           # 0.0055
             if ft == '15m':
                 last_klines = klines
                 fif_legs = r
@@ -876,15 +876,15 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
             trend.append(b)
             time.sleep(0.3)
 
-        dtrend = bb.determine_trend(one_H_legs)
+        dtrend = bb.determine_trend(fif_legs)
 
-        last_legs = bb.get_last_legs(dtrend,one_H_legs)
+        last_legs = bb.get_last_legs(dtrend,fif_legs)
         # one_H_legs = one_H_legs[1:]
         # legs = [[dtrend] + one_H_legs[1:] for dtrend, one_H_legs in zip(dtrend, one_H_legs)]
         # last_legs = [leg for leg in legs if leg[0] != 'bull_pullback' and leg[0] != 'bear_pullback']
 
         if debug_mode:
-            print(one_H_legs)
+            print(fif_legs)
             print(dtrend)
 
             print(last_legs)
