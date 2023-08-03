@@ -3,7 +3,7 @@ import time
 import argparse
 from utils import *
 
-def run_baseball(username, debug_mode, fix_tp_mode, super_mode, fix_tp_point, base_sl, base_qty, max_qty,lever_mark_mode,init_fund,loss_ratio,AUM,balance_rate,hand_mode):
+def run_baseball(username, debug_mode, fix_tp_mode, super_mode, fix_tp_point, base_sl, base_qty, max_qty,lever_mark_mode,init_fund,loss_ratio,AUM,balance_rate,hand_mode,test_mode):
     logger = get_logger(username+'down_error.log')
 
     while True:
@@ -20,6 +20,8 @@ def run_baseball(username, debug_mode, fix_tp_mode, super_mode, fix_tp_point, ba
                 command.append('-lm')
             if hand_mode:
                 command.append('-hm')
+            if test_mode:
+                command.append('tm')
 
             command.append(f'-fp={fix_tp_point}')
             command.append(f'-bsl={base_sl}')
@@ -47,6 +49,8 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--super_mode', action='store_true', default=False, help='Enable super_mode')
     parser.add_argument('-lm', '--lever_mark_mode', action='store_true', default=True, help='Enable lever_mark_mode')
     parser.add_argument('-hm', '--hand_mode', action='store_true', default=False, help='Enable hand_mode')
+    parser.add_argument('-tm', '--test_mode', action='store_true', default=False, help='Enable test_mode')
+
 
 
     parser.add_argument('-fp', '--fix_tp_point', default=88,help='fix_tp_point')
@@ -61,4 +65,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # 调用守护程序函数，并将命令行参数传递给它
-    run_baseball(args.username, args.debug_mode, args.fix_tp_mode, args.super_mode, args.fix_tp_point, args.base_sl, args.base_qty, args.max_qty,args.lever_mark_mode,args.init_fund,args.loss_ratio,args.AUM,args.balance_rate,args.hand_mode)
+    run_baseball(args.username, args.debug_mode, args.fix_tp_mode, args.super_mode, args.fix_tp_point, args.base_sl, args.base_qty, args.max_qty,args.lever_mark_mode,args.init_fund,args.loss_ratio,args.AUM,args.balance_rate,args.hand_mode,args.test_mode)

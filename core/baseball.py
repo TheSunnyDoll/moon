@@ -735,7 +735,7 @@ class BaseBall():
             except Exception as e:
                 logger.debug(f"An unknown error occurred in mix_place_plan_order(): {e}")
 
-def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty,super_mode,init_fund,loss_ratio,loss_aum,lever_mark_mode,balance_rate,hand_mode):
+def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty,super_mode,init_fund,loss_ratio,loss_aum,lever_mark_mode,balance_rate,hand_mode,test_mode):
     old = ''
     bb = BaseBall()
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
@@ -918,11 +918,13 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
 
         loss_away,stop_loss_time,loss_side,total_profits,recent_open_long_list,recent_open_short_list = bb.earn_or_loss(huFu)
         out_max_qty = max_qty * 2
-        if long_qty <= out_max_qty and short_qty<= out_max_qty and not consolidating and loss_away and trading_time():
+        if test_mode:
+            fix_base_qty = 0.001
+        if long_qty <= out_max_qty and short_qty<= out_max_qty and not consolidating and loss_away and trading_time() or test_mode:
             selected_batch_orders = bb.select_batch_orders(orders,fix_base_qty,base_sl,current_price,super_mode,dtrend,recent_open_long_list,recent_open_short_list,long_qty,short_qty)
             bb.place_batch_orders(symbol,marginCoin,huFu,selected_batch_orders,debug_mode)
 
-        if not super_mode and not consolidating and loss_away and trading_time():
+        if not super_mode and not consolidating and loss_away and trading_time() or test_mode:
             track_orders = bb.on_track(last_legs,huFu,marginCoin,fix_base_qty,debug_mode,base_sl,pos,max_qty,dtrend,recent_open_long_list,recent_open_short_list,long_qty,short_qty,orders)
 
         time.sleep(0.3)
@@ -1021,6 +1023,7 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--super_mode', action='store_true', default=False, help='Enable super_mode')
     parser.add_argument('-lm', '--lever_mark_mode', action='store_true', default=True, help='Enable lever_mark_mode')
     parser.add_argument('-hm', '--hand_mode', action='store_true', default=False, help='Enable hand_mode')
+    parser.add_argument('-tm', '--test_mode', action='store_true', default=False, help='Enable test_mode')
 
 
     parser.add_argument('-fp', '--fix_tp_point', default=88,help='fix_tp_point')
@@ -1040,6 +1043,7 @@ if __name__ == "__main__":
     super_mode = args.super_mode
     lever_mark_mode = args.lever_mark_mode
     hand_mode = args.hand_mode
+    test_mode = args.test_mode
 
     fix_tp = float(args.fix_tp_point)
     base_qty = float(args.base_qty)
@@ -1058,4 +1062,4 @@ if __name__ == "__main__":
     symbol = 'BTCUSDT_UMCBL'
     marginCoin = 'USDT'
     logger.info("让场子热起来吧🔥！ 新一场棒球比赛即将开始⚾️～")
-    start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty,super_mode,init_fund,loss_ratio,loss_aum,lever_mark_mode,balance_rate,hand_mode)
+    start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max_qty,super_mode,init_fund,loss_ratio,loss_aum,lever_mark_mode,balance_rate,hand_mode,test_mode)
