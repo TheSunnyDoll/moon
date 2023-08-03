@@ -101,10 +101,10 @@ if close:
         data = huFu.mix_place_order(symbol,'USDT',short_qty,'close_short','market',reduceOnly=True)
 
 
-new_short_sl = 30110
+new_short_sl = 0
 new_short_tp = 0
 
-new_long_sl = 0
+new_long_sl = 29127
 new_long_tp = 0
 
 if move:
