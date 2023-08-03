@@ -876,15 +876,15 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
             trend.append(b)
             time.sleep(0.3)
 
-        dtrend = bb.determine_trend(fif_legs)
+        dtrend = bb.determine_trend(one_H_legs)
 
-        last_legs = bb.get_last_legs(dtrend,fif_legs)
+        last_legs = bb.get_last_legs(dtrend,one_H_legs)
         # one_H_legs = one_H_legs[1:]
         # legs = [[dtrend] + one_H_legs[1:] for dtrend, one_H_legs in zip(dtrend, one_H_legs)]
         # last_legs = [leg for leg in legs if leg[0] != 'bull_pullback' and leg[0] != 'bear_pullback']
 
         if debug_mode:
-            print(fif_legs)
+            print(one_H_legs)
             print(dtrend)
 
             print(last_legs)
