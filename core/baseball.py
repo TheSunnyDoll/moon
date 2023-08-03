@@ -281,10 +281,16 @@ class BaseBall():
     def batch_orders(self,oders,huFu,marginCoin,base_qty,debug_mode,base_sl,current_price,super_mode,dtrend,recent_open_long_list,recent_open_short_list,long_qty,short_qty):
         min_sl = 30
         base_sl_delta = 100
+        base_mul = 1.5
+        max_qty = 5
 
         if super_mode:
             base_sl = 30
             base_sl_delta = 40
+        sorted_open_short_items, sorted_open_long_items = extract_and_sort(oders)
+        if debug_mode:
+            print("sorted_open_short_items",sorted_open_short_items)
+            print("sorted_open_long_items",sorted_open_long_items)
 
         for ft_orders in oders:
             for order in ft_orders:
@@ -323,8 +329,7 @@ class BaseBall():
                 if sl_delta>=0 and tp_delta>=0:
                     if tp_delta < sl_delta:
                         hft_qty = round(base_qty * tp_delta/sl_delta,3)
-                if hft_qty > 5:
-                    hft_qty = 5
+
                 ## TODO: test
                 if not to_trend:
                     if dtrend is not None:
@@ -336,6 +341,13 @@ class BaseBall():
                                 continue
                     
                 if debug_mode:
+                    if order[0] == 'open_long':
+                        t_index = find_index(order[1],sorted_open_long_items)
+                        print(t_index,hft_qty)
+                        hft_qty = round(hft_qty * base_mul ** t_index,3)
+                    if order[0] == 'open_short':
+                        t_index = find_index(order[1],sorted_open_short_items)
+                        hft_qty = round(hft_qty * base_mul ** t_index,3)
                     if ((float(order[1]) not in [entry[1] for entry in recent_open_long_list]) or long_qty <= 0) and ((float(order[1]) not in [entry[1] for entry in recent_open_short_list]) or short_qty <= 0):
                         logger.info("来吧全垒打⚾️ !我准备好啦! 🥖击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s,出手数: %s",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta,hft_qty)
                 if not debug_mode:
@@ -345,13 +357,19 @@ class BaseBall():
                             if order[0] == 'open_long':
                                 if to_trend:
                                     trigger_price -= 1
+                                    t_index = find_index(order[1],sorted_open_long_items)
+                                    hft_qty = round(hft_qty * base_mul ** t_index,3)
                                 else:
                                     trigger_price += 1
                             if order[0] == 'open_short':
                                 if to_trend:
                                     trigger_price += 1
+                                    t_index = find_index(order[1],sorted_open_short_items)
+                                    hft_qty = round(hft_qty * base_mul ** t_index,3)
                                 else:
                                     trigger_price -= 1
+                            if hft_qty > max_qty:
+                                hft_qty = max_qty
                             if ((float(order[1]) not in [entry[1] for entry in recent_open_long_list]) or long_qty <= 0) and ((float(order[1]) not in [entry[1] for entry in recent_open_short_list]) or short_qty <= 0):
                                 huFu.mix_place_plan_order(symbol, marginCoin, hft_qty, order[0], 'limit', trigger_price, "market_price", executePrice=order[1], clientOrderId=order[4],presetTakeProfitPrice=order[2], presetStopLossPrice=sl, reduceOnly=False)
                                 logger.info("来吧全垒打⚾️ !我准备好啦! 🥖击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s,出手数: %s",order[0],order[1],order[2],sl,order[4],tp_delta,sl_delta,hft_qty)

@@ -565,3 +565,18 @@ def check_string_type(string):
         if keyword.lower() in string.lower():
             return keyword
     return ''
+
+def extract_and_sort(data):
+    open_short_items = [item[1] for sublist in data for item in sublist if item[0] == 'open_short']
+    sorted_open_short_items = sorted(list(set(open_short_items)))
+
+    open_long_items = [item[1] for sublist in data for item in sublist if item[0] == 'open_long']
+    sorted_open_long_items = sorted(list(set(open_long_items)), reverse=True)
+
+    return sorted_open_short_items, sorted_open_long_items
+
+def find_index(element, lst):
+    if element in lst:
+        return lst.index(element)
+    else:
+        return -1

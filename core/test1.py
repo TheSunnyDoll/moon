@@ -1,25 +1,15 @@
-import requests
-from bs4 import BeautifulSoup
+def find_index(element, lst):
+    if element in lst:
+        return lst.index(element)+1
+    else:
+        return -1
 
-url = 'https://metrics.deribit.com/options/BTC'
+# 示例数据
+data_list = [29587.0, 29593, 29695, 29767, 30004, 30333.5, 30588, 31036.0, 31140]
 
-# 请求网页
-response = requests.get(url)
-print(response)
-soup = BeautifulSoup(response.text, 'html.parser')
+# 要查找的元素
+element_to_find = 29767
 
-# 找到最大痛点表格
-table = soup.find('table', id='max-pain')
-
-# 提取表格行 
-rows = table.find_all('tr')
-
-# 解析最后一行即最近一次数据
-last_row = rows[-1]
-cells = last_row.find_all('td')
-
-# 打印输出
-print(cells[0].text) # 日期
-print(cells[1].text) # 价格
-print(cells[2].text) # 开息
-print(cells[3].text) # 收息
+# 调用函数并输出结果
+index = find_index(element_to_find, data_list)
+print(f"The element {element_to_find} is at index: {index}")
