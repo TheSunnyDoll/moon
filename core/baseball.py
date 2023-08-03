@@ -548,7 +548,7 @@ class BaseBall():
                 if not debug_mode:
                     huFu.mix_place_order(symbol,'USDT',short_info[0],'close_short','market',reduceOnly=True)
             if area != '':
-                if area == 'premuim':
+                if area == 'super_premuim':
                     a_base = a_base * 2
             delta = short_info[1] - current_price
             if delta >= a_base:
@@ -560,7 +560,7 @@ class BaseBall():
                 if not debug_mode:
                     huFu.mix_place_order(symbol,'USDT',short_info[0],'close_short','market',reduceOnly=True)
             if area != '':
-                if area == 'premuim':
+                if area == 'super_discount':
                     a_base = a_base * 2
             delta = current_price - long_info[1]
             if delta >= a_base:
@@ -713,14 +713,22 @@ class BaseBall():
             return False,new
 
     def dis_or_pre(self,legs,current_price):
-        last_leg = legs[-1]
-        middle = (last_leg[1] + last_leg[2])/2
-        middle_up = ((max(last_leg[1],last_leg[2]) + middle) /2 + middle) /2
-        middle_down = ((min(last_leg[1],last_leg[2]) + middle) /2 + middle) /2
-        print('midele',middle_up,middle_down)
-        if current_price >= middle_up:
+        max,min = find_max_min(legs)
+        middle = (max + min)/2
+        middle_up = (max + middle) /2 
+        middle_down = (min + middle) /2 
+        super_middle_up = (middle_up + max) /2
+        super_middle_down = (middle_down + min) /2
+        print('dealing range:',max,min)
+        print('midele',middle,middle_up,middle_down)
+        if current_price >= super_middle_up:
+            return 'super_premuim'
+        if current_price <= super_middle_down:
+            return 'super_discount'
+
+        if current_price >= middle:
             return 'premuim'
-        if current_price <= middle_down:
+        if current_price <= middle:
             return 'discount'
         else:
             return ''

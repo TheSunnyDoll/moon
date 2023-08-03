@@ -1,15 +1,16 @@
-def find_index(element, lst):
-    if element in lst:
-        return lst.index(element)+1
-    else:
-        return -1
+def find_max_min(data_list):
+    if not data_list:
+        return None, None
+
+    max_val = max(data_list, key=lambda x: x[1])[1]
+    min_val = min(data_list, key=lambda x: x[1])[1]
+
+    return max_val, min_val
 
 # 示例数据
-data_list = [29587.0, 29593, 29695, 29767, 30004, 30333.5, 30588, 31036.0, 31140]
-
-# 要查找的元素
-element_to_find = 29767
+data_list = [['reversal-bull', 29013.5, 29510.0], ['bear', 29324.5, 28695.5], ['bull', 28729.5, 29324.5], ['bull', 29162.5, 30043.5], ['bear', 29587.0, 28907.0], ['bull', 29019.5, 29266.0]]
 
 # 调用函数并输出结果
-index = find_index(element_to_find, data_list)
-print(f"The element {element_to_find} is at index: {index}")
+max_val, min_val = find_max_min(data_list)
+print("最大值:", max_val)
+print("最小值:", min_val)

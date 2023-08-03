@@ -580,3 +580,11 @@ def find_index(element, lst):
         return lst.index(element)
     else:
         return -1
+def find_max_min(data_list):
+    if not data_list:
+        return None, None
+
+    max_val = max(data_list, key=lambda x: x[1])[1]
+    min_val = min(data_list, key=lambda x: x[1])[1]
+
+    return max_val, min_val
