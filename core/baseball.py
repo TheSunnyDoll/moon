@@ -374,7 +374,7 @@ class BaseBall():
         min_sl = 30
         long_qty = float(pos[0]["total"])
         short_qty = float(pos[1]["total"])
-        base_point = 150
+        base_point = 30
         if debug_mode:
             print(legs)
         last_leg = legs[-1]
