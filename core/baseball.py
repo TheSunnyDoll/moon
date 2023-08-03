@@ -866,14 +866,17 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                     retry_count += 1
                     print("再来一次")
                     time.sleep(retry_delay)
-            r,b = bb.zigzag(klines=klines, min_size=0.0015, percent=True)           # 0.0055
-            if ft == '15m':
-                last_klines = klines
-                fif_legs = r
+            r,b = bb.zigzag(klines=klines, min_size=0.0055, percent=True)           # 0.0055
+
             if ft == '1H':
                 one_H_legs = r
             b.insert(0,ft)
             trend.append(b)
+            if ft == '15m':
+                r,b = bb.zigzag(klines=klines, min_size=0.0015, percent=True)           # 0.0055
+
+                last_klines = klines
+                fif_legs = r
             time.sleep(0.3)
 
         dtrend = bb.determine_trend(fif_legs)
