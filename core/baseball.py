@@ -846,7 +846,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
         startTime = get_previous_month_timestamp()
         endTime = get_previous_minute_timestamp()
         trend = []
-        ft_list = ['15m','30m','1H','4H','1D']
+        ft_list = ['5m','15m','30m','1H','4H','1D']
         last_legs = []
         last_klines = []
         for ft in ft_list:
@@ -872,22 +872,22 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                 one_H_legs = r
             b.insert(0,ft)
             trend.append(b)
-            if ft == '15m':
-                r,b = bb.zigzag(klines=klines, min_size=0.0015, percent=True)           # 0.0055
+            if ft == '5m':
+                r,b = bb.zigzag(klines=klines, min_size=0.0015, percent=True)           # 0.0015
 
                 last_klines = klines
-                fif_legs = r
+                five_legs = r
             time.sleep(0.3)
 
-        dtrend = bb.determine_trend(fif_legs)
+        dtrend = bb.determine_trend(five_legs)
 
-        last_legs = bb.get_last_legs(dtrend,fif_legs)
+        last_legs = bb.get_last_legs(dtrend,five_legs)
         # one_H_legs = one_H_legs[1:]
         # legs = [[dtrend] + one_H_legs[1:] for dtrend, one_H_legs in zip(dtrend, one_H_legs)]
         # last_legs = [leg for leg in legs if leg[0] != 'bull_pullback' and leg[0] != 'bear_pullback']
 
         if debug_mode:
-            print(fif_legs)
+            print(five_legs)
             print(dtrend)
 
             print(last_legs)
@@ -1005,7 +1005,22 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                 #                 huFu.mix_cancel_plan_order(symbol, marginCoin, order['orderId'], 'normal_plan')
                 #             except Exception as e:
                 #                 logger.debug(f"An unknown error occurred in mix_cancel_plan_order(): {e}")
+                ft == '5m'
+                try:
+                    klines = huFu.mix_get_candles(symbol, ft, startTime, endTime)
+                except Exception as e:
+                    logger.debug(f"An unknown error occurred in mix_get_candles(): {e} ,{ft}")
 
+                if not klines:
+                    retry_count += 1
+                    print("再来一次")
+                    time.sleep(retry_delay)
+                r,b = bb.zigzag(klines=klines, min_size=0.0015, percent=True)           # 0.0015
+                five_legs = r
+
+            dtrend = bb.determine_trend(five_legs)
+
+            last_legs = bb.get_last_legs(dtrend,five_legs)
             if not super_mode and not consolidating and loss_away and trading_time():
                 track_orders = bb.on_track(last_legs,huFu,marginCoin,fix_base_qty,debug_mode,base_sl,pos,max_qty,dtrend,recent_open_long_list,recent_open_short_list,long_qty,short_qty,orders)
 
