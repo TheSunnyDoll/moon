@@ -1047,7 +1047,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
 
         if consolidating:
             logger.warning("请注意!!! 准备休息,开始修理场地 ~~~~")
-            time.sleep(1800)
+            time.sleep(30)
 
         if is_less_than_10_minutes(time_remaining):
             if total_profits >= 0:
