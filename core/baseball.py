@@ -550,7 +550,7 @@ class BaseBall():
         if long_info[0] > 0:
             if consolidating:
                 if not debug_mode:
-                    huFu.mix_place_order(symbol,'USDT',short_info[0],'close_short','market',reduceOnly=True)
+                    huFu.mix_place_order(symbol,'USDT',short_info[0],'close_long','market',reduceOnly=True)
             if area != '':
                 if area == 'discount':
                     a_base = a_base * 2

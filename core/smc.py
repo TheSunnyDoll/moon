@@ -7,12 +7,33 @@ from utils import *
 class SMC():
     def __init__(self) -> None:
         pass
+
+    def process_kline_data(self,kline_data):
+        df = pd.DataFrame(kline_data, columns=['time', 'open', 'high', 'low', 'close', 'volume','usdt_volume'])
+        df['high'] = pd.to_numeric(df['high'], errors='coerce')
+        df['low'] = pd.to_numeric(df['low'], errors='coerce')
+
+        # Convert 'time' column to datetime and set it as the index
+        df['utc_time'] = pd.to_datetime(df['time'], unit='ms')
+
+        # Add 'status' column based on 'close' and 'open' values
+        df['status'] = 'star'
+        df.loc[df['close'] > df['open'], 'status'] = 'bull'
+        df.loc[df['close'] < df['open'], 'status'] = 'bear'
+        
+        df['delta'] = df['high'] - df['low']
+
+        # Move 'utc_time' column to the front
+        df = df[['utc_time', 'time','open', 'high', 'low', 'close', 'delta','volume', 'status']]
+        
+        return df
+
     def swings(self,*, klines, min_size, percent):
         klines = np.array(object=klines, dtype=np.float64)
         time = klines[:, 0]
         high = klines[:, 2]
         low = klines[:, 3]
-        print('high',high)
+    
         length = len(klines)
         zigzag = np.zeros(length)
         trend, last_high, last_low = 0, 0, 0
@@ -90,9 +111,92 @@ class SMC():
             if zigzag[i] == -1:
                 out.append([time[i], low[i]])
         sorted_price = sorted(out, key=lambda x: x[0])
-        price = [item[1] for item in sorted_price]
-        print(klines)
-        print(price)
+        swing_points = [item[1] for item in sorted_price]
+        marked_swing_points = []
+        
+        for i in range(len(swing_points)):
+            if i == 0:
+                continue
+            elif i == 1:
+                if swing_points[i] > swing_points[i - 1]:
+                    marked_swing_points.append((swing_points[i - 1], 'L'))
+                    marked_swing_points.append((swing_points[i], 'H'))
+                else:
+                    marked_swing_points.append((swing_points[i - 1], 'H'))
+                    marked_swing_points.append((swing_points[i], 'L'))
+            else:
+                if swing_points[i] > swing_points[i - 1]:
+                    if swing_points[i] > swing_points[i - 2]:
+                        marked_swing_points.append((swing_points[i], 'HH'))
+                    else:
+                        marked_swing_points.append((swing_points[i], 'HL'))
+                else:
+                    if swing_points[i] > swing_points[i - 2]:
+                        marked_swing_points.append((swing_points[i], 'LH'))
+                    else:
+                        marked_swing_points.append((swing_points[i], 'LL'))
+        
+        return marked_swing_points
+
+    def get_inside_bars(self,klines):
+        def is_inside_bar(current_high, current_low, prev_high, prev_low):
+            # 判断当前蜡烛是否是Inside Bar
+            if current_high <= prev_high and current_low >= prev_low:
+                return True
+            else:
+                return False
+
+        klines['inside_bar'] = 0
+
+        for i in range(1, len(klines)):
+            current_high = float(klines.at[i, 'high'])
+            current_low = float(klines.at[i, 'low'])
+            prev_high = float(klines.at[i - 1, 'high'])
+            prev_low = float(klines.at[i - 1, 'low'])
+
+            if is_inside_bar(current_high, current_low, prev_high, prev_low):
+                klines.loc[i, 'inside_bar'] = 1
+        klines = klines[['utc_time', 'time','open', 'high', 'low', 'close', 'delta','volume', 'status','inside_bar']]
+        filtered_df = klines[klines['inside_bar'] == 1]
+
+        return filtered_df
+    
+    def mark_swing_points(self,swing,klines):
+        def mark_near_index(l_label,inside_bar_indices,poi_decr):
+            derc_indices = []
+            for label in l_label:
+                # 找到 'swing_point' 列为 'LL' 的索引
+                indices = klines[klines['swing_point'] == label].index
+                derc_indices.append(indices)
+
+            for indices in derc_indices:
+                if not indices.empty:
+                    print(indices)
+                    # 找到 'swing_point' 为 'LL' 并且距离最近的 'inside_bar' 为 1 的索引
+                    nearest_inside_bar_index = min(inside_bar_indices, key=lambda x: min(abs(x - ll_idx) for ll_idx in indices))
+                    # 标记 'poi' 列为 'high'
+                    klines.loc[nearest_inside_bar_index, 'poi'] = poi_decr
+
+            
+        klines['swing_point'] = ''
+        klines['poi'] = ''
+        for point in swing:
+            if point[1] == 'L' or point[1] == 'LL' or point[1] == 'LH':
+                klines.loc[klines['low'] == point[0] , 'swing_point'] = point[1]
+            if point[1] == 'H' or point[1] == 'HL' or point[1] == 'HH':
+                klines.loc[klines['high'] == point[0] , 'swing_point'] = point[1]
+        # 找到 'inside_bar' 为 1 的索引
+        inside_bar_indices = klines[klines['inside_bar'] == 1].index
+
+        l_label = ['LL','LH','L']
+        poi_decr = 'high_buy'
+        mark_near_index(l_label,inside_bar_indices,poi_decr)
+
+        l_label = ['HL','HH','H']
+        poi_decr = 'high_sell'
+        mark_near_index(l_label,inside_bar_indices,poi_decr)
+
+        return klines
 
 
 def start(hero,symbol,marginCoin,debug_mode):
@@ -102,6 +206,8 @@ def start(hero,symbol,marginCoin,debug_mode):
     endTime = get_previous_minute_timestamp()
     trend = []
     ft_list = ['5m','15m','30m','1H','4H','1D']
+    ft_list = ['5m','15m']
+
     last_legs = []
     last_klines = []
     for ft in ft_list:
@@ -121,8 +227,21 @@ def start(hero,symbol,marginCoin,debug_mode):
                 retry_count += 1
                 print("再来一次")
                 time.sleep(retry_delay)
-        smc.swings(klines=klines, min_size=0.0055, percent=True)
-
+        if ft == '5m':
+            data = smc.process_kline_data(klines)
+            inside = smc.get_inside_bars(data)
+            print(inside)
+        #inside = smc.get_inside_bars(klines)
+        #print(inside)
+        if ft == '15m':
+            swing = smc.swings(klines=klines, min_size=0.0055, percent=True)
+            print(swing)
+            mal = smc.mark_swing_points(swing,data)
+            print(mal)
+            filtered_df = mal[mal['swing_point'] != '']
+            print(filtered_df)
+            filtered_df = mal[mal['poi'] != '']
+            print(filtered_df)
 
 
 if __name__ == "__main__":
