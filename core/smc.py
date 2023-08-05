@@ -228,8 +228,13 @@ def start(hero,symbol,marginCoin,debug_mode):
 
     smc = SMC()
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
-    startTime = get_previous_month_timestamp()
-    endTime = get_previous_minute_timestamp()
+    # startTime = get_previous_month_timestamp()
+    # endTime = get_previous_minute_timestamp()
+    x = 1
+
+    startTime = get_previous_x_timestamp(x+1)
+
+    endTime = get_previous_x_timestamp(x)
     trend = []
     ft_list = ['5m','15m','30m','1H','4H','1D']
     ft_list = ['5m','15m']

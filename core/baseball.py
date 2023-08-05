@@ -889,7 +889,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
         else:
             d_legs = one_H_legs
         dtrend = bb.determine_trend(d_legs)
-
+        print('test',d_legs)
         last_legs = bb.get_last_legs(dtrend,d_legs)
         # one_H_legs = one_H_legs[1:]
         # legs = [[dtrend] + one_H_legs[1:] for dtrend, one_H_legs in zip(dtrend, one_H_legs)]
