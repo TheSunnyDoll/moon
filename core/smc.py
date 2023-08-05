@@ -155,6 +155,7 @@ class SMC():
             prev_low = float(klines.at[i - 1, 'low'])
 
             if is_inside_bar(current_high, current_low, prev_high, prev_low):
+                delta = current_high - current_low
                 klines.loc[i, 'inside_bar'] = 1
         klines = klines[['utc_time', 'time','open', 'high', 'low', 'close', 'delta','volume', 'status','inside_bar']]
         filtered_df = klines[klines['inside_bar'] == 1]
@@ -163,6 +164,7 @@ class SMC():
     
     def mark_swing_points(self,swing,klines):
         def mark_near_index(l_label,inside_bar_indices,poi_decr):
+
             derc_indices = []
             for label in l_label:
                 # 找到 'swing_point' 列为 'LL' 的索引
@@ -171,11 +173,13 @@ class SMC():
 
             for indices in derc_indices:
                 if not indices.empty:
-                    print(indices)
-                    # 找到 'swing_point' 为 'LL' 并且距离最近的 'inside_bar' 为 1 的索引
-                    nearest_inside_bar_index = min(inside_bar_indices, key=lambda x: min(abs(x - ll_idx) for ll_idx in indices))
-                    # 标记 'poi' 列为 'high'
-                    klines.loc[nearest_inside_bar_index, 'poi'] = poi_decr
+                    for ele in indices:
+                        # 找到 'swing_point' 为 'LL' 并且距离最近的 'inside_bar' 为 1 的索引
+                        nearest_inside_bar_index = min(inside_bar_indices, key=lambda x: abs(x - ele))
+                        delta = abs(ele - nearest_inside_bar_index)
+                        if delta <= 5:
+                        # 标记 'poi' 列为 'high'
+                            klines.loc[nearest_inside_bar_index, 'poi'] = poi_decr
 
             
         klines['swing_point'] = ''
@@ -187,7 +191,6 @@ class SMC():
                 klines.loc[klines['high'] == point[0] , 'swing_point'] = point[1]
         # 找到 'inside_bar' 为 1 的索引
         inside_bar_indices = klines[klines['inside_bar'] == 1].index
-
         l_label = ['LL','LH','L']
         poi_decr = 'high_buy'
         mark_near_index(l_label,inside_bar_indices,poi_decr)
@@ -198,8 +201,31 @@ class SMC():
 
         return klines
 
+    def mark_reversal_bar(self,df):
+        # 初始化reversal_bar列为''
+        df['reversal_bar'] = ''
+
+        # 判断是否为reversal_bar并赋值
+        for i in range(1, len(df)):
+            current_high = df.at[i, 'high']
+            current_low = df.at[i, 'low']
+            prev_high = df.at[i - 1, 'high']
+            prev_low = df.at[i - 1, 'low']
+            close = df.at[i, 'close']
+            open = df.at[i, 'open']
+
+            if current_high > prev_high and current_low < prev_low:
+                if close < open:
+                    df.at[i, 'reversal_bar'] = 'reversal_sell'
+                else:
+                    df.at[i, 'reversal_bar'] = 'reversal_buy'
+
+        return df
+
 
 def start(hero,symbol,marginCoin,debug_mode):
+    pd.set_option('display.max_rows', 100)
+
     smc = SMC()
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
     startTime = get_previous_month_timestamp()
@@ -230,18 +256,30 @@ def start(hero,symbol,marginCoin,debug_mode):
         if ft == '5m':
             data = smc.process_kline_data(klines)
             inside = smc.get_inside_bars(data)
-            print(inside)
+            swing = smc.swings(klines=klines, min_size=0.0015, percent=True)
+            print('swing',swing)
+            mal = smc.mark_swing_points(swing,data)
+
+            filtered_df = mal[mal['poi'] != '']
+            # print(filtered_df)
+            # print()
+
+            mal = smc.mark_reversal_bar(mal)
+            filtered_df = mal[mal['reversal_bar'] != '']
+            # print(filtered_df)
+            print(mal)
+
         #inside = smc.get_inside_bars(klines)
         #print(inside)
-        if ft == '15m':
-            swing = smc.swings(klines=klines, min_size=0.0055, percent=True)
-            print(swing)
-            mal = smc.mark_swing_points(swing,data)
-            print(mal)
-            filtered_df = mal[mal['swing_point'] != '']
-            print(filtered_df)
-            filtered_df = mal[mal['poi'] != '']
-            print(filtered_df)
+        # if ft == '15m':
+        #     swing = smc.swings(klines=klines, min_size=0.0055, percent=True)
+        #     print(swing)
+        #     mal = smc.mark_swing_points(swing,data)
+        #     print(mal)
+        #     filtered_df = mal[mal['swing_point'] != '']
+        #     print(filtered_df)
+        #     filtered_df = mal[mal['poi'] != '']
+        #     print(filtered_df)
 
 
 if __name__ == "__main__":

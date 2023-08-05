@@ -521,7 +521,7 @@ class BaseBall():
                 if is_approximately_equal(short_info[1],entry)   or is_approximately_equal(long_info[1],entry):
                     logger.warning("球员记分,编号: %s, 进场位 %f, 得分圈%f",label,entry,delta)
 
-    def base_run(self,current_price,pos,huFu,super_mode,consolidating,debug_mode,area):
+    def base_run(self,current_price,pos,huFu,super_mode,consolidating,debug_mode,area,test_mode):
         # a垒 ,36 开始,保一半
         a_base = 36
         # b垒 ,72 开始,保一半 
@@ -535,7 +535,7 @@ class BaseBall():
 
         if short_info[0] > 0:
             if consolidating:
-                if not debug_mode:
+                if not debug_mode and not test_mode:
                     huFu.mix_place_order(symbol,'USDT',short_info[0],'close_short','market',reduceOnly=True)
             if area != '':
                 if area == 'premuim':
@@ -549,7 +549,7 @@ class BaseBall():
                 ## move sl to new_short_sl
         if long_info[0] > 0:
             if consolidating:
-                if not debug_mode:
+                if not debug_mode and not test_mode:
                     huFu.mix_place_order(symbol,'USDT',short_info[0],'close_long','market',reduceOnly=True)
             if area != '':
                 if area == 'discount':
@@ -974,7 +974,7 @@ def start(hero,symbol,marginCoin,debug_mode,fix_mode,fix_tp,base_qty,base_sl,max
                 except Exception as e:
                     logger.debug(f"An unknown error occurred in mix_get_market_price(): {e}")
 
-                bb.base_run(current_price,pos,huFu,super_mode,consolidating,debug_mode,area)
+                bb.base_run(current_price,pos,huFu,super_mode,consolidating,debug_mode,area,test_mode)
                 time.sleep(1.5)
             logger.info("裁判播报员: ⚾️ 坐标 %s ",current_price)
 
