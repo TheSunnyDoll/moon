@@ -77,6 +77,18 @@ def get_previous_x_timestamp(x):
     timestamp_ms = timestamp * 1000
     return timestamp_ms
 
+def get_previous_xmin_timestamp(x):
+    current_time = datetime.datetime.now()
+    previous_day = current_time - datetime.timedelta(minutes=x)
+    previous_day_midnight = previous_day.replace(hour=0, minute=0, second=0, microsecond=0)
+    timestamp = int(time.mktime(previous_day_midnight.timetuple()))
+    timestamp_ms = timestamp * 1000
+    return timestamp_ms
+
+def get_current_timestamp():
+    current_timestamp = time.time()
+    return current_timestamp * 1000
+
 
 def timestamp_to_hour(timestamp_ms):
     timestamp_sec = timestamp_ms // 1000
