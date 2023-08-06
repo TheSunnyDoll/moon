@@ -84,8 +84,8 @@ class SideBar():
                 except Exception as e:
                     logger.debug(f"An unknown error occurred in mix_place_order(): {e}")
             try:
-
-                huFu.mix_place_order(symbol,'USDT',base_qty,'open_long','market',reduceOnly=False)
+                if long_qty == 0:
+                    huFu.mix_place_order(symbol,'USDT',base_qty,'open_long','market',reduceOnly=False)
             except Exception as e:
                 logger.debug(f"An unknown error occurred in mix_place_order(): {e}")
             logger.info("open long")
@@ -103,15 +103,15 @@ class SideBar():
             long_qty = float(pos[0]["total"])
             short_qty = float(pos[1]["total"])
 
-            if short_qty >0:
+            if long_qty >0:
                 try:
 
                     huFu.mix_place_order(symbol,'USDT',long_qty,'close_long','market',reduceOnly=True)
                 except Exception as e:
                     logger.debug(f"An unknown error occurred in mix_place_order(): {e}")
             try:
-
-                huFu.mix_place_order(symbol,'USDT',base_qty,'open_short','market',reduceOnly=False)
+                if short_qty == 0:
+                    huFu.mix_place_order(symbol,'USDT',base_qty,'open_short','market',reduceOnly=False)
             except Exception as e:
                 logger.debug(f"An unknown error occurred in mix_place_order(): {e}")
             logger.info("open short")
