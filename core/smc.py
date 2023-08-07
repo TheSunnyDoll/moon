@@ -304,7 +304,7 @@ class SMC():
                  recent_open_price_list.append(float(order['priceAvg']))
         
         for ord in order_list:
-            if is_approx_equal_to_any(ord[1],order_list):
+            if is_approx_equal_to_any(ord[1],recent_open_price_list):
                 order_list = [order for order in order_list if order != ord]
         return order_list
 
