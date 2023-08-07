@@ -65,9 +65,9 @@ def earn_or_loss(huFu,x):
                 else:
                     pos = 0
             if loss_day_df['T/L'].sum() < 0:
-                return loss_day_df['time'].iloc[0],day,profit_day_df['T/L'].sum(),loss_day_df['T/L'].sum(),net_profit,pos,profit_day_df['T/L'].max(),loss_day_df['T/L'].min()
+                return loss_day_df['time'].iloc[0],day,profit_day_df['T/L'].sum(),loss_day_df['T/L'].sum(),profit_day_df['T/L'].max(),loss_day_df['T/L'].min(),net_profit,pos
             elif profit_day_df['T/L'].sum()>0:
-                return profit_day_df['time'].iloc[0],day,profit_day_df['T/L'].sum(),loss_day_df['T/L'].sum(),net_profit,pos,profit_day_df['T/L'].max(),loss_day_df['T/L'].min()
+                return profit_day_df['time'].iloc[0],day,profit_day_df['T/L'].sum(),loss_day_df['T/L'].sum(),profit_day_df['T/L'].max(),loss_day_df['T/L'].min(),net_profit,pos
 
 
 
@@ -111,8 +111,8 @@ if __name__ == "__main__":
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
     tl_list = []
     for i in range(10):
-        date, week_day, profit ,loss, net ,pos,max_pro,max_dd= earn_or_loss(huFu,i)
-        tl_list.append([date, week_day, profit ,loss, net,pos,max_pro,max_dd])
+        date, week_day, profit ,loss,max_pro,max_dd, net ,pos= earn_or_loss(huFu,i)
+        tl_list.append([date, week_day, profit ,loss,max_pro,max_dd, net,pos])
 
     columns = ['time', 'week_day', 'profit' ,'loss', 'net','pos','max_profit','max_loss']
     tl_list_pd = pd.DataFrame(tl_list, columns=columns)
