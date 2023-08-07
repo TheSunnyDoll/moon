@@ -263,13 +263,17 @@ class BaseBall():
                 idm2_order2 = [drec,idm2_entry,tp2,sl2,ft+'_idm2_order2']
                 ft_orders[len(ft_orders):] = [eng_order,idm1_order1,idm1_order2,idm2_order1,idm2_order2]
             else:
-                if positive:
-                    eng_order_fix_tp = [drec,eng_entry,eng_tp3,sl1,ft+'_eng_order_fix_tp']
+
                 idm1_order1_fix_tp = [drec,idm1_entry,idm1_tp3,sl2,ft+'_idm1_order1_fix_tp']
                 idm1_order2_fix_tp = [drec,idm1_entry,idm1_tp3,sl2,ft+'_idm1_order2_fix_tp']
                 idm2_order1_fix_tp = [drec,idm2_entry,idm2_tp3,sl2,ft+'_idm2_order1_fix_tp']
                 idm2_order2_fix_tp = [drec,idm2_entry,idm2_tp3,sl2,ft+'_idm2_order2_fix_tp']
-                ft_orders[len(ft_orders):] = [eng_order_fix_tp,idm1_order1_fix_tp,idm1_order2_fix_tp,idm2_order1_fix_tp,idm2_order2_fix_tp]
+                if positive:
+                    eng_order_fix_tp = [drec,eng_entry,eng_tp3,sl1,ft+'_eng_order_fix_tp']
+                    ft_orders[len(ft_orders):] = [eng_order_fix_tp,idm1_order1_fix_tp,idm1_order2_fix_tp,idm2_order1_fix_tp,idm2_order2_fix_tp]
+                else:
+                    ft_orders[len(ft_orders):] = [idm1_order1_fix_tp,idm1_order2_fix_tp,idm2_order1_fix_tp,idm2_order2_fix_tp]
+
 
             orders.append(ft_orders)
 
