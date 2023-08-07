@@ -64,7 +64,7 @@ class SideBar():
         # if bar[2] inside bar ; bar[1] outside ; buy
 
     def place_order(self,side,huFu,symbol,marginCoin):
-        base_qty = 0.001
+        base_qty = 0.01
         if side == 'long':
             # get position; close short ; entry long
             try:

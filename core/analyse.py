@@ -51,12 +51,12 @@ def earn_or_loss(huFu,x):
         for day in week_days:
             loss_day_df = loss_df[loss_df['week_day'].str.contains(day)]
             profit_day_df = profit_df[profit_df['week_day'].str.contains(day)]
-            # if not loss_day_df.empty:
-            #     # print(loss_day_df)
-            #     print(loss_day_df['time'].iloc[0],day," Total loss sum:", loss_day_df['T/L'].sum())
-            # if not profit_day_df.empty:
-            #     # print(profit_day_df)
-            #     print(profit_day_df['time'].iloc[0],day," Total profit sum:", profit_day_df['T/L'].sum())
+            if not loss_day_df.empty:
+                print(loss_day_df)
+                print(loss_day_df['time'].iloc[0],day," Total loss sum:", loss_day_df['T/L'].sum())
+            if not profit_day_df.empty:
+                print(profit_day_df)
+                print(profit_day_df['time'].iloc[0],day," Total profit sum:", profit_day_df['T/L'].sum())
             if not loss_day_df.empty or not profit_day_df.empty:
                 net_profit = loss_day_df['T/L'].sum() + profit_day_df['T/L'].sum()
                 # print(day," net profit sum:", net_profit)
