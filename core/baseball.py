@@ -739,6 +739,8 @@ class BaseBall():
             try:
                 tp_delta = abs(odr[3] - odr[5])
                 sl_delta = abs(odr[3] - odr[6])
+                if odr[0] < 0.001:
+                    odr[0] = 0.001
                 logger.info("来吧全垒打⚾️ !我准备好啦! 🥖击打方向: %s ,击打点位: %s, 得分点: %s,失分点: %s ,编号: %s,得分圈: %s,失分圈: %s,出手数: %s",odr[1],odr[3],odr[5],odr[6],odr[4],tp_delta,sl_delta,odr[0])
                 if not debug_mode:
                     huFu.mix_place_plan_order(symbol, marginCoin, odr[0], odr[1], 'limit', odr[2], "market_price", executePrice=odr[3], clientOrderId=odr[4],presetTakeProfitPrice=odr[5], presetStopLossPrice=odr[6], reduceOnly=False)
