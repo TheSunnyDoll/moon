@@ -391,8 +391,6 @@ def inside_bar_orders(hero,symbol,marginCoin,debug_mode):
         startTime = get_previous_x_hour_timestamp(x)
         endTime = get_minute_timestamp()
         ft_list = ['5m','15m']
-        data= []
-        data_15 = []
         for ft in ft_list:
 
             max_retries = 3
@@ -412,8 +410,8 @@ def inside_bar_orders(hero,symbol,marginCoin,debug_mode):
                     time.sleep(retry_delay)
             
             if ft == '5m':
-                data = smc.process_kline_data(klines)
-                inside = smc.get_inside_bars(data)
+                df_klines_5m = smc.process_kline_data(klines)
+                inside = smc.get_inside_bars(df_klines_5m)
 
             if ft == '15m':
                 data_15 = smc.process_kline_data(klines)
@@ -430,7 +428,7 @@ def inside_bar_orders(hero,symbol,marginCoin,debug_mode):
                     logger.info("裁判播报员: ⚾️ 坐标 %s ",current_price)
                 except Exception as e:
                     logger.debug(f"An unknown error occurred in mix_get_market_price(): {e}")
-                order_list = smc.inside_order_adv(data,inside,current_price) 
+                order_list = smc.inside_order_adv(df_klines_5m,inside,current_price) 
                 order_list_15 = smc.inside_order_adv(data_15,inside_15,current_price) 
 
                 if order_list != [] or order_list_15 != []:
