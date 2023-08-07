@@ -608,3 +608,9 @@ def find_max_min(data_list):
     min_val = min(data_list, key=lambda x: x[1])[1]
 
     return max_val, min_val
+
+def is_approx_equal_to_any(value, price_list, tolerance=5):
+    for price in price_list:
+        if abs(value - price) <= tolerance:
+            return True
+    return False

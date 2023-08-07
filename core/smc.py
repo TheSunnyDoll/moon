@@ -278,7 +278,7 @@ class SMC():
         
 
     def place_batch_orders(self,orders,huFu):
-        # odr[0] = qty      odr[1]=derc     odr[2]=tirgger      odr[3]=execute      odr[4]=Oid      odr[5]=tp   odr[6]=sl
+        #  odr[0]=derc     odr[1]=entry     odr[2]=tp   odr[3]=sl
 
         base_qty = 0.001
         for odr in orders:
@@ -288,6 +288,25 @@ class SMC():
                 print("place",odr)
             except Exception as e:
                 logger.debug(f"An unknown error occurred in mix_place_plan_order(): {e}")
+
+
+    def get_net_orders(self,huFu,order_list):
+        startTime = get_previous_hour_timestamp(2)
+        endTime = get_previous_minute_timestamp()
+        orders = huFu.mix_get_history_orders(symbol, startTime, endTime, 100, lastEndId='', isPre=False)['data']['orderList']
+
+        recent_open_price_list = []
+
+        for order in orders:
+            if order['side'] == 'open_long' and order['state'] == 'filled':
+                 recent_open_price_list.append(float(order['priceAvg']))
+            if order['side'] == 'open_short' and order['state'] == 'filled':
+                 recent_open_price_list.append(float(order['priceAvg']))
+        
+        for ord in order_list:
+            if is_approx_equal_to_any(ord[1],order_list):
+                order_list = [order for order in order_list if order != ord]
+        return order_list
 
 
 ## inside bar 过5根bar后开始挂单,挂在close处， 入场为h+l /2 ，止损放在前一根另一边,第72根失效（不包含inside_bar）
@@ -371,7 +390,7 @@ def inside_bar_orders(hero,symbol,marginCoin,debug_mode):
         x = 6
         startTime = get_previous_x_hour_timestamp(x)
         endTime = get_minute_timestamp()
-        ft_list = ['5m']
+        ft_list = ['5m','15m']
 
         for ft in ft_list:
 
@@ -393,42 +412,56 @@ def inside_bar_orders(hero,symbol,marginCoin,debug_mode):
             if ft == '5m':
                 data = smc.process_kline_data(klines)
                 inside = smc.get_inside_bars(data)
-                batch_refresh_interval = 3
 
-                for i in range(batch_refresh_interval):
-                    for k in range(2):             # 60
-                        time.sleep(15)
+            if ft == '15m':
+                data_15 = smc.process_kline_data(klines)
+                inside_15 = smc.get_inside_bars(data_15)
+
+            batch_refresh_interval = 3
+
+            for i in range(batch_refresh_interval):
+                for k in range(2):             # 60
+                    time.sleep(15)
+                    try:
+                        result = huFu.mix_get_market_price(symbol)
+                        current_price = float(result['data']['markPrice'])
+                        logger.info("裁判播报员: ⚾️ 坐标 %s ",current_price)
+                    except Exception as e:
+                        logger.debug(f"An unknown error occurred in mix_get_market_price(): {e}")
+                    order_list = smc.inside_order_adv(data,inside,current_price) 
+                    order_list_15 = smc.inside_order_adv(data_15,inside_15,current_price) 
+
+                    if order_list != [] or order_list_15 != []:
+                        # cancel all orders
                         try:
-                            result = huFu.mix_get_market_price(symbol)
-                            current_price = float(result['data']['markPrice'])
-                            logger.info("裁判播报员: ⚾️ 坐标 %s ",current_price)
+                            data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
+                            if data != []:
+                                    ## clear all open orders
+                                ## if orders in open_orders 
+                                huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
+
                         except Exception as e:
-                            logger.debug(f"An unknown error occurred in mix_get_market_price(): {e}")
-                        order_list = smc.inside_order_adv(data,inside,current_price)      
+                            logger.debug(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
+
+
+                        try:
+                            data = huFu.mix_get_open_order('BTCUSDT_UMCBL')['data']
+                            if data != []:
+                                huFu.mix_cancel_all_orders ('UMCBL', marginCoin)
+                        except Exception as e:
+                            logger.debug(f"An unknown error occurred in mix_cancel_all_orders(): {e}")
+                        
+                        # place orders
                         if order_list != []:
-                            # cancel all orders
-                            try:
-                                data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
-                                if data != []:
-                                        ## clear all open orders
-                                    ## if orders in open_orders 
-                                    huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
-
-                            except Exception as e:
-                                logger.debug(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
-
-
-                            try:
-                                data = huFu.mix_get_open_order('BTCUSDT_UMCBL')['data']
-                                if data != []:
-                                    huFu.mix_cancel_all_orders ('UMCBL', marginCoin)
-                            except Exception as e:
-                                logger.debug(f"An unknown error occurred in mix_cancel_all_orders(): {e}")
-                            
-                            # place orders
+                            order_list = smc.get_net_orders(huFu,order_list)
                             smc.place_batch_orders(order_list,huFu)
 
-                        time.sleep(15)
+                        if order_list_15 != []:
+                            order_list_15 = smc.get_net_orders(huFu,order_list_15)
+
+                            smc.place_batch_orders(order_list_15,huFu)
+
+                    time.sleep(15)
 
 if __name__ == "__main__":
     # 解析命令行参数
