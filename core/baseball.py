@@ -255,13 +255,15 @@ class BaseBall():
 
             ft_orders = []
             if not fix_mode:
-                if positive:
-                    eng_order = [drec,eng_entry,tp1,sl1,ft+'_eng_order']
                 idm1_order1 = [drec,idm1_entry,tp1,sl2,ft+'_idm1_order1']
                 idm1_order2 = [drec,idm1_entry,tp2,sl2,ft+'_idm1_order2']
                 idm2_order1 = [drec,idm2_entry,tp1,sl2,ft+'_idm2_order1']
                 idm2_order2 = [drec,idm2_entry,tp2,sl2,ft+'_idm2_order2']
-                ft_orders[len(ft_orders):] = [eng_order,idm1_order1,idm1_order2,idm2_order1,idm2_order2]
+                if positive:
+                    eng_order = [drec,eng_entry,tp1,sl1,ft+'_eng_order']
+                    ft_orders[len(ft_orders):] = [eng_order,idm1_order1,idm1_order2,idm2_order1,idm2_order2]
+                ft_orders[len(ft_orders):] = [idm1_order1,idm1_order2,idm2_order1,idm2_order2]
+
             else:
 
                 idm1_order1_fix_tp = [drec,idm1_entry,idm1_tp3,sl2,ft+'_idm1_order1_fix_tp']
