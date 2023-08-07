@@ -412,8 +412,6 @@ def inside_bar_orders(hero,symbol,marginCoin,debug_mode):
             if ft == '5m':
                 df_klines_5m = smc.process_kline_data(klines)
                 df_klines_5m.drop(df_klines_5m.tail(5).index, inplace=True)
-
-                print(df_klines_5m)
                 inside = smc.get_inside_bars(df_klines_5m)
 
             if ft == '15m':
