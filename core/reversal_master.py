@@ -40,8 +40,10 @@ def start(hero,symbol,marginCoin,debug_mode):
     rvs = Reversal()
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
     # last_1m = rvs.get_last_bar(symbol,huFu,'1m')
+    ## 整分 5/0 开始 获取5m
     last_5m = rvs.get_last_bar(symbol,huFu,'5m')
     print(last_5m)
+    ## 判定是否io
     # print(last_1m)
 
 

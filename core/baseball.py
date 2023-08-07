@@ -308,7 +308,7 @@ class BaseBall():
                         to_trend = True
                     tp_delta = order[2] - order[1]
                     sl_delta = order[1] - order[3]
-                    if sl_delta <= 0 or sl_delta >= base_sl_delta:
+                    if sl_delta <= 4 or sl_delta >= base_sl_delta:
                         sl = order[1] - base_sl
                         sl_delta = base_sl
                     elif sl_delta < min_sl:
@@ -321,7 +321,7 @@ class BaseBall():
                         to_trend = True
                     tp_delta = order[1] - order[2]
                     sl_delta = order[3] - order[1]
-                    if sl_delta <= 0 or sl_delta >= base_sl_delta:
+                    if sl_delta <= 4 or sl_delta >= base_sl_delta:
                         sl = order[1] + base_sl
                         sl_delta = base_sl
                     elif sl_delta < min_sl:
@@ -429,7 +429,7 @@ class BaseBall():
                 if order[0] == 'open_long':
                     tp_delta = order[2] - order[1]
                     sl_delta = order[1] - order[3]
-                    if sl_delta <= 0 or sl_delta >= 100:
+                    if sl_delta <= 4 or sl_delta >= 100:
                         sl = order[1] - base_sl
                         sl_delta = base_sl
                     elif sl_delta < min_sl:
@@ -440,7 +440,7 @@ class BaseBall():
                 if order[0] == 'open_short':
                     tp_delta = order[1] - order[2]
                     sl_delta = order[3] - order[1]
-                    if sl_delta <= 0 or sl_delta >= 100:
+                    if sl_delta <= 4 or sl_delta >= 100:
                         sl = order[1] + base_sl
                         sl_delta = base_sl
                     elif sl_delta < min_sl:
