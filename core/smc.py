@@ -391,7 +391,8 @@ def inside_bar_orders(hero,symbol,marginCoin,debug_mode):
         startTime = get_previous_x_hour_timestamp(x)
         endTime = get_minute_timestamp()
         ft_list = ['5m','15m']
-
+        data= []
+        data_15 = []
         for ft in ft_list:
 
             max_retries = 3
@@ -409,6 +410,7 @@ def inside_bar_orders(hero,symbol,marginCoin,debug_mode):
                     retry_count += 1
                     print("再来一次")
                     time.sleep(retry_delay)
+            
             if ft == '5m':
                 data = smc.process_kline_data(klines)
                 inside = smc.get_inside_bars(data)
