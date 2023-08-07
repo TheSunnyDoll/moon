@@ -114,7 +114,7 @@ if __name__ == "__main__":
         date, week_day, profit ,loss,max_pro,max_dd, net ,pos= earn_or_loss(huFu,i)
         tl_list.append([date, week_day, profit ,loss,max_pro,max_dd, net,pos])
 
-    columns = ['time', 'week_day', 'profit' ,'loss', 'net','pos','max_profit','max_loss']
+    columns = ['time', 'week_day', 'profit' ,'loss','max_profit','max_loss', 'net','pos']
     tl_list_pd = pd.DataFrame(tl_list, columns=columns)
     print(tl_list_pd)
     print(tl_list_pd['net'].sum())
