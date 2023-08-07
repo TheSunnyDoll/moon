@@ -91,7 +91,6 @@ class SideBar():
             except Exception as e:
                 logger.debug(f"An unknown error occurred in mix_place_order(): {e}")
 
-            print(side)
         elif side == 'short':
             # get position; close short ; entry long
             try:
