@@ -1,30 +1,26 @@
-def mark_swing_points(swing_points):
-    marked_swing_points = []
-    
-    for i in range(len(swing_points)):
-        if i == 0:
-            continue
-        elif i == 1:
-            if swing_points[i] > swing_points[i - 1]:
-                marked_swing_points.append((swing_points[i - 1], 'L'))
-                marked_swing_points.append((swing_points[i], 'H'))
-            else:
-                marked_swing_points.append((swing_points[i - 1], 'H'))
-                marked_swing_points.append((swing_points[i], 'L'))
-        else:
-            if swing_points[i] > swing_points[i - 1]:
-                if swing_points[i] > swing_points[i - 2]:
-                    marked_swing_points.append((swing_points[i], 'HH'))
-                else:
-                    marked_swing_points.append((swing_points[i], 'HL'))
-            else:
-                if swing_points[i] > swing_points[i - 2]:
-                    marked_swing_points.append((swing_points[i], 'LH'))
-                else:
-                    marked_swing_points.append((swing_points[i], 'LL'))
-    
-    return marked_swing_points
+import pandas as pd
 
-swing_points = [29030.0, 29414.0, 29181.5, 29353.5, 29121.5, 29346.0, 29077.0]
-marked_swing_points = mark_swing_points(swing_points)
-print(marked_swing_points)
+# 示例数据
+data = {
+    'utc_time': ['2023-08-03 08:45:00', '2023-08-03 13:40:00', '2023-08-03 14:25:00', '2023-08-03 14:50:00'],
+    'time': [1691052300000, 1691070000000, 1691072700000, 1691074200000],
+    'open': [29036.5, 29181, 29171, 29355],
+    'high': [29059.5, 29185.5, 29200.5, 29355],
+    'low': [29036.5, 29144.0, 29168.5, 29311.0],
+    'close': [29048, 29144.5, 29193.5, 29323],
+    'delta': [23.0, 41.5, 32.0, 44.0],
+    'volume': [326.207, 899.645, 167.941, 1033.412],
+    'status': ['bull', 'bear', 'bull', 'bear'],
+    'inside_bar': [1, 1, 1, 1]
+}
+
+df = pd.DataFrame(data)
+
+# 你要判断的 price 值
+price = 29100
+
+# 使用 Pandas 进行比较和判断
+df['middle'] = df[['high', 'low']].mean(axis=1).apply(lambda x: round(x * 2) / 2)
+
+
+print(df)

@@ -12,6 +12,8 @@ class SMC():
         df = pd.DataFrame(kline_data, columns=['time', 'open', 'high', 'low', 'close', 'volume','usdt_volume'])
         df['high'] = pd.to_numeric(df['high'], errors='coerce')
         df['low'] = pd.to_numeric(df['low'], errors='coerce')
+        df['open'] = pd.to_numeric(df['open'])
+        df['close'] = pd.to_numeric(df['close'])
 
         # Convert 'time' column to datetime and set it as the index
         df['utc_time'] = pd.to_datetime(df['time'], unit='ms')
@@ -151,12 +153,22 @@ class SMC():
         for i in range(1, len(klines)):
             current_high = float(klines.at[i, 'high'])
             current_low = float(klines.at[i, 'low'])
+            current_open = float(klines.at[i, 'open']) 
+            current_close = float(klines.at[i, 'close'])
+
             prev_high = float(klines.at[i - 1, 'high'])
             prev_low = float(klines.at[i - 1, 'low'])
 
             if is_inside_bar(current_high, current_low, prev_high, prev_low):
+                upper_shadow = abs(current_high - max(current_open, current_close))
+                lower_shadow = abs(min(current_open, current_close) - current_low)
+                shadow_length = max(upper_shadow, lower_shadow)
+
+                entity_delta = abs(float(klines.at[i, 'open']) - float(klines.at[i, 'close']))
+
                 delta = current_high - current_low
-                klines.loc[i, 'inside_bar'] = 1
+                if delta >= 15 and delta > (entity_delta + 3) and entity_delta > 5 and shadow_length < entity_delta * 2.5:
+                    klines.loc[i, 'inside_bar'] = 1
         klines = klines[['utc_time', 'time','open', 'high', 'low', 'close', 'delta','volume', 'status','inside_bar']]
         filtered_df = klines[klines['inside_bar'] == 1]
 
@@ -222,6 +234,64 @@ class SMC():
 
         return df
 
+    def inside_order_adv(self,df,filtered_df,current_price):
+        order_list = []
+        filtered_df['middle'] = filtered_df[['open', 'close']].mean(axis=1).apply(lambda x: round(x * 2) / 2)
+
+        for i, row in filtered_df.iterrows():
+            if current_price < row['middle']:
+                print(f"Index: {i}")
+                derc = 'open_short'
+                entry_m = row['middle']
+                entry_edge = row['low']
+                sl = df.at[i - 1, 'high']
+                sl_m_delta = abs(entry_m - sl)
+                sl_edge_delta = abs(entry_edge - sl)
+                tp_m = entry_m - sl_m_delta * 2
+                tp_edge = entry_edge - sl_edge_delta * 2
+                order_m = [derc,entry_m,tp_m,sl,sl_m_delta]
+                order_edge = [derc,entry_edge,tp_edge,sl,sl_edge_delta]
+                order_list.append(order_m)
+                order_list.append(order_edge)
+                print(f"entry_m: {order_m}")
+                print(f"entry_edge: {order_edge}")
+
+            if current_price > row['middle']:
+                print(f"Index: {i}")
+                derc = 'open_long'
+
+                entry_m = row['middle']
+                entry_edge = row['high']
+                sl = df.at[i - 1, 'low']
+                sl_m_delta = abs(entry_m - sl)
+                sl_edge_delta = abs(entry_edge - sl)
+                tp_m = entry_m + sl_m_delta * 2
+                tp_edge = entry_edge + sl_edge_delta * 2
+                order_m = [derc,entry_m,tp_m,sl,sl_m_delta]
+                order_edge = [derc,entry_edge,tp_edge,sl,sl_edge_delta]
+                print(f"entry_m: {order_m}")
+                print(f"entry_edge: {order_edge}")
+                order_list.append(order_m)
+                order_list.append(order_edge)
+            
+        return order_list
+        
+
+    def place_batch_orders(self,orders,huFu):
+        # odr[0] = qty      odr[1]=derc     odr[2]=tirgger      odr[3]=execute      odr[4]=Oid      odr[5]=tp   odr[6]=sl
+
+        base_qty = 0.001
+        for odr in orders:
+            try:
+
+                huFu.mix_place_plan_order(symbol, marginCoin, base_qty ,odr[0], 'limit', odr[1], "market_price", executePrice=odr[1],presetTakeProfitPrice=odr[2], presetStopLossPrice=odr[3], reduceOnly=False)
+                print("place",odr)
+            except Exception as e:
+                logger.debug(f"An unknown error occurred in mix_place_plan_order(): {e}")
+
+
+## inside bar 过5根bar后开始挂单,挂在close处， 入场为h+l /2 ，止损放在前一根另一边,第72根失效（不包含inside_bar）
+## 止损两次即失效
 
 def start(hero,symbol,marginCoin,debug_mode):
     pd.set_option('display.max_rows', 100)
@@ -230,7 +300,7 @@ def start(hero,symbol,marginCoin,debug_mode):
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
     # startTime = get_previous_month_timestamp()
     # endTime = get_previous_minute_timestamp()
-    x = 1
+    x = 3
 
     startTime = get_previous_x_timestamp(x+1)
 
@@ -261,18 +331,23 @@ def start(hero,symbol,marginCoin,debug_mode):
         if ft == '5m':
             data = smc.process_kline_data(klines)
             inside = smc.get_inside_bars(data)
-            swing = smc.swings(klines=klines, min_size=0.0015, percent=True)
-            print('swing',swing)
-            mal = smc.mark_swing_points(swing,data)
+            # 使用 Pandas 进行比较和判断
+            current_price = 29000
+            order_list = smc.inside_order_adv(data,inside,current_price)      
+            current_price = 30000
+            smc.inside_order_adv(data,inside,current_price)   
+            # swing = smc.swings(klines=klines, min_size=0.0015, percent=True)
+            # print('swing',swing)
+            # mal = smc.mark_swing_points(swing,data)
 
-            filtered_df = mal[mal['poi'] != '']
-            # print(filtered_df)
-            # print()
+            # filtered_df = mal[mal['poi'] != '']
+            # # print(filtered_df)
+            # # print()
 
-            mal = smc.mark_reversal_bar(mal)
-            filtered_df = mal[mal['reversal_bar'] != '']
-            # print(filtered_df)
-            print(mal)
+            # mal = smc.mark_reversal_bar(mal)
+            # filtered_df = mal[mal['reversal_bar'] != '']
+            # # print(filtered_df)
+            # print(mal)
 
         #inside = smc.get_inside_bars(klines)
         #print(inside)
@@ -286,6 +361,74 @@ def start(hero,symbol,marginCoin,debug_mode):
         #     filtered_df = mal[mal['poi'] != '']
         #     print(filtered_df)
 
+
+def inside_bar_orders(hero,symbol,marginCoin,debug_mode):
+    pd.set_option('display.max_rows', 100)
+
+    smc = SMC()
+    huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
+    while True:
+        x = 6
+        startTime = get_previous_x_hour_timestamp(x)
+        endTime = get_minute_timestamp()
+        ft_list = ['5m']
+
+        for ft in ft_list:
+
+            max_retries = 3
+            retry_delay = 1  # 延迟时间，单位为秒
+            retry_count = 0
+            klines = []
+
+            while not klines and retry_count < max_retries:
+                try:
+                    klines = huFu.mix_get_candles(symbol, ft, startTime, endTime)
+                except Exception as e:
+                    logger.debug(f"An unknown error occurred in mix_get_candles(): {e} ,{ft}")
+                
+                if not klines:
+                    retry_count += 1
+                    print("再来一次")
+                    time.sleep(retry_delay)
+            if ft == '5m':
+                data = smc.process_kline_data(klines)
+                inside = smc.get_inside_bars(data)
+                batch_refresh_interval = 3
+
+                for i in range(batch_refresh_interval):
+                    for k in range(2):             # 60
+                        time.sleep(15)
+                        try:
+                            result = huFu.mix_get_market_price(symbol)
+                            current_price = float(result['data']['markPrice'])
+                            logger.info("裁判播报员: ⚾️ 坐标 %s ",current_price)
+                        except Exception as e:
+                            logger.debug(f"An unknown error occurred in mix_get_market_price(): {e}")
+                        order_list = smc.inside_order_adv(data,inside,current_price)      
+                        if order_list != []:
+                            # cancel all orders
+                            try:
+                                data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
+                                if data != []:
+                                        ## clear all open orders
+                                    ## if orders in open_orders 
+                                    huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
+
+                            except Exception as e:
+                                logger.debug(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
+
+
+                            try:
+                                data = huFu.mix_get_open_order('BTCUSDT_UMCBL')['data']
+                                if data != []:
+                                    huFu.mix_cancel_all_orders ('UMCBL', marginCoin)
+                            except Exception as e:
+                                logger.debug(f"An unknown error occurred in mix_cancel_all_orders(): {e}")
+                            
+                            # place orders
+                            smc.place_batch_orders(order_list,huFu)
+
+                        time.sleep(15)
 
 if __name__ == "__main__":
     # 解析命令行参数
@@ -316,4 +459,5 @@ if __name__ == "__main__":
     hero = config[heroname]
     symbol = 'BTCUSDT_UMCBL'
     marginCoin = 'USDT'
-    start(hero,symbol,marginCoin,debug_mode)
+    # start(hero,symbol,marginCoin,debug_mode)
+    inside_bar_orders(hero,symbol,marginCoin,debug_mode)
