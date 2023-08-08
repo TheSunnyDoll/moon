@@ -305,6 +305,16 @@ class SMC():
         for ord in order_list:
             if is_approx_equal_to_any(ord[1],recent_open_price_list):
                 order_list = [order for order in order_list if order != ord]
+        try:
+            data_list = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
+        except Exception as e:
+            logger.debug(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
+        execute_prices = [float(data['executePrice']) for data in data_list]
+        # 输出结果
+        for ord in order_list:
+            if is_approx_equal_to_any(ord[1],execute_prices,0):
+                order_list = [order for order in order_list if order != ord]
+
         return order_list
 
 
@@ -419,6 +429,26 @@ def inside_bar_orders(smc,symbol,marginCoin,debug_mode,base_qty,huFu):
 
                 inside_15 = smc.get_inside_bars(data_15)
 
+        # cancel all orders
+        try:
+            data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
+            if data != []:
+                    ## clear all open orders
+                ## if orders in open_orders 
+                huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
+
+        except Exception as e:
+            logger.debug(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
+
+
+        try:
+            data = huFu.mix_get_open_order('BTCUSDT_UMCBL')['data']
+            if data != []:
+                huFu.mix_cancel_all_orders ('UMCBL', marginCoin)
+        except Exception as e:
+            logger.debug(f"An unknown error occurred in mix_cancel_all_orders(): {e}")
+        
+
         batch_refresh_interval = 3
 
         for i in range(batch_refresh_interval):
@@ -432,35 +462,17 @@ def inside_bar_orders(smc,symbol,marginCoin,debug_mode,base_qty,huFu):
                     logger.debug(f"An unknown error occurred in mix_get_market_price(): {e}")
                 order_list = smc.inside_order_adv(df_klines_5m,inside,current_price) 
                 order_list_15 = smc.inside_order_adv(data_15,inside_15,current_price) 
+                if order_list != []:
+                    order_list = smc.get_net_orders(huFu,order_list)
+                if order_list_15 != []:
+                    order_list_15 = smc.get_net_orders(huFu,order_list_15)
 
                 if order_list != [] or order_list_15 != []:
-                    # cancel all orders
-                    try:
-                        data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
-                        if data != []:
-                                ## clear all open orders
-                            ## if orders in open_orders 
-                            huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
 
-                    except Exception as e:
-                        logger.debug(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
-
-
-                    try:
-                        data = huFu.mix_get_open_order('BTCUSDT_UMCBL')['data']
-                        if data != []:
-                            huFu.mix_cancel_all_orders ('UMCBL', marginCoin)
-                    except Exception as e:
-                        logger.debug(f"An unknown error occurred in mix_cancel_all_orders(): {e}")
-                    
                     # place orders
-                    if order_list != []:
-                        order_list = smc.get_net_orders(huFu,order_list)
+
+                    if not debug_mode:
                         smc.place_batch_orders(order_list,huFu,base_qty)
-
-                    if order_list_15 != []:
-                        order_list_15 = smc.get_net_orders(huFu,order_list_15)
-
                         smc.place_batch_orders(order_list_15,huFu,base_qty)
 
                 time.sleep(15)
