@@ -291,7 +291,7 @@ class SMC():
 
     def get_net_orders(self,huFu,order_list):
         startTime = get_previous_hour_timestamp_ex()
-        endTime = get_current_timestamp()
+        endTime = get_previous_minute_timestamp()
         orders = huFu.mix_get_history_orders(symbol, startTime, endTime, 100, lastEndId='', isPre=False)['data']['orderList']
 
         recent_open_price_list = []
