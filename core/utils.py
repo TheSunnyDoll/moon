@@ -111,8 +111,10 @@ def get_today_0_timestamp():
     return timestamp_ms
 
 def get_current_timestamp():
-    current_timestamp = time.time()
-    return current_timestamp * 1000
+    current_time = datetime.datetime.now()
+    timestamp = int(time.mktime(current_time.timetuple()))
+    timestamp_ms = timestamp * 1000
+    return timestamp_ms
 
 
 def timestamp_to_hour(timestamp_ms):
