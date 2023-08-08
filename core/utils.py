@@ -28,6 +28,14 @@ def get_previous_hour_timestamp():
     timestamp_ms = timestamp * 1000
     return timestamp_ms
 
+def get_previous_hour_timestamp_ex():
+    current_time = datetime.datetime.now()
+    previous_hour = current_time - datetime.timedelta(hours=1)
+    timestamp = int(time.mktime(previous_hour.timetuple()))
+    timestamp_ms = timestamp * 1000
+    return timestamp_ms
+
+
 def get_previous_three_hour_timestamp():
     current_time = datetime.datetime.now()
     previous_hour = current_time - datetime.timedelta(hours=3)
