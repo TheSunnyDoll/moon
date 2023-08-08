@@ -317,7 +317,7 @@ class SMC():
         for ord in order_list:
             if is_approx_equal_to_any(ord[1],execute_prices,0):
                 order_list = [order for order in order_list if order != ord]
-
+        print("net order list",order_list)
         return order_list
 
 
