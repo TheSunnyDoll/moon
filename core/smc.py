@@ -290,7 +290,7 @@ class SMC():
 
 
     def get_net_orders(self,huFu,order_list):
-        startTime = get_previous_x_hour_timestamp(1)
+        startTime = get_previous_hour_timestamp()
         endTime = get_previous_minute_timestamp()
         orders = huFu.mix_get_history_orders(symbol, startTime, endTime, 100, lastEndId='', isPre=False)['data']['orderList']
 
@@ -301,11 +301,13 @@ class SMC():
                  recent_open_price_list.append(float(order['priceAvg']))
             if order['side'] == 'open_short' and order['state'] == 'filled':
                  recent_open_price_list.append(float(order['priceAvg']))
-        
+        st = timestamp_to_time(startTime)
+        et = timestamp_to_time(endTime)
+
         for ord in order_list:
             if is_approx_equal_to_any(ord[1],recent_open_price_list):
                 order_list = [order for order in order_list if order != ord]
-        print("recent_open_price_list",recent_open_price_list)
+        print(st,"to",et,"recent_open_price_list",recent_open_price_list)
         try:
             data_list = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
         except Exception as e:
