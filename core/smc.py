@@ -307,7 +307,7 @@ class SMC():
         for ord in order_list:
             if is_approx_equal_to_any(ord[1],recent_open_price_list):
                 order_list = [order for order in order_list if order != ord]
-        print(st,"to",et,"recent_open_price_list",recent_open_price_list)
+        print(st," to ",et," recent_open_price_list",recent_open_price_list)
         try:
             data_list = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
         except Exception as e:
