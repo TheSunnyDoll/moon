@@ -16,7 +16,7 @@ class SMC():
         df['close'] = pd.to_numeric(df['close'])
 
         # Convert 'time' column to datetime and set it as the index
-        df['utc_time'] = pd.to_datetime(df['time'], unit='ms')
+        df['utc_time'] = pd.to_datetime(int(df['time']), unit='ms')
 
         # Add 'status' column based on 'close' and 'open' values
         df['status'] = 'star'
