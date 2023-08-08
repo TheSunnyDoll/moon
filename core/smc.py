@@ -277,10 +277,9 @@ class SMC():
         return order_list
         
 
-    def place_batch_orders(self,orders,huFu):
+    def place_batch_orders(self,orders,huFu,base_qty):
         #  odr[0]=derc     odr[1]=entry     odr[2]=tp   odr[3]=sl
 
-        base_qty = 0.001
         for odr in orders:
             try:
 
@@ -381,7 +380,7 @@ def start(hero,symbol,marginCoin,debug_mode):
         #     print(filtered_df)
 
 
-def inside_bar_orders(hero,symbol,marginCoin,debug_mode):
+def inside_bar_orders(hero,symbol,marginCoin,debug_mode,base_qty):
     pd.set_option('display.max_rows', 100)
 
     smc = SMC()
@@ -457,12 +456,12 @@ def inside_bar_orders(hero,symbol,marginCoin,debug_mode):
                     # place orders
                     if order_list != []:
                         order_list = smc.get_net_orders(huFu,order_list)
-                        smc.place_batch_orders(order_list,huFu)
+                        smc.place_batch_orders(order_list,huFu,base_qty)
 
                     if order_list_15 != []:
                         order_list_15 = smc.get_net_orders(huFu,order_list_15)
 
-                        smc.place_batch_orders(order_list_15,huFu)
+                        smc.place_batch_orders(order_list_15,huFu,base_qty)
 
                 time.sleep(15)
 
@@ -476,7 +475,7 @@ if __name__ == "__main__":
 
     parser.add_argument('-fp', '--fix_tp_point', default=88,help='fix_tp_point')
     parser.add_argument('-bsl', '--base_sl', default=88,help='base_sl')
-    parser.add_argument('-bq', '--base_qty', default=0.05,help='base_qty')
+    parser.add_argument('-bq', '--base_qty', default=0.01,help='base_qty')
     parser.add_argument('-mxq', '--max_qty', default=1.5,help='max_qty')
 
     args = parser.parse_args()
@@ -496,4 +495,4 @@ if __name__ == "__main__":
     symbol = 'BTCUSDT_UMCBL'
     marginCoin = 'USDT'
     # start(hero,symbol,marginCoin,debug_mode)
-    inside_bar_orders(hero,symbol,marginCoin,debug_mode)
+    inside_bar_orders(hero,symbol,marginCoin,debug_mode,base_qty)

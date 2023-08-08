@@ -93,6 +93,15 @@ def get_previous_xmin_timestamp(x):
     timestamp_ms = timestamp * 1000
     return timestamp_ms
 
+def get_today_0_timestamp():
+    # 获取今天凌晨的日期对象
+    today = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+
+    # 获取今天凌晨的 Unix 时间戳（毫秒级）
+    timestamp_ms = int(time.mktime(today.timetuple()) * 1000)
+
+    return timestamp_ms
+
 def get_current_timestamp():
     current_timestamp = time.time()
     return current_timestamp * 1000

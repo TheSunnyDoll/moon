@@ -7,15 +7,19 @@ import datetime
 import pandas as pd
 
 def earn_or_loss(huFu,x):
-        # print(x)
+        print(x)
         if x == 0:
-            startTime = get_previous_x_timestamp(x+1)
+            startTime = get_today_0_timestamp()
+
+            endTime = get_previous_minute_timestamp()
+        elif x == 1:
+            startTime = get_previous_x_timestamp(1)
 
             endTime = get_previous_minute_timestamp()
         else:
-            startTime = get_previous_x_timestamp(x+1)
+            startTime = get_previous_x_timestamp(x)
 
-            endTime = get_previous_x_timestamp(x)
+            endTime = get_previous_x_timestamp(x-1)
         #endTime = get_previous_minute_timestamp()
         orders = huFu.mix_get_history_orders(symbol, startTime, endTime, 100, lastEndId='', isPre=False)['data']['orderList']
         loss_list = []
