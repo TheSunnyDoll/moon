@@ -316,44 +316,48 @@ def start(hero,symbol,marginCoin,debug_mode):
 
     smc = SMC()
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
+    inside_bar_orders(smc,symbol,marginCoin,debug_mode,base_qty,huFu)
+
+
+
     # startTime = get_previous_month_timestamp()
     # endTime = get_previous_minute_timestamp()
-    x = 3
+    # x = 3
 
-    startTime = get_previous_x_timestamp(x+1)
+    # startTime = get_previous_x_timestamp(x+1)
 
-    endTime = get_previous_x_timestamp(x)
-    trend = []
-    ft_list = ['5m','15m','30m','1H','4H','1D']
-    ft_list = ['5m','15m']
+    # endTime = get_previous_x_timestamp(x)
+    # trend = []
+    # ft_list = ['5m','15m','30m','1H','4H','1D']
+    # ft_list = ['5m','15m']
 
-    last_legs = []
-    last_klines = []
-    for ft in ft_list:
+    # last_legs = []
+    # last_klines = []
+    # for ft in ft_list:
 
-        max_retries = 3
-        retry_delay = 1  # 延迟时间，单位为秒
-        retry_count = 0
-        klines = []
+    #     max_retries = 3
+    #     retry_delay = 1  # 延迟时间，单位为秒
+    #     retry_count = 0
+    #     klines = []
 
-        while not klines and retry_count < max_retries:
-            try:
-                klines = huFu.mix_get_candles(symbol, ft, startTime, endTime)
-            except Exception as e:
-                logger.debug(f"An unknown error occurred in mix_get_candles(): {e} ,{ft}")
+    #     while not klines and retry_count < max_retries:
+    #         try:
+    #             klines = huFu.mix_get_candles(symbol, ft, startTime, endTime)
+    #         except Exception as e:
+    #             logger.debug(f"An unknown error occurred in mix_get_candles(): {e} ,{ft}")
             
-            if not klines:
-                retry_count += 1
-                print("再来一次")
-                time.sleep(retry_delay)
-        if ft == '5m':
-            data = smc.process_kline_data(klines)
-            inside = smc.get_inside_bars(data)
-            # 使用 Pandas 进行比较和判断
-            current_price = 29000
-            order_list = smc.inside_order_adv(data,inside,current_price)      
-            current_price = 30000
-            smc.inside_order_adv(data,inside,current_price)   
+    #         if not klines:
+    #             retry_count += 1
+    #             print("再来一次")
+    #             time.sleep(retry_delay)
+    #     if ft == '5m':
+    #         data = smc.process_kline_data(klines)
+    #         inside = smc.get_inside_bars(data)
+    #         # 使用 Pandas 进行比较和判断
+    #         current_price = 29000
+    #         order_list = smc.inside_order_adv(data,inside,current_price)      
+    #         current_price = 30000
+    #         smc.inside_order_adv(data,inside,current_price)   
             # swing = smc.swings(klines=klines, min_size=0.0015, percent=True)
             # print('swing',swing)
             # mal = smc.mark_swing_points(swing,data)
@@ -380,11 +384,7 @@ def start(hero,symbol,marginCoin,debug_mode):
         #     print(filtered_df)
 
 
-def inside_bar_orders(hero,symbol,marginCoin,debug_mode,base_qty):
-    pd.set_option('display.max_rows', 100)
-
-    smc = SMC()
-    huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
+def inside_bar_orders(smc,symbol,marginCoin,debug_mode,base_qty,huFu):
     while True:
         x = 6
         startTime = get_previous_x_hour_timestamp(x)
@@ -494,5 +494,4 @@ if __name__ == "__main__":
     hero = config[heroname]
     symbol = 'BTCUSDT_UMCBL'
     marginCoin = 'USDT'
-    # start(hero,symbol,marginCoin,debug_mode)
-    inside_bar_orders(hero,symbol,marginCoin,debug_mode,base_qty)
+    start(hero,symbol,marginCoin,debug_mode)
