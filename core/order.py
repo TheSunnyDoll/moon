@@ -70,8 +70,8 @@ if cancelAll:
     try:
         data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
         if data != []:
-            huFu.mix_cancel_plan_order(symbol, marginCoin, '',planType='track_plan')
-            huFu.mix_cancel_plan_order(symbol, marginCoin, '',planType='normal_plan')
+            huFu.mix_cancel_plan_order(symbol, marginCoin, 'track_plan')
+            huFu.mix_cancel_plan_order(symbol, marginCoin, 'normal_plan')
 
             # huFu.mix_cancel_all_trigger_orders('UMCBL', 'track_plan')
             # huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
