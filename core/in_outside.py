@@ -240,15 +240,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-u', '--username', help='Username')
     parser.add_argument('-d', '--debug_mode', action='store_true', default=False, help='Enable debug mode')
-    parser.add_argument('-f', '--fix_tp_mode', action='store_true', default=False, help='Enable fix_tp mode')
     parser.add_argument('-s', '--super_mode', action='store_true', default=False, help='Enable super_mode')
     parser.add_argument('-tl', '--trailing_loss', action='store_true', default=False, help='Enable trailing_loss')
 
     parser.add_argument('-pr', '--pair', default='BTCUSDT_UMCBL',help='pair')
-    parser.add_argument('-fp', '--fix_tp_point', default=88,help='fix_tp_point')
-    parser.add_argument('-bsl', '--base_sl', default=88,help='base_sl')
     parser.add_argument('-bq', '--base_qty', default=0,help='base_qty')
-    parser.add_argument('-mxq', '--max_qty', default=1.5,help='max_qty')
     parser.add_argument('-tm', '--trailing_delta_mul', default=1,help='trailing_delta_mul')
     parser.add_argument('-rr', '--rangeRate', default=0.01,help='rangeRate')
 
@@ -258,21 +254,17 @@ if __name__ == "__main__":
     args = parser.parse_args()
     heroname = args.username
     debug_mode = args.debug_mode
-    fix_mode = args.fix_tp_mode
     super_mode = args.super_mode
     trailing_loss = args.trailing_loss
 
-    fix_tp = float(args.fix_tp_point)
     base_qty = float(args.base_qty)
-    base_sl = float(args.base_sl)
-    max_qty = float(args.max_qty)
     trailing_delta_mul = float(args.trailing_delta_mul)
     rangeRate = float(args.rangeRate)
+    symbol = args.pair
 
     logger = get_logger(heroname+'_record.log')
 
     config = get_config_file()
     hero = config[heroname]
-    symbol = args.pair
     marginCoin = 'USDT'
     start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode,trailing_delta_mul,trailing_loss,rangeRate)
