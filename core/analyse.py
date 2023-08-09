@@ -28,7 +28,8 @@ def earn_or_loss(huFu,x):
         total_loss = 0
         recent_open_long_list = []
         recent_open_short_list = []
-
+        if orders == None:
+            return '','','','','','','',''
         for order in orders:
             uTime = timestamp_to_time(float(order['uTime'])).strftime("%Y-%m-%d %H:%M:%S")
             week  = date_to_week(uTime)
@@ -116,7 +117,10 @@ if __name__ == "__main__":
     tl_list = []
     for i in range(10):
         date, week_day, profit ,loss,max_pro,max_dd, net ,pos= earn_or_loss(huFu,i)
-        tl_list.append([date, week_day, profit ,loss,max_pro,max_dd, net,pos])
+        if date == '':
+            continue
+        else:
+            tl_list.append([date, week_day, profit ,loss,max_pro,max_dd, net,pos])
 
     columns = ['time', 'week_day', 'profit' ,'loss','max_profit','max_loss', 'net','pos']
     tl_list_pd = pd.DataFrame(tl_list, columns=columns)

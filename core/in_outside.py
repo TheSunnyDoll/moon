@@ -63,8 +63,7 @@ class SideBar():
         # if bar[1] inside bar ; bar[2] outside ; sell
         # if bar[2] inside bar ; bar[1] outside ; buy
 
-    def place_order(self,side,huFu,symbol,marginCoin):
-        base_qty = 0.01
+    def place_order(self,side,huFu,symbol,marginCoin,base_qty):
         if side == 'long':
             # get position; close short ; entry long
             try:
@@ -117,7 +116,7 @@ class SideBar():
                 logger.debug(f"An unknown error occurred in mix_place_order(): {e}")
             
 
-def start(hero,symbol,marginCoin,debug_mode):
+def start(hero,symbol,marginCoin,debug_mode,base_qty):
     rvs = SideBar()
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
     # last_1m = rvs.get_last_bar(symbol,huFu,'1m')
@@ -127,7 +126,7 @@ def start(hero,symbol,marginCoin,debug_mode):
         # print(last_1m)
         side = rvs.inside_outside(last_5m_bars)
         if side != '':
-            rvs.place_order(side,huFu,symbol,marginCoin)
+            rvs.place_order(side,huFu,symbol,marginCoin,base_qty)
 
         time.sleep(10)
 
@@ -142,7 +141,7 @@ if __name__ == "__main__":
 
     parser.add_argument('-fp', '--fix_tp_point', default=88,help='fix_tp_point')
     parser.add_argument('-bsl', '--base_sl', default=88,help='base_sl')
-    parser.add_argument('-bq', '--base_qty', default=0.05,help='base_qty')
+    parser.add_argument('-bq', '--base_qty', default=0.1,help='base_qty')
     parser.add_argument('-mxq', '--max_qty', default=1.5,help='max_qty')
 
     args = parser.parse_args()
@@ -161,4 +160,4 @@ if __name__ == "__main__":
     hero = config[heroname]
     symbol = 'BTCUSDT_UMCBL'
     marginCoin = 'USDT'
-    start(hero,symbol,marginCoin,debug_mode)
+    start(hero,symbol,marginCoin,debug_mode,base_qty)
