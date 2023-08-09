@@ -135,7 +135,7 @@ class SideBar():
                         # get pos price
                         result = huFu.mix_get_single_position(symbol,marginCoin)
                         trailing_price = round(float(result['data'][0]["averageOpenPrice"]) + trailing_delta)
-                        print('trailing_price',trailing_price)
+                        logger.info("entry at %s , trailing loss at %f",result['data'][0]['averageOpenPrice'],trailing_price)
                         side = 'close_long'
                         rangeRate = 0.01
                         huFu.mix_place_trailing_stop_order(symbol, marginCoin, trailing_price, side, triggerType=None,size=base_qty, rangeRate=rangeRate)
@@ -175,7 +175,7 @@ class SideBar():
                         # get pos price
                         result = huFu.mix_get_single_position(symbol,marginCoin)
                         trailing_price = round(float(result['data'][1]["averageOpenPrice"]) - trailing_delta)
-                        print('trailing_price',trailing_price)
+                        logger.info("entry at %s , trailing loss at %f",result['data'][1]['averageOpenPrice'],trailing_price)
 
                         side = 'close_short'
                         huFu.mix_place_trailing_stop_order(symbol, marginCoin, trailing_price, side, triggerType=None,size=base_qty, rangeRate=rangeRate)
