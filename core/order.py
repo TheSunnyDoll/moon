@@ -57,13 +57,21 @@ if dex != 0:
     print("应开仓位数：", position_size)
 
 if cancelAll:
-    huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
+    try:
+        data = huFu.mix_get_open_order('BTCUSDT_UMCBL')['data']
+        if data != []:
+            huFu.mix_cancel_all_orders ('UMCBL', marginCoin)
+    except Exception as e:
+        print(f"An unknown error occurred in mix_cancel_all_orders(): {e}")
+    
+
     print("cancel all plan")
     # cancel all orders
     try:
         data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
         if data != []:
             huFu.mix_cancel_all_trigger_orders('UMCBL', 'track_plan')
+            huFu.mix_cancel_all_trigger_orders('UMCBL', 'normal_plan')
 
     except Exception as e:
         print(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
