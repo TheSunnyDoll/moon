@@ -190,9 +190,9 @@ def start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode,trailing_delta,t
     # last_1m = rvs.get_last_bar(symbol,huFu,'1m')
     while True:
         last_5m_bars = rvs.get_last_bar(symbol,huFu,'5m')
-
-        for i in last_5m_bars:
-            print(timestamp_to_time(int(i[0])) , i)
+        if debug_mode:
+            for i in last_5m_bars:
+                print(timestamp_to_time(int(i[0])) , i)
         if super_mode:
         # print(last_1m)
             side = rvs.inside_outside(last_5m_bars)
