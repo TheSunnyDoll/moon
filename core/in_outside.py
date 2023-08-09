@@ -87,6 +87,7 @@ class SideBar():
         # if bar[2] inside bar ; bar[1] outside ; buy
 
     def place_order(self,side,huFu,symbol,marginCoin,base_qty):
+        trailing_delta = 10
         def qty_decide(huFu):
             max_retries = 3
             retry_delay = 1  # 延迟时间，单位为秒
@@ -131,6 +132,13 @@ class SideBar():
                     huFu.mix_place_order(symbol,'USDT',base_qty,'open_long','market',reduceOnly=False)
                     logger.info("open long")
 
+                    # get pos price
+                    result = huFu.mix_get_single_position(symbol,marginCoin)
+                    trailing_price = round(float(result['data'][0]["averageOpenPrice"]) + trailing_delta)
+                    print('trailing_price',trailing_price)
+                    
+
+
             except Exception as e:
                 logger.debug(f"An unknown error occurred in mix_place_order(): {e}")
 
@@ -160,6 +168,11 @@ class SideBar():
                         
                     huFu.mix_place_order(symbol,'USDT',base_qty,'open_short','market',reduceOnly=False)
                     logger.info("open short")
+                    # get pos price
+                    result = huFu.mix_get_single_position(symbol,marginCoin)
+                    trailing_price = round(float(result['data'][0]["averageOpenPrice"]) + trailing_delta)
+                    print('trailing_price',trailing_price)
+
             except Exception as e:
                 logger.debug(f"An unknown error occurred in mix_place_order(): {e}")
             
