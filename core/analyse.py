@@ -35,12 +35,20 @@ def earn_or_loss(huFu,x):
             week  = date_to_week(uTime)
             if float(order['totalProfits']) < 0:
                 delta = abs(float(order['totalProfits']) / float(order['size']))
-                entry = float(order['priceAvg']) - float(order['totalProfits']) / float(order['size']) 
+                if order['side'] == 'close_long':
+                    entry = float(order['priceAvg']) - float(order['totalProfits']) / float(order['size']) 
+                else:
+                    entry = float(order['priceAvg']) + float(order['totalProfits']) / float(order['size']) 
+
                 loss_list.append([uTime ,entry,week,order['size'],order['side'],order['priceAvg'],order['totalProfits'],delta])
                 total_loss += order['totalProfits']
             if float(order['totalProfits']) > 0:
                 delta = abs(float(order['totalProfits']) / float(order['size']))
-                entry = float(order['priceAvg']) - float(order['totalProfits']) / float(order['size']) 
+                if order['side'] == 'close_long':
+                    entry = float(order['priceAvg']) - float(order['totalProfits']) / float(order['size']) 
+                else:
+                    entry = float(order['priceAvg']) + float(order['totalProfits']) / float(order['size']) 
+                
                 profit_list.append([uTime,entry,week,order['size'],order['side'],order['priceAvg'],order['totalProfits'],delta])
                 total_profits += order['totalProfits']
             if order['side'] == 'open_long' and order['state'] == 'filled':

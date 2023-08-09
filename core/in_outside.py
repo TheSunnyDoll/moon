@@ -124,9 +124,10 @@ class SideBar():
                     logger.debug(f"An unknown error occurred in mix_place_order(): {e}")
             try:
                 if long_qty == 0:
-                    qty = qty_decide(huFu)
-                    if qty > 0:
+                    if base_qty == 0:
+                        qty = qty_decide(huFu)
                         base_qty = qty
+
                     huFu.mix_place_order(symbol,'USDT',base_qty,'open_long','market',reduceOnly=False)
                     logger.info("open long")
 
@@ -153,9 +154,10 @@ class SideBar():
                     logger.debug(f"An unknown error occurred in mix_place_order(): {e}")
             try:
                 if short_qty == 0:
-                    qty = qty_decide(huFu)
-                    if qty > 0:
+                    if base_qty == 0:
+                        qty = qty_decide(huFu)
                         base_qty = qty
+                        
                     huFu.mix_place_order(symbol,'USDT',base_qty,'open_short','market',reduceOnly=False)
                     logger.info("open short")
             except Exception as e:
@@ -191,7 +193,7 @@ if __name__ == "__main__":
 
     parser.add_argument('-fp', '--fix_tp_point', default=88,help='fix_tp_point')
     parser.add_argument('-bsl', '--base_sl', default=88,help='base_sl')
-    parser.add_argument('-bq', '--base_qty', default=0.1,help='base_qty')
+    parser.add_argument('-bq', '--base_qty', default=0,help='base_qty')
     parser.add_argument('-mxq', '--max_qty', default=1.5,help='max_qty')
 
     args = parser.parse_args()
