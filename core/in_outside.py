@@ -126,7 +126,7 @@ class SideBar():
                     try:
                         data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
                         if data != []:
-                            huFu.mix_cancel_plan_order(symbol, marginCoin, 'track_plan')
+                            huFu.mix_cancel_plan_order(symbol, marginCoin, planType='track_plan')
 
                     except Exception as e:
                         logger.debug(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
@@ -145,7 +145,7 @@ class SideBar():
                     trailing_protect_price = round(float(result['data'][0]["averageOpenPrice"]) - protect_loss_delta)
                     side = 'close_long'
                     huFu.mix_place_trailing_stop_order(symbol, marginCoin, trailing_protect_price, side, triggerType=None,size=base_qty, rangeRate=protect_rangeRate)
-                    logger.info("entry at %s , trailing protect loss at %f , trailing protect delta is %f ",result['data'][0]['averageOpenPrice'],trailing_price,protect_loss_delta)
+                    logger.info("entry at %s , trailing protect loss at %f , trailing protect delta is %f ",result['data'][0]['averageOpenPrice'],trailing_protect_price,protect_loss_delta)
 
                     if trailing_loss:
                         trailing_price = round(float(result['data'][0]["averageOpenPrice"]) + trailing_delta)
@@ -176,7 +176,7 @@ class SideBar():
                     try:
                         data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
                         if data != []:
-                            huFu.mix_cancel_plan_order(symbol, marginCoin, 'track_plan')
+                            huFu.mix_cancel_plan_order(symbol, marginCoin, planType='track_plan')
 
                     except Exception as e:
                         logger.debug(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
@@ -195,7 +195,7 @@ class SideBar():
                     trailing_protect_price = round(float(result['data'][1]["averageOpenPrice"]) + protect_loss_delta)
                     side = 'close_short'
                     huFu.mix_place_trailing_stop_order(symbol, marginCoin, trailing_protect_price, side, triggerType=None,size=base_qty, rangeRate=protect_rangeRate)
-                    logger.info("entry at %s , trailing protect loss at %f , trailing protect delta is %f ",result['data'][1]['averageOpenPrice'],trailing_price,protect_loss_delta)
+                    logger.info("entry at %s , trailing protect loss at %f , trailing protect delta is %f ",result['data'][1]['averageOpenPrice'],trailing_protect_price,protect_loss_delta)
 
                     if trailing_loss:
                         trailing_price = round(float(result['data'][1]["averageOpenPrice"]) - trailing_delta)
