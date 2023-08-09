@@ -122,14 +122,6 @@ class SideBar():
                 try:
 
                     huFu.mix_place_order(symbol,'USDT',short_qty,'close_short','market',reduceOnly=True)
-                    # cancel all orders
-                    try:
-                        data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
-                        if data != []:
-                            huFu.mix_cancel_plan_order(symbol, marginCoin, planType='track_plan')
-
-                    except Exception as e:
-                        logger.debug(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
 
                 except Exception as e:
                     logger.debug(f"An unknown error occurred in mix_place_order(): {e}")
@@ -138,6 +130,19 @@ class SideBar():
                     if base_qty == 0:
                         qty = qty_decide(huFu)
                         base_qty = qty
+                    # cancel all orders
+                    try:
+                        data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
+                        if data != []:
+                            for order in data:
+                                if order['planType'] == 'normal_plan':
+                                    huFu.mix_cancel_plan_order(symbol, marginCoin, order['orderId'],'normal_plan')
+                                elif order['planType'] == 'track_plan':
+                                    huFu.mix_cancel_plan_order(symbol, marginCoin, order['orderId'],'track_plan')
+
+
+                    except Exception as e:
+                        logger.debug(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
 
                     huFu.mix_place_order(symbol,'USDT',base_qty,'open_long','market',reduceOnly=False)
                     logger.info("open long")
@@ -173,6 +178,14 @@ class SideBar():
                 try:
 
                     huFu.mix_place_order(symbol,'USDT',long_qty,'close_long','market',reduceOnly=True)
+
+                except Exception as e:
+                    logger.debug(f"An unknown error occurred in mix_place_order(): {e}")
+            try:
+                if short_qty == 0:
+                    if base_qty == 0:
+                        qty = qty_decide(huFu)
+                        base_qty = qty
                     # cancel all orders
                     try:
                         data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
@@ -187,15 +200,7 @@ class SideBar():
                     except Exception as e:
                         logger.debug(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
 
-                except Exception as e:
-                    logger.debug(f"An unknown error occurred in mix_place_order(): {e}")
-            try:
-                if short_qty == 0:
-                    if base_qty == 0:
-                        qty = qty_decide(huFu)
-                        base_qty = qty
-                        
-                    huFu.mix_place_order(symbol,'USDT',base_qty,'open_short','market',reduceOnly=False)
+                    huFu.mix_place_order(symbol,'USDT',base_qty,'open_short','market',price='',reduceOnly=False)
                     logger.info("open short")
                     # get pos price
                     result = huFu.mix_get_single_position(symbol,marginCoin)
