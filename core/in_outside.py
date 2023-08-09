@@ -64,6 +64,23 @@ class SideBar():
         # if bar[2] inside bar ; bar[1] outside ; buy
 
     def place_order(self,side,huFu,symbol,marginCoin,base_qty):
+        def qty_decide(huFu):
+            max_retries = 3
+            retry_delay = 1  # 延迟时间，单位为秒
+            retry_count = 0
+            dex = 0
+
+            while dex == 0 and retry_count < max_retries:
+                try :
+                    dex = huFu.mix_get_accounts(productType='UMCBL')['data'][0]['usdtEquity']
+                    return round(float(dex)/10000,3)
+                except Exception as e:
+                    logger.debug(f"An unknown error occurred in mix_get_single_position(): {e}")
+                if dex == 0:
+                    retry_count += 1
+                    print("再来一次")
+                    time.sleep(retry_delay)
+      
         if side == 'long':
             # get position; close short ; entry long
             try:
@@ -84,6 +101,9 @@ class SideBar():
                     logger.debug(f"An unknown error occurred in mix_place_order(): {e}")
             try:
                 if long_qty == 0:
+                    qty = qty_decide(huFu)
+                    if qty > 0:
+                        base_qty = qty
                     huFu.mix_place_order(symbol,'USDT',base_qty,'open_long','market',reduceOnly=False)
                     logger.info("open long")
 
@@ -110,6 +130,9 @@ class SideBar():
                     logger.debug(f"An unknown error occurred in mix_place_order(): {e}")
             try:
                 if short_qty == 0:
+                    qty = qty_decide(huFu)
+                    if qty > 0:
+                        base_qty = qty
                     huFu.mix_place_order(symbol,'USDT',base_qty,'open_short','market',reduceOnly=False)
                     logger.info("open short")
             except Exception as e:
