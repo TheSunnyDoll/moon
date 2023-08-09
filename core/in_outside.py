@@ -86,7 +86,7 @@ class SideBar():
         # if bar[1] inside bar ; bar[2] outside ; sell
         # if bar[2] inside bar ; bar[1] outside ; buy
 
-    def place_order(self,side,huFu,symbol,marginCoin,base_qty,trailing_delta):
+    def place_order(self,side,huFu,symbol,marginCoin,base_qty,trailing_delta,trailing_loss):
         def qty_decide(huFu):
             max_retries = 3
             retry_delay = 1  # 延迟时间，单位为秒
@@ -131,13 +131,14 @@ class SideBar():
                     huFu.mix_place_order(symbol,'USDT',base_qty,'open_long','market',reduceOnly=False)
                     logger.info("open long")
 
-                    # get pos price
-                    result = huFu.mix_get_single_position(symbol,marginCoin)
-                    trailing_price = round(float(result['data'][0]["averageOpenPrice"]) + trailing_delta)
-                    print('trailing_price',trailing_price)
-                    side = 'close_long'
-                    rangeRate = 0.01
-                    huFu.mix_place_trailing_stop_order(symbol, marginCoin, trailing_price, side, triggerType=None,size=base_qty, rangeRate=rangeRate)
+                    if trailing_loss:
+                        # get pos price
+                        result = huFu.mix_get_single_position(symbol,marginCoin)
+                        trailing_price = round(float(result['data'][0]["averageOpenPrice"]) + trailing_delta)
+                        print('trailing_price',trailing_price)
+                        side = 'close_long'
+                        rangeRate = 0.01
+                        huFu.mix_place_trailing_stop_order(symbol, marginCoin, trailing_price, side, triggerType=None,size=base_qty, rangeRate=rangeRate)
 
 
             except Exception as e:
@@ -169,20 +170,22 @@ class SideBar():
                         
                     huFu.mix_place_order(symbol,'USDT',base_qty,'open_short','market',reduceOnly=False)
                     logger.info("open short")
-                    # get pos price
-                    result = huFu.mix_get_single_position(symbol,marginCoin)
-                    trailing_price = round(float(result['data'][1]["averageOpenPrice"]) - trailing_delta)
-                    print('trailing_price',trailing_price)
 
-                    side = 'close_short'
-                    rangeRate = 0.01
-                    huFu.mix_place_trailing_stop_order(symbol, marginCoin, trailing_price, side, triggerType=None,size=base_qty, rangeRate=rangeRate)
+                    if trailing_loss:
+                        # get pos price
+                        result = huFu.mix_get_single_position(symbol,marginCoin)
+                        trailing_price = round(float(result['data'][1]["averageOpenPrice"]) - trailing_delta)
+                        print('trailing_price',trailing_price)
+
+                        side = 'close_short'
+                        rangeRate = 0.01
+                        huFu.mix_place_trailing_stop_order(symbol, marginCoin, trailing_price, side, triggerType=None,size=base_qty, rangeRate=rangeRate)
 
             except Exception as e:
                 logger.debug(f"An unknown error occurred in mix_place_order(): {e}")
             
 
-def start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode,trailing_delta):
+def start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode,trailing_delta,trailing_loss):
     rvs = SideBar()
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
     # last_1m = rvs.get_last_bar(symbol,huFu,'1m')
@@ -196,7 +199,7 @@ def start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode,trailing_delta):
             side = rvs.inside_outside_x(last_5m_bars)
 
         if side != '':
-            rvs.place_order(side,huFu,symbol,marginCoin,base_qty,trailing_delta)
+            rvs.place_order(side,huFu,symbol,marginCoin,base_qty,trailing_delta,trailing_loss)
 
         time.sleep(10)
 
@@ -208,6 +211,7 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--debug_mode', action='store_true', default=False, help='Enable debug mode')
     parser.add_argument('-f', '--fix_tp_mode', action='store_true', default=False, help='Enable fix_tp mode')
     parser.add_argument('-s', '--super_mode', action='store_true', default=False, help='Enable super_mode')
+    parser.add_argument('-tl', '--trailing_loss', action='store_true', default=False, help='Enable trailing_loss')
 
     parser.add_argument('-fp', '--fix_tp_point', default=88,help='fix_tp_point')
     parser.add_argument('-bsl', '--base_sl', default=88,help='base_sl')
@@ -221,6 +225,8 @@ if __name__ == "__main__":
     debug_mode = args.debug_mode
     fix_mode = args.fix_tp_mode
     super_mode = args.super_mode
+    trailing_loss = args.trailing_loss
+
     fix_tp = float(args.fix_tp_point)
     base_qty = float(args.base_qty)
     base_sl = float(args.base_sl)
@@ -233,4 +239,4 @@ if __name__ == "__main__":
     hero = config[heroname]
     symbol = 'BTCUSDT_UMCBL'
     marginCoin = 'USDT'
-    start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode,trailing_delta)
+    start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode,trailing_delta,trailing_loss)
