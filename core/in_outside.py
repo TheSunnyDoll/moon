@@ -87,6 +87,8 @@ class SideBar():
         # if bar[2] inside bar ; bar[1] outside ; buy
 
     def place_order(self,side,huFu,symbol,marginCoin,base_qty,trailing_delta,trailing_loss,rangeRate):
+        protect_loss_delta = 500
+        protect_rangeRate = 0.01
         def qty_decide(huFu):
             max_retries = 3
             retry_delay = 1  # 延迟时间，单位为秒
@@ -139,15 +141,16 @@ class SideBar():
 
                     huFu.mix_place_order(symbol,'USDT',base_qty,'open_long','market',reduceOnly=False)
                     logger.info("open long")
+                    # get pos price
+                    trailing_protect_price = round(float(result['data'][0]["averageOpenPrice"]) - protect_loss_delta)
+                    side = 'close_long'
+                    huFu.mix_place_trailing_stop_order(symbol, marginCoin, trailing_protect_price, side, triggerType=None,size=base_qty, rangeRate=protect_rangeRate)
+                    logger.info("entry at %s , trailing protect loss at %f , trailing protect delta is %f ",result['data'][0]['averageOpenPrice'],trailing_price,protect_loss_delta)
 
                     if trailing_loss:
-                        # get pos price
-                        result = huFu.mix_get_single_position(symbol,marginCoin)
                         trailing_price = round(float(result['data'][0]["averageOpenPrice"]) + trailing_delta)
-                        logger.info("entry at %s , trailing loss at %f , trailing delta is %f ",result['data'][0]['averageOpenPrice'],trailing_price,trailing_delta)
-                        side = 'close_long'
-                        rangeRate = 0.01
                         huFu.mix_place_trailing_stop_order(symbol, marginCoin, trailing_price, side, triggerType=None,size=base_qty, rangeRate=rangeRate)
+                        logger.info(" trailing profit at %f , trailing delta is %f ",trailing_price,trailing_delta)
 
 
             except Exception as e:
@@ -188,15 +191,16 @@ class SideBar():
                         
                     huFu.mix_place_order(symbol,'USDT',base_qty,'open_short','market',reduceOnly=False)
                     logger.info("open short")
+                    # get pos price
+                    trailing_protect_price = round(float(result['data'][1]["averageOpenPrice"]) + protect_loss_delta)
+                    side = 'close_short'
+                    huFu.mix_place_trailing_stop_order(symbol, marginCoin, trailing_protect_price, side, triggerType=None,size=base_qty, rangeRate=protect_rangeRate)
+                    logger.info("entry at %s , trailing protect loss at %f , trailing protect delta is %f ",result['data'][1]['averageOpenPrice'],trailing_price,protect_loss_delta)
 
                     if trailing_loss:
-                        # get pos price
-                        result = huFu.mix_get_single_position(symbol,marginCoin)
                         trailing_price = round(float(result['data'][1]["averageOpenPrice"]) - trailing_delta)
-                        logger.info("entry at %s , trailing loss at %f , trailing delta is %f ",result['data'][1]['averageOpenPrice'],trailing_price,trailing_delta)
-
-                        side = 'close_short'
                         huFu.mix_place_trailing_stop_order(symbol, marginCoin, trailing_price, side, triggerType=None,size=base_qty, rangeRate=rangeRate)
+                        logger.info(" trailing profit at %f , trailing delta is %f ",trailing_price,trailing_delta)
 
             except Exception as e:
                 logger.debug(f"An unknown error occurred in mix_place_order(): {e}")
@@ -216,6 +220,7 @@ def start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode,trailing_delta_m
         trailing_delta = round(trailing_delta_mul * current_price * 0.0005)
         last_5m_bars = rvs.get_last_bar(symbol,huFu,'5m')
         if debug_mode:
+            print(trailing_delta)
             for i in last_5m_bars:
                 print(timestamp_to_time(int(i[0])) , i)
         if super_mode:
