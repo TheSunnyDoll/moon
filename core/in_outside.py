@@ -142,6 +142,7 @@ class SideBar():
                     huFu.mix_place_order(symbol,'USDT',base_qty,'open_long','market',reduceOnly=False)
                     logger.info("open long")
                     # get pos price
+                    result = huFu.mix_get_single_position(symbol,marginCoin)
                     trailing_protect_price = round(float(result['data'][0]["averageOpenPrice"]) - protect_loss_delta)
                     side = 'close_long'
                     huFu.mix_place_trailing_stop_order(symbol, marginCoin, trailing_protect_price, side, triggerType=None,size=base_qty, rangeRate=protect_rangeRate)
@@ -197,6 +198,7 @@ class SideBar():
                     huFu.mix_place_order(symbol,'USDT',base_qty,'open_short','market',reduceOnly=False)
                     logger.info("open short")
                     # get pos price
+                    result = huFu.mix_get_single_position(symbol,marginCoin)
                     trailing_protect_price = round(float(result['data'][1]["averageOpenPrice"]) + protect_loss_delta)
                     side = 'close_short'
                     huFu.mix_place_trailing_stop_order(symbol, marginCoin, trailing_protect_price, side, triggerType=None,size=base_qty, rangeRate=protect_rangeRate)
