@@ -86,8 +86,7 @@ class SideBar():
         # if bar[1] inside bar ; bar[2] outside ; sell
         # if bar[2] inside bar ; bar[1] outside ; buy
 
-    def place_order(self,side,huFu,symbol,marginCoin,base_qty):
-        trailing_delta = 10
+    def place_order(self,side,huFu,symbol,marginCoin,base_qty,trailing_delta):
         def qty_decide(huFu):
             max_retries = 3
             retry_delay = 1  # 延迟时间，单位为秒
@@ -183,7 +182,7 @@ class SideBar():
                 logger.debug(f"An unknown error occurred in mix_place_order(): {e}")
             
 
-def start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode):
+def start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode,trailing_delta):
     rvs = SideBar()
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
     # last_1m = rvs.get_last_bar(symbol,huFu,'1m')
@@ -197,7 +196,7 @@ def start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode):
             side = rvs.inside_outside_x(last_5m_bars)
 
         if side != '':
-            rvs.place_order(side,huFu,symbol,marginCoin,base_qty)
+            rvs.place_order(side,huFu,symbol,marginCoin,base_qty,trailing_delta)
 
         time.sleep(10)
 
@@ -214,6 +213,8 @@ if __name__ == "__main__":
     parser.add_argument('-bsl', '--base_sl', default=88,help='base_sl')
     parser.add_argument('-bq', '--base_qty', default=0,help='base_qty')
     parser.add_argument('-mxq', '--max_qty', default=1.5,help='max_qty')
+    parser.add_argument('-td', '--trailing_delta', default=15,help='trailing_delta')
+
 
     args = parser.parse_args()
     heroname = args.username
@@ -224,6 +225,7 @@ if __name__ == "__main__":
     base_qty = float(args.base_qty)
     base_sl = float(args.base_sl)
     max_qty = float(args.max_qty)
+    trailing_delta = float(args.trailing_delta)
 
     logger = get_logger(heroname+'_record.log')
 
@@ -231,4 +233,4 @@ if __name__ == "__main__":
     hero = config[heroname]
     symbol = 'BTCUSDT_UMCBL'
     marginCoin = 'USDT'
-    start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode)
+    start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode,trailing_delta)
