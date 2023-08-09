@@ -202,11 +202,19 @@ class SideBar():
                 logger.debug(f"An unknown error occurred in mix_place_order(): {e}")
             
 
-def start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode,trailing_delta,trailing_loss,rangeRate):
+def start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode,trailing_delta_mul,trailing_loss,rangeRate):
     rvs = SideBar()
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
     # last_1m = rvs.get_last_bar(symbol,huFu,'1m')
     while True:
+        try:
+            result = huFu.mix_get_market_price(symbol)
+            current_price = float(result['data']['markPrice'])
+        except Exception as e:
+            logger.debug(f"An unknown error occurred in mix_get_market_price(): {e}")
+
+        trailing_delta = round(trailing_delta_mul * current_price * 0.0005)
+        print(trailing_delta)
         last_5m_bars = rvs.get_last_bar(symbol,huFu,'5m')
         if debug_mode:
             for i in last_5m_bars:
@@ -232,11 +240,12 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--super_mode', action='store_true', default=False, help='Enable super_mode')
     parser.add_argument('-tl', '--trailing_loss', action='store_true', default=False, help='Enable trailing_loss')
 
+    parser.add_argument('-pr', '--pair', default='BTCUSDT_UMCBL',help='pair')
     parser.add_argument('-fp', '--fix_tp_point', default=88,help='fix_tp_point')
     parser.add_argument('-bsl', '--base_sl', default=88,help='base_sl')
     parser.add_argument('-bq', '--base_qty', default=0,help='base_qty')
     parser.add_argument('-mxq', '--max_qty', default=1.5,help='max_qty')
-    parser.add_argument('-td', '--trailing_delta', default=15,help='trailing_delta')
+    parser.add_argument('-tm', '--trailing_delta_mul', default=1,help='trailing_delta_mul')
     parser.add_argument('-rr', '--rangeRate', default=0.01,help='rangeRate')
 
     
@@ -253,13 +262,13 @@ if __name__ == "__main__":
     base_qty = float(args.base_qty)
     base_sl = float(args.base_sl)
     max_qty = float(args.max_qty)
-    trailing_delta = float(args.trailing_delta)
+    trailing_delta_mul = float(args.trailing_delta_mul)
     rangeRate = float(args.rangeRate)
 
     logger = get_logger(heroname+'_record.log')
 
     config = get_config_file()
     hero = config[heroname]
-    symbol = 'BTCUSDT_UMCBL'
+    symbol = args.pair
     marginCoin = 'USDT'
-    start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode,trailing_delta,trailing_loss,rangeRate)
+    start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode,trailing_delta_mul,trailing_loss,rangeRate)
