@@ -176,7 +176,12 @@ class SideBar():
                     try:
                         data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
                         if data != []:
-                            huFu.mix_cancel_plan_order(symbol, marginCoin, planType='track_plan')
+                            for order in data:
+                                if order['planType'] == 'normal_plan':
+                                    huFu.mix_cancel_plan_order(symbol, marginCoin, order['orderId'],'normal_plan')
+                                elif order['planType'] == 'track_plan':
+                                    huFu.mix_cancel_plan_order(symbol, marginCoin, order['orderId'],'track_plan')
+
 
                     except Exception as e:
                         logger.debug(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
