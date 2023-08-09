@@ -137,7 +137,7 @@ class SideBar():
                     print('trailing_price',trailing_price)
                     side = 'close_long'
                     rangeRate = 0.01
-                    huFu.mix_place_trailing_stop_order(self, symbol, marginCoin, trailing_price, side,triggerType=None, size=base_qty, rangeRate=rangeRate)
+                    huFu.mix_place_trailing_stop_order(self, symbol, marginCoin, trailing_price, side, size=base_qty, rangeRate=rangeRate)
 
 
             except Exception as e:
@@ -171,12 +171,12 @@ class SideBar():
                     logger.info("open short")
                     # get pos price
                     result = huFu.mix_get_single_position(symbol,marginCoin)
-                    trailing_price = round(float(result['data'][0]["averageOpenPrice"]) - trailing_delta)
+                    trailing_price = round(float(result['data'][1]["averageOpenPrice"]) - trailing_delta)
                     print('trailing_price',trailing_price)
 
                     side = 'close_short'
                     rangeRate = 0.01
-                    huFu.mix_place_trailing_stop_order(self, symbol, marginCoin, trailing_price, side,triggerType=None, size=base_qty, rangeRate=rangeRate)
+                    huFu.mix_place_trailing_stop_order(self, symbol, marginCoin, trailing_price, side, size=base_qty, rangeRate=rangeRate)
 
             except Exception as e:
                 logger.debug(f"An unknown error occurred in mix_place_order(): {e}")
