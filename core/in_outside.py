@@ -137,7 +137,7 @@ class SideBar():
                     print('trailing_price',trailing_price)
                     side = 'close_long'
                     rangeRate = 0.01
-                    huFu.mix_place_trailing_stop_order(self, symbol, marginCoin, trailing_price, side, size=base_qty, rangeRate=rangeRate)
+                    huFu.mix_place_trailing_stop_order(symbol, marginCoin, trailing_price, side, triggerType=None,size=base_qty, rangeRate=rangeRate)
 
 
             except Exception as e:
@@ -176,7 +176,7 @@ class SideBar():
 
                     side = 'close_short'
                     rangeRate = 0.01
-                    huFu.mix_place_trailing_stop_order(self, symbol, marginCoin, trailing_price, side, size=base_qty, rangeRate=rangeRate)
+                    huFu.mix_place_trailing_stop_order(symbol, marginCoin, trailing_price, side, triggerType=None,size=base_qty, rangeRate=rangeRate)
 
             except Exception as e:
                 logger.debug(f"An unknown error occurred in mix_place_order(): {e}")
