@@ -144,7 +144,7 @@ class SideBar():
                         # get pos price
                         result = huFu.mix_get_single_position(symbol,marginCoin)
                         trailing_price = round(float(result['data'][0]["averageOpenPrice"]) + trailing_delta)
-                        logger.info("entry at %s , trailing loss at %f",result['data'][0]['averageOpenPrice'],trailing_price)
+                        logger.info("entry at %s , trailing loss at %f , trailing delta is %f ",result['data'][0]['averageOpenPrice'],trailing_price,trailing_delta)
                         side = 'close_long'
                         rangeRate = 0.01
                         huFu.mix_place_trailing_stop_order(symbol, marginCoin, trailing_price, side, triggerType=None,size=base_qty, rangeRate=rangeRate)
@@ -193,7 +193,7 @@ class SideBar():
                         # get pos price
                         result = huFu.mix_get_single_position(symbol,marginCoin)
                         trailing_price = round(float(result['data'][1]["averageOpenPrice"]) - trailing_delta)
-                        logger.info("entry at %s , trailing loss at %f",result['data'][1]['averageOpenPrice'],trailing_price)
+                        logger.info("entry at %s , trailing loss at %f , trailing delta is %f ",result['data'][1]['averageOpenPrice'],trailing_price,trailing_delta)
 
                         side = 'close_short'
                         huFu.mix_place_trailing_stop_order(symbol, marginCoin, trailing_price, side, triggerType=None,size=base_qty, rangeRate=rangeRate)
@@ -214,7 +214,6 @@ def start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode,trailing_delta_m
             logger.debug(f"An unknown error occurred in mix_get_market_price(): {e}")
 
         trailing_delta = round(trailing_delta_mul * current_price * 0.0005)
-        print(trailing_delta)
         last_5m_bars = rvs.get_last_bar(symbol,huFu,'5m')
         if debug_mode:
             for i in last_5m_bars:
