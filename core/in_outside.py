@@ -126,7 +126,7 @@ class SideBar():
                     try:
                         data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
                         if data != []:
-                            huFu.mix_cancel_all_trigger_orders('UMCBL', 'track_plan')
+                            huFu.mix_cancel_plan_order(symbol, marginCoin, 'track_plan')
 
                     except Exception as e:
                         logger.debug(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
@@ -176,7 +176,7 @@ class SideBar():
                     try:
                         data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
                         if data != []:
-                            huFu.mix_cancel_all_trigger_orders('UMCBL', 'track_plan')
+                            huFu.mix_cancel_plan_order(symbol, marginCoin, 'track_plan')
 
                     except Exception as e:
                         logger.debug(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
