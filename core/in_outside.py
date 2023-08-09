@@ -60,6 +60,29 @@ class SideBar():
         else:
             return ''
 
+    def inside_outside_x(self,bars):
+        def is_inside_bar(pre,current):
+            if current[2] < pre[2] and current[3]> pre[3]:
+                return True
+            else:
+                return False
+        
+        def is_outside_bar(pre,current):
+            if current[2] > pre[2] and current[3] < pre[3]:
+                return True
+            else:
+                return False
+        
+        if is_inside_bar(bars[0],bars[1]):
+            if is_outside_bar(bars[1],bars[2]):
+                return 'short'
+        elif is_outside_bar(bars[0],bars[1]):
+            if is_inside_bar(bars[1],bars[2]):
+                return 'long'  
+        else:
+            return ''
+
+
         # if bar[1] inside bar ; bar[2] outside ; sell
         # if bar[2] inside bar ; bar[1] outside ; buy
 
@@ -139,15 +162,19 @@ class SideBar():
                 logger.debug(f"An unknown error occurred in mix_place_order(): {e}")
             
 
-def start(hero,symbol,marginCoin,debug_mode,base_qty):
+def start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode):
     rvs = SideBar()
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
     # last_1m = rvs.get_last_bar(symbol,huFu,'1m')
     while True:
         last_5m_bars = rvs.get_last_bar(symbol,huFu,'5m')
 
+        if super_mode:
         # print(last_1m)
-        side = rvs.inside_outside(last_5m_bars)
+            side = rvs.inside_outside(last_5m_bars)
+        else:
+            side = rvs.inside_outside_x(last_5m_bars)
+
         if side != '':
             rvs.place_order(side,huFu,symbol,marginCoin,base_qty)
 
@@ -183,4 +210,4 @@ if __name__ == "__main__":
     hero = config[heroname]
     symbol = 'BTCUSDT_UMCBL'
     marginCoin = 'USDT'
-    start(hero,symbol,marginCoin,debug_mode,base_qty)
+    start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode)
