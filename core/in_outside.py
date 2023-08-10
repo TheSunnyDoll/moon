@@ -70,11 +70,12 @@ class SideBar():
             # Create a DataFrame from the data
             df = pd.DataFrame(klines, columns=columns)
 
-            # Convert timestamp column to datetime
-            df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
 
             # Convert numeric columns to appropriate data types
-            df[['open', 'high', 'low', 'close', 'volume', 'turnover']] = df[['open', 'high', 'low', 'close', 'volume', 'turnover']].apply(pd.to_numeric)
+            df[['timestamp','open', 'high', 'low', 'close', 'volume', 'turnover']] = df[['timestamp','open', 'high', 'low', 'close', 'volume', 'turnover']].apply(pd.to_numeric)
+            
+            # Convert timestamp column to datetime
+            df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
 
             # Calculate sv
             df['sv'] = np.where(df['close'] - (df['high'] + df['low'] + df['close']) / 3 >= 0, df['volume'], -df['volume'])
