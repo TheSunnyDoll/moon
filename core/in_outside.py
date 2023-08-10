@@ -18,7 +18,7 @@ class SideBar():
         if ft == '1m':
             x = 2
         if ft == '5m':
-            x= 5
+            x= 8
         startTime = get_previous_x_hour_timestamp(x)
         endTime = get_minute_timestamp()
 
@@ -94,7 +94,6 @@ class SideBar():
             # Calculate lsma
             weighted_moving_avg = 2 * pd.Series(df['close']).rolling(window=int(27/2)).mean() - pd.Series(df['close']).rolling(window=27).mean()
             df['lsma'] = pd.Series(weighted_moving_avg).rolling(window=int(np.sqrt(27))).mean()
-
 
             last_row = df.iloc[-1].to_dict()
             open = last_row['open']
