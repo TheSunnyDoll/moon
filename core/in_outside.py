@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 import argparse
 from utils import *
+pd.set_option('display.max_rows', 100)
 
 
 class SideBar():
@@ -17,8 +18,8 @@ class SideBar():
         if ft == '1m':
             x = 2
         if ft == '5m':
-            x= 16
-        startTime = get_previous_xmin_timestamp(x)
+            x= 5
+        startTime = get_previous_x_hour_timestamp(x)
         endTime = get_minute_timestamp()
 
         # endTime = get_current_timestamp()
@@ -64,6 +65,13 @@ class SideBar():
 
     def inside_outside_x(self,bars,klines):
         def confirm_bar(klines):
+            def kvo(df, short_period, long_period, signal_period):
+                df['hlc3'] = (df['high'] + df['low'] + df['close']) / 3
+                df['sv'] = np.where(df['hlc3'].diff() >= 0, df['volume'], -df['volume'])
+                df['kvo'] = df['sv'].ewm(span=short_period).mean() - df['sv'].ewm(span=long_period).mean()
+                df['signal'] = df['kvo'].ewm(span=signal_period).mean()
+                return df
+
             # Define column names
             columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume', 'turnover']
 
@@ -77,27 +85,24 @@ class SideBar():
             # Convert timestamp column to datetime
             df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
 
-            # Calculate sv
-            df['sv'] = np.where(df['close'] - (df['high'] + df['low'] + df['close']) / 3 >= 0, df['turnover'], -df['turnover'])
-
-            # Calculate kvo
-            df['kvo'] = df['sv'].ewm(span=34).mean() - df['sv'].ewm(span=55).mean()
-
-            # Calculate sig
-            df['sig'] = df['kvo'].ewm(span=13).mean()
+            # Calculate KVO
+            short_period = 34  # Change this to your desired short period
+            long_period = 55   # Change this to your desired long period
+            signal_period = 13 # Change this to your desired signal period
+            df = kvo(df, short_period, long_period, signal_period)
 
             # Calculate lsma
-            length = 27
-            weights = np.arange(1, length + 1)
-            weights = weights * 2 - 1
-            weights = weights[::-1]
-            weights = weights / np.sum(weights)
-            df['lsma'] = df['close'].rolling(window=length).apply(lambda x: np.dot(x, weights), raw=True)
+            weighted_moving_avg = 2 * pd.Series(df['close']).rolling(window=int(27/2)).mean() - pd.Series(df['close']).rolling(window=27).mean()
+            df['lsma'] = pd.Series(weighted_moving_avg).rolling(window=int(np.sqrt(27))).mean()
+
+
             last_row = df.iloc[-1].to_dict()
             open = last_row['open']
             close = last_row['close']
             kvo = last_row['kvo']
             lsma = last_row['lsma']
+            print(df)
+
             if close > open and kvo > 0 and lsma < close:
                 return 'long'
             elif close < open and kvo < 0 and lsma > close:
