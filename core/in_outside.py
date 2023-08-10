@@ -101,7 +101,6 @@ class SideBar():
             close = last_row['close']
             kvo = last_row['kvo']
             lsma = last_row['lsma']
-            print(df)
 
             if close > open and kvo > 0 and lsma < close:
                 return 'long'
