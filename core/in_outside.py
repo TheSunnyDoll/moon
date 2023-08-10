@@ -78,7 +78,7 @@ class SideBar():
             df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
 
             # Calculate sv
-            df['sv'] = np.where(df['close'] - (df['high'] + df['low'] + df['close']) / 3 >= 0, df['volume'], -df['volume'])
+            df['sv'] = np.where(df['close'] - (df['high'] + df['low'] + df['close']) / 3 >= 0, df['turnover'], -df['turnover'])
 
             # Calculate kvo
             df['kvo'] = df['sv'].ewm(span=34).mean() - df['sv'].ewm(span=55).mean()
