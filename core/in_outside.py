@@ -11,6 +11,8 @@ from utils import *
 class SideBar():
     def __init__(self) -> None:
         pass
+    
+
     def get_last_bar(self,symbol,huFu,ft):
         if ft == '1m':
             x = 2
@@ -36,7 +38,7 @@ class SideBar():
                 retry_count += 1
                 print("再来一次")
                 time.sleep(retry_delay)
-        return klines[-3:]
+        return klines[-3:],klines
 
     def inside_outside(self,bars):
         def is_inside_bar(pre,current):
@@ -60,7 +62,48 @@ class SideBar():
         else:
             return ''
 
-    def inside_outside_x(self,bars):
+    def inside_outside_x(self,bars,klines):
+        def confirm_bar(klines):
+            # Define column names
+            columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume', 'turnover']
+
+            # Create a DataFrame from the data
+            df = pd.DataFrame(klines, columns=columns)
+
+            # Convert timestamp column to datetime
+            df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+
+            # Convert numeric columns to appropriate data types
+            df[['open', 'high', 'low', 'close', 'volume', 'turnover']] = df[['open', 'high', 'low', 'close', 'volume', 'turnover']].apply(pd.to_numeric)
+
+            # Calculate sv
+            df['sv'] = np.where(df['close'] - (df['high'] + df['low'] + df['close']) / 3 >= 0, df['volume'], -df['volume'])
+
+            # Calculate kvo
+            df['kvo'] = df['sv'].ewm(span=34).mean() - df['sv'].ewm(span=55).mean()
+
+            # Calculate sig
+            df['sig'] = df['kvo'].ewm(span=13).mean()
+
+            # Calculate lsma
+            length = 27
+            weights = np.arange(1, length + 1)
+            weights = weights * 2 - 1
+            weights = weights[::-1]
+            weights = weights / np.sum(weights)
+            df['lsma'] = df['close'].rolling(window=length).apply(lambda x: np.dot(x, weights), raw=True)
+            last_row = df.iloc[-1].to_dict()
+            open = last_row['open']
+            close = last_row['close']
+            kvo = last_row['kvo']
+            lsma = last_row['lsma']
+            if close > open and kvo > 0 and lsma < close:
+                return 'long'
+            elif close < open and kvo < 0 and lsma > close:
+                return 'short'
+            else:
+                return '' 
+
         def is_inside_bar(pre,current):
             if current[2] < pre[2] and current[3]> pre[3]:
                 return True
@@ -72,15 +115,19 @@ class SideBar():
                 return True
             else:
                 return False
-        
+        derc = confirm_bar(klines)
+        print("derc ",derc)
+
         if is_inside_bar(bars[0],bars[1]):
-            if is_outside_bar(bars[1],bars[2]):
+            if is_outside_bar(bars[1],bars[2]) and derc == 'short':
                 return 'short'
         elif is_outside_bar(bars[0],bars[1]):
-            if is_inside_bar(bars[1],bars[2]):
+            if is_inside_bar(bars[1],bars[2]) and derc == 'long':
                 return 'long'  
         else:
             return ''
+
+
 
 
         # if bar[1] inside bar ; bar[2] outside ; sell
@@ -230,16 +277,19 @@ def start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode,trailing_delta_m
             logger.debug(f"An unknown error occurred in mix_get_market_price(): {e}")
 
         trailing_delta = round(trailing_delta_mul * current_price * 0.0005)
-        last_5m_bars = rvs.get_last_bar(symbol,huFu,'5m')
-        if debug_mode:
-            print(trailing_delta)
-            for i in last_5m_bars:
-                print(timestamp_to_time(int(i[0])) , i)
+        last_5m_bars,all_bars = rvs.get_last_bar(symbol,huFu,'5m')
+
         if super_mode:
         # print(last_1m)
             side = rvs.inside_outside(last_5m_bars)
         else:
-            side = rvs.inside_outside_x(last_5m_bars)
+            side = rvs.inside_outside_x(last_5m_bars,all_bars)
+        if debug_mode:
+            print(trailing_delta)
+            for i in last_5m_bars:
+                print(timestamp_to_time(int(i[0])) , i)
+            print('side:',side)
+        
         if not debug_mode:
             if side != '':
                 rvs.place_order(side,huFu,symbol,marginCoin,base_qty,trailing_delta,trailing_loss,rangeRate)
