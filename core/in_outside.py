@@ -319,11 +319,7 @@ class SideBar():
                 except Exception as e:
                     logger.debug(f"An unknown error occurred in mix_place_order(): {e}")
             try:
-                if short_qty == 0:
-                    if base_qty == 0:
-                        qty = qty_decide(huFu)
-                        base_qty = qty
-                elif pyramid_mode:
+                if short_qty == 0 or pyramid_mode:
                     if base_qty == 0:
                         qty = qty_decide(huFu)
                         base_qty = qty
