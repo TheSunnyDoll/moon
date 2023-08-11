@@ -193,18 +193,17 @@ class SideBar():
             # Calculate lsma
             period = 27
             df['hma'] = hma(period)
-
             last_row = df.iloc[-2].to_dict()
             open = last_row['open']
             close = last_row['close']
             kvo = last_row['kvo']
             lsma = last_row['hma']
             if close > open and kvo > 0 and lsma < close:
-                return 'long'
+                return 'long',last_row
             elif close < open and kvo < 0 and lsma > close:
-                return 'short'
+                return 'short',last_row
             else:
-                return '' 
+                return '',last_row
 
         def is_inside_bar(pre,current):
             if current[2] < pre[2] and current[3]> pre[3]:
@@ -217,18 +216,19 @@ class SideBar():
                 return True
             else:
                 return False
-        derc = confirm_bar(klines)
-
+        derc,last_bar = confirm_bar(klines)
         if is_inside_bar(bars[0],bars[1]):
             if is_outside_bar(bars[1],bars[2]) and derc == 'short':
                 print("derc ",derc)
-                return 'short'
+                return 'short',last_bar
         elif is_outside_bar(bars[0],bars[1]):
             if is_inside_bar(bars[1],bars[2]) and derc == 'long':
                 print("derc ",derc)
-                return 'long'  
+                return 'long',last_bar  
         else:
-            return ''
+            return '',last_bar
+        
+        return '',last_bar
 
 
 
@@ -407,7 +407,7 @@ def start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode,trailing_delta_m
         else:
             last_5m_bars,all_bars = rvs.get_last_bar_x(symbol,huFu,'5m')
 
-            side = rvs.inside_outside_x(last_5m_bars,all_bars)
+            side,last_bar = rvs.inside_outside_x(last_5m_bars,all_bars)
             lastest_bar = last_5m_bars[-1]
 
 
@@ -415,7 +415,8 @@ def start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode,trailing_delta_m
             continue
         else:
             pre_lastest_bar = lastest_bar
-        print("new bar:",timestamp_to_time(int(pre_lastest_bar[0])),pre_lastest_bar)
+        print("new bar:",last_bar)
+
         if debug_mode:
             print(trailing_delta)
             for i in last_5m_bars:
