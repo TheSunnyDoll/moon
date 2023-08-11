@@ -40,30 +40,35 @@ class SideBar():
                 print("再来一次")
                 time.sleep(retry_delay)
         return klines[-3:],klines
+    
+    def get_last_bar_x(self,symbol,huFu,ft):
+        if ft == '1m':
+            x = 2
+        if ft == '5m':
+            x= 8
+        startTime = get_previous_x_hour_timestamp(x)
+        endTime = get_minute_timestamp()
 
-    def inside_outside(self,bars):
-        def is_inside_bar(pre,current):
-            if current[2] <= pre[2] and current[3]>= pre[3]:
-                return True
-            else:
-                return False
-        
-        def is_outside_bar(pre,current):
-            if current[2] >= pre[2] and current[3] <= pre[3]:
-                return True
-            else:
-                return False
-        
-        if is_inside_bar(bars[0],bars[1]):
-            if is_outside_bar(bars[1],bars[2]):
-                return 'short'
-        elif is_outside_bar(bars[0],bars[1]):
-            if is_inside_bar(bars[1],bars[2]):
-                return 'long'  
-        else:
-            return ''
+        # endTime = get_current_timestamp()
 
-    def inside_outside_x(self,bars,klines):
+        max_retries = 3
+        retry_delay = 1  # 延迟时间，单位为秒
+        retry_count = 0
+        klines = []
+
+        while not klines and retry_count < max_retries:
+            try:
+                klines = huFu.mix_get_candles(symbol, ft, startTime, endTime)
+            except Exception as e:
+                logger.debug(f"An unknown error occurred in mix_get_candles(): {e} ,{ft}")
+            
+            if not klines:
+                retry_count += 1
+                print("再来一次")
+                time.sleep(retry_delay)
+        return klines[-4:-1],klines
+
+    def inside_outside(self,bars,klines):
         def confirm_bar(klines):
             def kvo(df, short_period, long_period, signal_period):
                 df['hlc3'] = (df['high'] + df['low'] + df['close']) / 3
@@ -100,7 +105,76 @@ class SideBar():
             close = last_row['close']
             kvo = last_row['kvo']
             lsma = last_row['lsma']
+            print(df)
+            if close > open and kvo > 0 and lsma < close:
+                return 'long'
+            elif close < open and kvo < 0 and lsma > close:
+                return 'short'
+            else:
+                return '' 
 
+        def is_inside_bar(pre,current):
+            if current[2] < pre[2] and current[3]> pre[3]:
+                return True
+            else:
+                return False
+        
+        def is_outside_bar(pre,current):
+            if current[2] > pre[2] and current[3] < pre[3]:
+                return True
+            else:
+                return False
+        derc = confirm_bar(klines)
+
+        if is_inside_bar(bars[0],bars[1]):
+            if is_outside_bar(bars[1],bars[2]) and derc == 'short':
+                print("derc ",derc)
+                return 'short'
+        elif is_outside_bar(bars[0],bars[1]):
+            if is_inside_bar(bars[1],bars[2]) and derc == 'long':
+                print("derc ",derc)
+                return 'long'  
+        else:
+            return ''
+
+    def inside_outside_x(self,bars,klines):
+        def confirm_bar(klines):
+            def kvo(df, short_period, long_period, signal_period):
+                df['hlc3'] = (df['high'] + df['low'] + df['close']) / 3
+                df['sv'] = np.where(df['hlc3'].diff() >= 0, df['volume'], -df['volume'])
+                df['kvo'] = df['sv'].ewm(span=short_period).mean() - df['sv'].ewm(span=long_period).mean()
+                df['signal'] = df['kvo'].ewm(span=signal_period).mean()
+                return df
+
+            # Define column names
+            columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume', 'turnover']
+
+            # Create a DataFrame from the data
+            df = pd.DataFrame(klines, columns=columns)
+
+
+            # Convert numeric columns to appropriate data types
+            df[['timestamp','open', 'high', 'low', 'close', 'volume', 'turnover']] = df[['timestamp','open', 'high', 'low', 'close', 'volume', 'turnover']].apply(pd.to_numeric)
+            
+            # Convert timestamp column to datetime
+            df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+
+            # Calculate KVO
+            short_period = 34  # Change this to your desired short period
+            long_period = 55   # Change this to your desired long period
+            signal_period = 13 # Change this to your desired signal period
+            df = kvo(df, short_period, long_period, signal_period)
+
+            # Calculate lsma
+            weighted_moving_avg = 2 * pd.Series(df['close']).rolling(window=int(27/2)).mean() - pd.Series(df['close']).rolling(window=27).mean()
+            df['lsma'] = pd.Series(weighted_moving_avg).rolling(window=int(np.sqrt(27))).mean()
+
+            last_row = df.iloc[-2].to_dict()
+            open = last_row['open']
+            close = last_row['close']
+            kvo = last_row['kvo']
+            lsma = last_row['lsma']
+            print(df)
             if close > open and kvo > 0 and lsma < close:
                 return 'long'
             elif close < open and kvo < 0 and lsma > close:
@@ -294,13 +368,17 @@ def start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode,trailing_delta_m
             logger.debug(f"An unknown error occurred in mix_get_market_price(): {e}")
 
         trailing_delta = round(trailing_delta_mul * current_price * 0.0005)
-        last_5m_bars,all_bars = rvs.get_last_bar(symbol,huFu,'5m')
 
         if super_mode:
         # print(last_1m)
-            side = rvs.inside_outside(last_5m_bars)
-        else:
+            last_5m_bars,all_bars = rvs.get_last_bar_x(symbol,huFu,'5m')
+
             side = rvs.inside_outside_x(last_5m_bars,all_bars)
+        else:
+
+            last_5m_bars,all_bars = rvs.get_last_bar(symbol,huFu,'5m')
+
+            side = rvs.inside_outside(last_5m_bars,all_bars)
         if debug_mode:
             print(trailing_delta)
             for i in last_5m_bars:
