@@ -119,12 +119,13 @@ class SideBar():
             close = last_row['close']
             kvo = last_row['kvo']
             lsma = last_row['hma']
+            last_bar = [last_row['timestamp'],open,close,kvo,lsma]
             if close > open and kvo > 0 and lsma < close:
-                return 'long',last_row
+                return 'long',last_bar
             elif close < open and kvo < 0 and lsma > close:
-                return 'short',last_row
+                return 'short',last_bar
             else:
-                return '',last_row 
+                return '',last_bar 
 
         def is_inside_bar(pre,current):
             if current[2] < pre[2] and current[3]> pre[3]:
