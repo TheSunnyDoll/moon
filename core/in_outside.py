@@ -327,6 +327,9 @@ class SideBar():
                     if base_qty == 0:
                         qty = qty_decide(huFu)
                         base_qty = qty
+                    if short_qty > base_qty * 5:
+                        logger.warning("reach the max qty %f",base_qty * 5)
+                        return
                     # cancel all orders
                     try:
                         data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
