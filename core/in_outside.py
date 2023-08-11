@@ -63,7 +63,6 @@ class SideBar():
                 klines = huFu.mix_get_candles(symbol, ft, startTime, endTime)
             except Exception as e:
                 logger.debug(f"An unknown error occurred in mix_get_candles(): {e} ,{ft}")
-            print(klines)
             if not klines:
                 retry_count += 1
                 print("再来一次")
