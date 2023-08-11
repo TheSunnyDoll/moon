@@ -120,9 +120,9 @@ class SideBar():
             kvo = last_row['kvo']
             lsma = last_row['hma']
             if close > open and kvo > 0 and lsma < close:
-                return 'long'
+                return 'long',last_row
             elif close < open and kvo < 0 and lsma > close:
-                return 'short'
+                return 'short',last_row
             else:
                 return '' 
 
@@ -137,18 +137,19 @@ class SideBar():
                 return True
             else:
                 return False
-        derc = confirm_bar(klines)
+        derc,last_bar = confirm_bar(klines)
 
         if is_inside_bar(bars[0],bars[1]):
             if is_outside_bar(bars[1],bars[2]) and derc == 'short':
                 print("derc ",derc)
-                return 'short'
+                return 'short',last_bar
         elif is_outside_bar(bars[0],bars[1]):
             if is_inside_bar(bars[1],bars[2]) and derc == 'long':
                 print("derc ",derc)
-                return 'long'  
+                return 'long',last_bar  
         else:
-            return ''
+            return '',last_bar
+        return '',last_bar
 
     def inside_outside_x(self,bars,klines):
         def confirm_bar(klines):
@@ -401,7 +402,7 @@ def start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode,trailing_delta_m
         # print(last_1m)
             last_5m_bars,all_bars = rvs.get_last_bar(symbol,huFu,'5m')
 
-            side = rvs.inside_outside(last_5m_bars,all_bars)
+            side,last_bar = rvs.inside_outside(last_5m_bars,all_bars)
             lastest_bar = last_5m_bars[-2]
 
         else:
