@@ -75,12 +75,21 @@ class SideBar():
                 df['hlc3'] = (df['high'] + df['low'] + df['close']) / 3
                 df['sv'] = np.where(df['hlc3'].diff() >= 0, df['volume'], -df['volume'])
                 # 计算KVO
-                ema_short = ta.EMA(df['sv'], 34)
-                ema_long = ta.EMA(df['sv'], 55)
+                ema_short = ta.EMA(df['sv'], short_period)
+                ema_long = ta.EMA(df['sv'], long_period)
                 df['kvo'] = ema_short - ema_long
 
                 df['signal'] = df['kvo'].ewm(span=signal_period).mean()
                 return df
+            
+            def hma(period):
+                wma_1 = df['close'].rolling(period//2).apply(lambda x: \
+                np.sum(x * np.arange(1, period//2+1)) / np.sum(np.arange(1, period//2+1)), raw=True)
+                wma_2 = df['close'].rolling(period).apply(lambda x: \
+                np.sum(x * np.arange(1, period+1)) / np.sum(np.arange(1, period+1)), raw=True)
+                diff = 2 * wma_1 - wma_2
+                hma = diff.rolling(int(np.sqrt(period))).mean()
+                return hma
 
             # Define column names
             columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume', 'turnover']
@@ -102,14 +111,14 @@ class SideBar():
             df = kvo(df, short_period, long_period, signal_period)
 
             # Calculate lsma
-            weighted_moving_avg = 2 * pd.Series(df['close']).rolling(window=int(27/2)).mean() - pd.Series(df['close']).rolling(window=27).mean()
-            df['lsma'] = pd.Series(weighted_moving_avg).rolling(window=int(np.sqrt(27))).mean()
+            period = 27
+            df['hma'] = hma(period)
 
             last_row = df.iloc[-1].to_dict()
             open = last_row['open']
             close = last_row['close']
             kvo = last_row['kvo']
-            lsma = last_row['lsma']
+            lsma = last_row['hma']
             if close > open and kvo > 0 and lsma < close:
                 return 'long'
             elif close < open and kvo < 0 and lsma > close:
@@ -153,6 +162,14 @@ class SideBar():
 
                 df['signal'] = df['kvo'].ewm(span=signal_period).mean()
                 return df
+            def hma(period):
+                wma_1 = df['close'].rolling(period//2).apply(lambda x: \
+                np.sum(x * np.arange(1, period//2+1)) / np.sum(np.arange(1, period//2+1)), raw=True)
+                wma_2 = df['close'].rolling(period).apply(lambda x: \
+                np.sum(x * np.arange(1, period+1)) / np.sum(np.arange(1, period+1)), raw=True)
+                diff = 2 * wma_1 - wma_2
+                hma = diff.rolling(int(np.sqrt(period))).mean()
+                return hma
 
             # Define column names
             columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume', 'turnover']
@@ -174,14 +191,15 @@ class SideBar():
             df = kvo(df, short_period, long_period, signal_period)
 
             # Calculate lsma
-            weighted_moving_avg = 2 * pd.Series(df['close']).rolling(window=int(27/2)).mean() - pd.Series(df['close']).rolling(window=27).mean()
-            df['lsma'] = pd.Series(weighted_moving_avg).rolling(window=int(np.sqrt(27))).mean()
+            period = 27
+            df['hma'] = hma(period)
 
             last_row = df.iloc[-2].to_dict()
             open = last_row['open']
             close = last_row['close']
             kvo = last_row['kvo']
-            lsma = last_row['lsma']
+            lsma = last_row['hma']
+            print(df)
             if close > open and kvo > 0 and lsma < close:
                 return 'long'
             elif close < open and kvo < 0 and lsma > close:

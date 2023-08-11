@@ -23,5 +23,17 @@ df['sv'] = np.where(df['hlc3'].diff() >= 0, df['volume'], -df['volume'])
 ema_short = ta.EMA(df['sv'], 34)
 ema_long = ta.EMA(df['sv'], 55)
 df['kvo'] = ema_short - ema_long
+close = np.array(df['close'])
 
+def hma(period):
+ wma_1 = df['close'].rolling(period//2).apply(lambda x: \
+ np.sum(x * np.arange(1, period//2+1)) / np.sum(np.arange(1, period//2+1)), raw=True)
+ wma_2 = df['close'].rolling(period).apply(lambda x: \
+ np.sum(x * np.arange(1, period+1)) / np.sum(np.arange(1, period+1)), raw=True)
+ diff = 2 * wma_1 - wma_2
+ hma = diff.rolling(int(np.sqrt(period))).mean()
+ return hma
+
+period = 27
+df['hma'] = hma(period)
 print(df)
