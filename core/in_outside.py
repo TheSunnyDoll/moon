@@ -6,6 +6,8 @@ import pandas as pd
 import numpy as np
 import argparse
 from utils import *
+import talib as ta
+
 pd.set_option('display.max_rows', 100)
 
 
@@ -61,7 +63,7 @@ class SideBar():
                 klines = huFu.mix_get_candles(symbol, ft, startTime, endTime)
             except Exception as e:
                 logger.debug(f"An unknown error occurred in mix_get_candles(): {e} ,{ft}")
-            
+            print(klines)
             if not klines:
                 retry_count += 1
                 print("再来一次")
@@ -73,7 +75,11 @@ class SideBar():
             def kvo(df, short_period, long_period, signal_period):
                 df['hlc3'] = (df['high'] + df['low'] + df['close']) / 3
                 df['sv'] = np.where(df['hlc3'].diff() >= 0, df['volume'], -df['volume'])
-                df['kvo'] = df['sv'].ewm(span=short_period).mean() - df['sv'].ewm(span=long_period).mean()
+                # 计算KVO
+                ema_short = ta.EMA(df['sv'], 34)
+                ema_long = ta.EMA(df['sv'], 55)
+                df['kvo'] = ema_short - ema_long
+
                 df['signal'] = df['kvo'].ewm(span=signal_period).mean()
                 return df
 
@@ -141,7 +147,11 @@ class SideBar():
             def kvo(df, short_period, long_period, signal_period):
                 df['hlc3'] = (df['high'] + df['low'] + df['close']) / 3
                 df['sv'] = np.where(df['hlc3'].diff() >= 0, df['volume'], -df['volume'])
-                df['kvo'] = df['sv'].ewm(span=short_period).mean() - df['sv'].ewm(span=long_period).mean()
+                # 计算KVO
+                ema_short = ta.EMA(df['sv'], 34)
+                ema_long = ta.EMA(df['sv'], 55)
+                df['kvo'] = ema_short - ema_long
+
                 df['signal'] = df['kvo'].ewm(span=signal_period).mean()
                 return df
 
@@ -173,7 +183,7 @@ class SideBar():
             close = last_row['close']
             kvo = last_row['kvo']
             lsma = last_row['lsma']
-
+            print(df)
             if close > open and kvo > 0 and lsma < close:
                 return 'long'
             elif close < open and kvo < 0 and lsma > close:
