@@ -378,12 +378,15 @@ def start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode,trailing_delta_m
             last_5m_bars,all_bars = rvs.get_last_bar(symbol,huFu,'5m')
 
             side = rvs.inside_outside(last_5m_bars,all_bars)
+            lastest_bar = last_5m_bars[-2]
+
         else:
             last_5m_bars,all_bars = rvs.get_last_bar_x(symbol,huFu,'5m')
 
             side = rvs.inside_outside_x(last_5m_bars,all_bars)
+            lastest_bar = last_5m_bars[-1]
 
-        lastest_bar = last_5m_bars[-1]
+
         if lastest_bar == pre_lastest_bar:
             continue
         else:
