@@ -148,8 +148,8 @@ class SideBar():
                 df['hlc3'] = (df['high'] + df['low'] + df['close']) / 3
                 df['sv'] = np.where(df['hlc3'].diff() >= 0, df['volume'], -df['volume'])
                 # 计算KVO
-                ema_short = ta.EMA(df['sv'], 34)
-                ema_long = ta.EMA(df['sv'], 55)
+                ema_short = ta.EMA(df['sv'], short_period)
+                ema_long = ta.EMA(df['sv'], long_period)
                 df['kvo'] = ema_short - ema_long
 
                 df['signal'] = df['kvo'].ewm(span=signal_period).mean()
