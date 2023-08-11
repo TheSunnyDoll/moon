@@ -124,7 +124,7 @@ class SideBar():
             elif close < open and kvo < 0 and lsma > close:
                 return 'short',last_row
             else:
-                return '' 
+                return '',last_row 
 
         def is_inside_bar(pre,current):
             if current[2] < pre[2] and current[3]> pre[3]:
