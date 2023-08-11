@@ -211,7 +211,7 @@ class SideBar():
         # if bar[1] inside bar ; bar[2] outside ; sell
         # if bar[2] inside bar ; bar[1] outside ; buy
 
-    def place_order(self,side,huFu,symbol,marginCoin,base_qty,trailing_delta,trailing_loss_mode,rangeRate,trailing_delta_mul):
+    def place_order(self,side,huFu,symbol,marginCoin,base_qty,trailing_delta,trailing_loss_mode,rangeRate,trailing_delta_mul,pyramid_mode):
         # tp long 12, tp short 15
         # sl long 24 , sl short 30
         if trailing_delta_mul != 1:
@@ -323,6 +323,10 @@ class SideBar():
                     if base_qty == 0:
                         qty = qty_decide(huFu)
                         base_qty = qty
+                elif pyramid_mode:
+                    if base_qty == 0:
+                        qty = qty_decide(huFu)
+                        base_qty = qty
                     # cancel all orders
                     try:
                         data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
@@ -355,9 +359,10 @@ class SideBar():
                 logger.debug(f"An unknown error occurred in mix_place_order(): {e}")
             
 
-def start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode,trailing_delta_mul,trailing_loss_mode,rangeRate):
+def start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode,trailing_delta_mul,trailing_loss_mode,rangeRate,pyramid_mode):
     rvs = SideBar()
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
+    pre_lastest_bar = ''
     # last_1m = rvs.get_last_bar(symbol,huFu,'1m')
     while True:
         try:
@@ -378,15 +383,21 @@ def start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode,trailing_delta_m
 
             side = rvs.inside_outside_x(last_5m_bars,all_bars)
 
+        lastest_bar = last_5m_bars[-1]
+        if lastest_bar == pre_lastest_bar:
+            continue
+        else:
+            pre_lastest_bar = lastest_bar
+        print("new bar:",timestamp_to_time(int(pre_lastest_bar[0])),pre_lastest_bar)
         if debug_mode:
             print(trailing_delta)
             for i in last_5m_bars:
                 print(timestamp_to_time(int(i[0])) , i)
             print('side:',side)
-        
+
         if not debug_mode:
             if side != '':
-                rvs.place_order(side,huFu,symbol,marginCoin,base_qty,trailing_delta,trailing_loss_mode,rangeRate,trailing_delta_mul)
+                rvs.place_order(side,huFu,symbol,marginCoin,base_qty,trailing_delta,trailing_loss_mode,rangeRate,trailing_delta_mul,pyramid_mode)
 
         time.sleep(10)
 
@@ -398,6 +409,7 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--debug_mode', action='store_true', default=False, help='Enable debug mode')
     parser.add_argument('-s', '--super_mode', action='store_true', default=False, help='Enable super_mode')
     parser.add_argument('-tl', '--trailing_loss_mode', action='store_true', default=False, help='Enable trailing_loss')
+    parser.add_argument('-pm', '--pyramid_mode', action='store_true', default=False, help='Enable pyramid_mode')
 
     parser.add_argument('-pr', '--pair', default='BTCUSDT_UMCBL',help='pair')
     parser.add_argument('-bq', '--base_qty', default=0,help='base_qty')
@@ -412,6 +424,7 @@ if __name__ == "__main__":
     debug_mode = args.debug_mode
     super_mode = args.super_mode
     trailing_loss_mode = args.trailing_loss_mode
+    pyramid_mode = args.pyramid_mode
 
     base_qty = float(args.base_qty)
     trailing_delta_mul = float(args.trailing_delta_mul)
@@ -423,4 +436,4 @@ if __name__ == "__main__":
     config = get_config_file()
     hero = config[heroname]
     marginCoin = 'USDT'
-    start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode,trailing_delta_mul,trailing_loss_mode,rangeRate)
+    start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode,trailing_delta_mul,trailing_loss_mode,rangeRate,pyramid_mode)

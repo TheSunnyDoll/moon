@@ -633,3 +633,9 @@ def is_approx_equal_to_any(value, price_list, tolerance=5):
         if abs(value - price) <= tolerance:
             return True
     return False
+
+def is_value_approx_in_list(value, value_list, tolerance=5):
+    for item in value_list:
+        if abs(value - item[1]) <= tolerance:
+            return True
+    return False

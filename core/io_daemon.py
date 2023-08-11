@@ -3,7 +3,7 @@ import time
 import argparse
 from utils import *
 
-def run_ioside(username,debug_mode, super_mode, trailing_loss,base_qty,trailing_delta_mul,rangeRate, pair):
+def run_ioside(username,debug_mode, super_mode, trailing_loss,base_qty,trailing_delta_mul,rangeRate, pair,pyramid_mode):
     logger = get_logger(username+'down_error.log')
 
     while True:
@@ -16,6 +16,8 @@ def run_ioside(username,debug_mode, super_mode, trailing_loss,base_qty,trailing_
                 command.append('-tl')
             if super_mode:
                 command.append('-s')
+            if pyramid_mode:
+                command.append('-pm')
 
 
             command.append(f'-bq={base_qty}')
@@ -38,6 +40,7 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--debug_mode', action='store_true', default=False, help='Enable debug mode')
     parser.add_argument('-s', '--super_mode', action='store_true', default=False, help='Enable super_mode')
     parser.add_argument('-tl', '--trailing_loss', action='store_true', default=False, help='Enable trailing_loss')
+    parser.add_argument('-pm', '--pyramid_mode', action='store_true', default=False, help='Enable pyramid_mode')
 
     parser.add_argument('-pr', '--pair', default='BTCUSDT_UMCBL',help='pair')
     parser.add_argument('-bq', '--base_qty', default=0,help='base_qty')
@@ -48,4 +51,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # 调用守护程序函数，并将命令行参数传递给它
-    run_ioside(args.username, args.debug_mode, args.super_mode, args.trailing_loss,args.base_qty,args.trailing_delta_mul,args.rangeRate, args.pair)
+    run_ioside(args.username, args.debug_mode, args.super_mode, args.trailing_loss,args.base_qty,args.trailing_delta_mul,args.rangeRate, args.pair,args.pyramid_mode)
