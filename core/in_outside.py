@@ -247,9 +247,9 @@ class SideBar():
             protect_long_loss_delta = 350
             protect_short_loss_delta = 440
         else:
-            tp_long_delta = 12 * trailing_delta
+            tp_long_delta = 7 * trailing_delta
             tp_short_delta = 15 * trailing_delta
-            protect_long_loss_delta = 24 * trailing_delta
+            protect_long_loss_delta = 15 * trailing_delta
             protect_short_loss_delta = 30 * trailing_delta
         
         protect_rangeRate = 0.01
