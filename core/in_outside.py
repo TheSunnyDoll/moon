@@ -402,6 +402,9 @@ def start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode,trailing_delta_m
             last_5m_bars,all_bars = rvs.get_last_bar(symbol,huFu,'5m')
 
             side,last_bar = rvs.inside_outside(last_5m_bars,all_bars)
+            if side == 'long':
+                side,last_bar = rvs.inside_outside_x(last_5m_bars,all_bars)
+
             lastest_bar = last_5m_bars[-2]
 
         else:
