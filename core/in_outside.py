@@ -270,13 +270,21 @@ class SideBar():
       
         if side == 'long':
             # get position; close short ; entry long
-            try:
-                result = huFu.mix_get_single_position(symbol,marginCoin)
-                pos = result['data']
+            max_retries = 3
+            retry_delay = 1  # 延迟时间，单位为秒
+            retry_count = 0
+            pos == []
+            while pos == [] and retry_count < max_retries:
+                try :
+                    result = huFu.mix_get_single_position(symbol,marginCoin)
+                    pos = result['data']
+                except Exception as e:
+                    logger.debug(f"An unknown error occurred in mix_get_single_position(): {e}")
+                if pos == []:
+                    retry_count += 1
+                    print("再来一次")
+                    time.sleep(retry_delay)
 
-            except Exception as e:
-                logger.debug(f"An unknown error occurred in mix_get_single_position(): {e}")
-            
             long_qty = float(pos[0]["total"])
             short_qty = float(pos[1]["total"])
 
@@ -326,12 +334,21 @@ class SideBar():
 
         elif side == 'short':
             # get position; close short ; entry long
-            try:
-                result = huFu.mix_get_single_position(symbol,marginCoin)
-                pos = result['data']
+            max_retries = 3
+            retry_delay = 1  # 延迟时间，单位为秒
+            retry_count = 0
+            pos == []
+            while pos == [] and retry_count < max_retries:
+                try :
+                    result = huFu.mix_get_single_position(symbol,marginCoin)
+                    pos = result['data']
+                except Exception as e:
+                    logger.debug(f"An unknown error occurred in mix_get_single_position(): {e}")
+                if pos == []:
+                    retry_count += 1
+                    print("再来一次")
+                    time.sleep(retry_delay)
 
-            except Exception as e:
-                logger.debug(f"An unknown error occurred in mix_get_single_position(): {e}")
             
             long_qty = float(pos[0]["total"])
             short_qty = float(pos[1]["total"])
