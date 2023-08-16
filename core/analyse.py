@@ -55,33 +55,34 @@ def earn_or_loss(huFu,x):
                  recent_open_long_list.append([uTime,order['size'],order['side'],order['priceAvg']])
             if order['side'] == 'open_short' and order['state'] == 'filled':
                  recent_open_short_list.append([uTime,order['size'],order['side'],order['priceAvg']])
-
         columns = ['time', 'entry', 'week_day', 'qty', 'action', 'exit', 'T/L', 'points']
         week_days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
         loss_df = pd.DataFrame(loss_list, columns=columns)
         profit_df = pd.DataFrame(profit_list, columns=columns)
-
         for day in week_days:
             loss_day_df = loss_df[loss_df['week_day'].str.contains(day)]
             profit_day_df = profit_df[profit_df['week_day'].str.contains(day)]
             if not loss_day_df.empty:
-                print(loss_day_df)
                 print(loss_day_df['time'].iloc[0],day," Total loss sum:", loss_day_df['T/L'].sum())
             if not profit_day_df.empty:
-                print(profit_day_df)
                 print(profit_day_df['time'].iloc[0],day," Total profit sum:", profit_day_df['T/L'].sum())
             if not loss_day_df.empty or not profit_day_df.empty:
                 net_profit = loss_day_df['T/L'].sum() + profit_day_df['T/L'].sum()
-                # print(day," net profit sum:", net_profit)
                 if net_profit > 0:
                     pos = 1
+                    return profit_day_df['time'].iloc[0],day,profit_day_df['T/L'].sum(),loss_day_df['T/L'].sum(),profit_day_df['T/L'].max(),loss_day_df['T/L'].min(),net_profit,pos
                 else:
                     pos = 0
-            if loss_day_df['T/L'].sum() < 0:
-                return loss_day_df['time'].iloc[0],day,profit_day_df['T/L'].sum(),loss_day_df['T/L'].sum(),profit_day_df['T/L'].max(),loss_day_df['T/L'].min(),net_profit,pos
-            elif profit_day_df['T/L'].sum()>0:
-                return profit_day_df['time'].iloc[0],day,profit_day_df['T/L'].sum(),loss_day_df['T/L'].sum(),profit_day_df['T/L'].max(),loss_day_df['T/L'].min(),net_profit,pos
-
+                    return loss_day_df['time'].iloc[0],day,profit_day_df['T/L'].sum(),loss_day_df['T/L'].sum(),profit_day_df['T/L'].max(),loss_day_df['T/L'].min(),net_profit,pos
+        return '','','','','','','',''
+            # if loss_day_df.empty and profit_day_df.empty:
+            #     return '','','','','','','',''
+            # if loss_day_df['T/L'].sum() < 0:
+            #     return loss_day_df['time'].iloc[0],day,profit_day_df['T/L'].sum(),loss_day_df['T/L'].sum(),profit_day_df['T/L'].max(),loss_day_df['T/L'].min(),net_profit,pos
+            # elif profit_day_df['T/L'].sum()>0:
+            #     return profit_day_df['time'].iloc[0],day,profit_day_df['T/L'].sum(),loss_day_df['T/L'].sum(),profit_day_df['T/L'].max(),loss_day_df['T/L'].min(),net_profit,pos
+            # else:
+            #     
 
 
         # count = loss_price_count(loss_list)
@@ -125,6 +126,7 @@ if __name__ == "__main__":
     tl_list = []
     for i in range(10):
         date, week_day, profit ,loss,max_pro,max_dd, net ,pos= earn_or_loss(huFu,i)
+        print(date, week_day, profit ,loss,max_pro,max_dd, net ,pos)
         if date == '':
             continue
         else:
