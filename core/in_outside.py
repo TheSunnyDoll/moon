@@ -358,7 +358,7 @@ class SideBar():
                             for order in data:
                                 if order['planType'] == 'normal_plan':
                                     huFu.mix_cancel_plan_order(symbol, marginCoin, order['orderId'],'normal_plan')
-                                elif order['planType'] == 'track_plan':
+                                elif order['planType'] == 'track_plan' and short_qty == 0:
                                     huFu.mix_cancel_plan_order(symbol, marginCoin, order['orderId'],'track_plan')
 
 
