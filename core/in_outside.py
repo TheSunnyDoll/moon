@@ -221,11 +221,9 @@ class SideBar():
         derc,last_bar = confirm_bar(klines)
         if is_inside_bar(bars[0],bars[1]):
             if is_outside_bar(bars[1],bars[2]) and derc == 'short':
-                print("derc ",derc)
                 return 'short',last_bar
         elif is_outside_bar(bars[0],bars[1]):
             if is_inside_bar(bars[1],bars[2]) and derc == 'long':
-                print("derc ",derc)
                 return 'long',last_bar  
         else:
             return '',last_bar
