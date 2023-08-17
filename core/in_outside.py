@@ -432,6 +432,7 @@ def start(hero,symbol,marginCoin,debug_mode,base_qty,super_mode,trailing_delta_m
 
 
         if lastest_bar == pre_lastest_bar:
+            time.sleep(10)
             continue
         else:
             pre_lastest_bar = lastest_bar
