@@ -96,10 +96,6 @@ if order :
 if orderId != 0:
     huFu.mix_cancel_plan_order(symbol, marginCoin, orderId, 'normal_plan')
 
-print("leverage -------------------------")
-data = huFu.mix_get_leverage(symbol)
-print(data)
-
 print("plan orders -------------------------")
 data = huFu.mix_get_plan_order_tpsl(symbol=symbol,isPlan='plan')['data']
 for data in data:
