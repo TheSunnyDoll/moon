@@ -15,7 +15,7 @@ def earn_or_loss(huFu,x):
         elif x == 1:
             startTime = get_previous_x_timestamp(1)
 
-            endTime = get_previous_minute_timestamp()
+            endTime = get_today_0_timestamp()
         else:
             startTime = get_previous_x_timestamp(x)
 
