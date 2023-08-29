@@ -119,8 +119,8 @@ if close:
     if long_qty != '':
         data = huFu.mix_place_order(symbol,'USDT',long_qty,'close_long','market',reduceOnly=True)
 
-    if short_qty != '':
-        data = huFu.mix_place_order(symbol,'USDT',short_qty,'close_short','market',reduceOnly=True)
+    # if short_qty != '':
+    #     data = huFu.mix_place_order(symbol,'USDT',short_qty,'close_short','market',reduceOnly=True)
 
 
 new_short_sl = 26550
