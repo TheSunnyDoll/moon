@@ -83,7 +83,7 @@ if cancelAll:
         print(f"An unknown error occurred in mix_get_plan_order_tpsl(): {e}")
 
 if order :
-    qty = 1
+    qty = 0.01
     #side = 'open_long'
     side = 'open_short'
 
