@@ -114,17 +114,20 @@ def earn_or_loss(huFu,x):
 
 
 if __name__ == "__main__":
-    symbol = 'BTCUSDT_UMCBL'
     parser = argparse.ArgumentParser()
     parser.add_argument('-u', '--username', help='Username')
+    parser.add_argument('-pr', '--pair', default='BTCUSDT_UMCBL',help='pair')
+
     args = parser.parse_args()
 
     heroname = args.username
+    symbol = args.pair
+
     config = get_config_file()
     hero = config[heroname]
     huFu = Client(hero['api_key'], hero['secret_key'], hero['passphrase'])
     tl_list = []
-    for i in range(10):
+    for i in range(20):
         date, week_day, profit ,loss,max_pro,max_dd, net ,pos= earn_or_loss(huFu,i)
         print(date, week_day, profit ,loss,max_pro,max_dd, net ,pos)
         if date == '':
