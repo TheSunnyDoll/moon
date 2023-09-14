@@ -8,3 +8,5 @@ rich
 ta
 pyyaml
 colorlog
+ansi2html
+Flask
