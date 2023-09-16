@@ -19,6 +19,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-u', '--username', help='Username')
 parser.add_argument('-d', '--debug_mode', action='store_true', default=False, help='Enable debug mode')
 parser.add_argument('-o', '--order', action='store_true', default=False, help='Enable order mode')
+parser.add_argument('-cm', '--copy_trade_mode', action='store_true', default=False, help='Enable copy_trade_mode')
 
 parser.add_argument('-c', '--cancel', help='cancel order id ', default=0)
 parser.add_argument('-s', '--symbol', help='set symbol ', default='BTC')
@@ -40,6 +41,7 @@ dex = args.balance
 close = args.close
 cancelAll = args.cancelAll
 symbol = args.symbol
+copy_trade_mode = args.copy_trade_mode
 
 
 symbol = symbol +'USDT_UMCBL'
@@ -117,10 +119,22 @@ if close:
     print(long_qty)
     print(short_qty)
     if long_qty != '':
-        data = huFu.mix_place_order(symbol,'USDT',long_qty,'close_long','market',reduceOnly=True)
+        if copy_trade_mode:
+            result = huFu.mix_get_cp_open_order(symbol, 'umcbl', pageSize=20, pageNo=1)['data']
+            for i in result:
+                tn = i['trackingNo']
+                huFu.mix_cp_close_position(symbol, tn)
+        else:
+            data = huFu.mix_place_order(symbol,'USDT',long_qty,'close_long','market',reduceOnly=True)
 
     if short_qty != '':
-        data = huFu.mix_place_order(symbol,'USDT',short_qty,'close_short','market',reduceOnly=True)
+        if copy_trade_mode:
+            result = huFu.mix_get_cp_open_order(symbol, 'umcbl', pageSize=20, pageNo=1)['data']
+            for i in result:
+                tn = i['trackingNo']
+                huFu.mix_cp_close_position(symbol, tn)
+        else:
+            data = huFu.mix_place_order(symbol,'USDT',short_qty,'close_short','market',reduceOnly=True)
 
 
 new_short_sl = 1720
