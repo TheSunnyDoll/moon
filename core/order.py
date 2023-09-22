@@ -29,6 +29,8 @@ parser.add_argument('-b', '--balance',  default=0 ,help='calculate position size
 
 parser.add_argument('-cl', '--close', action='store_true', default=False, help='Enable close position mode')
 parser.add_argument('-ca', '--cancelAll', action='store_true', default=False, help='cancel all')
+parser.add_argument('-os', '--only_short', action='store_true', default=False, help='only_short')
+parser.add_argument('-ol', '--only_long', action='store_true', default=False, help='only_long')
 
 
 args = parser.parse_args()
@@ -42,7 +44,8 @@ close = args.close
 cancelAll = args.cancelAll
 symbol = args.symbol
 copy_trade_mode = args.copy_trade_mode
-
+only_long = args.only_long
+only_short = args.only_short
 
 symbol = symbol +'USDT_UMCBL'
 
@@ -118,7 +121,7 @@ if close:
 
     print(long_qty)
     print(short_qty)
-    if long_qty != '':
+    if long_qty != '' and not only_short:
         if copy_trade_mode:
             result = huFu.mix_get_cp_open_order(symbol, 'umcbl', pageSize=20, pageNo=1)['data']
             for i in result:
@@ -127,7 +130,7 @@ if close:
         else:
             data = huFu.mix_place_order(symbol,'USDT',long_qty,'close_long','market',reduceOnly=True)
 
-    if short_qty != '':
+    if short_qty != '' and not only_long:
         if copy_trade_mode:
             result = huFu.mix_get_cp_open_order(symbol, 'umcbl', pageSize=20, pageNo=1)['data']
             for i in result:
